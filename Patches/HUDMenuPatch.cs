@@ -9,9 +9,9 @@ internal static class HUDMenuPatch
 {
     [HarmonyPatch(typeof(HUDMenu), nameof(HUDMenu.OnEnable))]
     [HarmonyPostfix]
-    static void OnEnablePostfix() => StateUtilities.IsMenuOpen = true;
+    static void OnEnablePostfix() => CameraStateUtilities.IsMenuOpen = true;
 
     [HarmonyPatch(typeof(HUDMenu), nameof(HUDMenu.OnDisable))]
     [HarmonyPostfix]
-    static void OnDisablePostfix() => StateUtilities.IsMenuOpen = false;
+    static void OnDisablePostfix() => CameraStateUtilities.IsMenuOpen = false;
 }

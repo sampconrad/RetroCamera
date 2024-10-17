@@ -20,14 +20,14 @@ internal static class ActionWheelSystemPatch
             {
                 Core.Log.LogInfo("No wheel visible...");
 
-                StateUtilities.IsMenuOpen = false;
+                CameraStateUtilities.IsMenuOpen = false;
                 WheelVisible = false;
             }
             else if (__instance._CurrentActiveWheel == null)
             {
                 Core.Log.LogInfo("Wheel is null...");
 
-                StateUtilities.IsMenuOpen = false;
+                CameraStateUtilities.IsMenuOpen = false;
                 WheelVisible = false;
             }
         }
@@ -36,7 +36,7 @@ internal static class ActionWheelSystemPatch
             Core.Log.LogInfo("CurrentActiveWheel is visible!");
 
             WheelVisible = true;
-            StateUtilities.IsMenuOpen = true;
+            CameraStateUtilities.IsMenuOpen = true;
         }
     }
 }

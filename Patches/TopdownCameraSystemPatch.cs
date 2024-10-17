@@ -4,7 +4,7 @@ using ModernCamera.Behaviours;
 using ProjectM;
 using System.Runtime.InteropServices;
 using static ModernCamera.Utilities.InteropUtilities;
-using static ModernCamera.Utilities.StateUtilities;
+using static ModernCamera.Utilities.CameraStateUtilities;
 
 namespace ModernCamera.Patches;
 
@@ -39,6 +39,8 @@ internal static class TopdownCameraSystemPatch
     {
         if (Settings.Enabled)
         {
+            Core.Log.LogInfo("Handling inputs via detour...");
+
             CurrentCameraBehaviour?.HandleInput(ref inputState);
         }
 
@@ -48,11 +50,14 @@ internal static class TopdownCameraSystemPatch
     {
         if (Settings.Enabled)
         {
+            Core.Log.LogInfo("Updating camera inputs via detour...");
+
             if (!DefaultZoomSettingsSaved)
             {
                 DefaultZoomSettings = cameraState.ZoomSettings;
                 DefaultStandardZoomSettings = cameraData.StandardZoomSettings;
                 DefaultBuildModeZoomSettings = cameraData.BuildModeZoomSettings;
+
                 DefaultZoomSettingsSaved = true;
             }
 
@@ -75,9 +80,9 @@ internal static class TopdownCameraSystemPatch
             }
 
             // Update current camera behaviour
-            if (!CurrentCameraBehaviour.Active) CurrentCameraBehaviour?.Activate(ref cameraState);
+            if (!CurrentCameraBehaviour!.Active) CurrentCameraBehaviour?.Activate(ref cameraState);
 
-            CurrentCameraBehaviour?.UpdateCameraInputs(ref cameraState, ref cameraData);
+            CurrentCameraBehaviour!.UpdateCameraInputs(ref cameraState, ref cameraData);
             cameraData.StandardZoomSettings = cameraState.ZoomSettings;
         }
         else if (DefaultZoomSettingsSaved && !UsingDefaultZoomSettings)

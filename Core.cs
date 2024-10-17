@@ -11,6 +11,7 @@ internal class Core
     public static ZoomModifierSystem ZoomModifierSystem { get; internal set; }
     public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
     public static UIDataSystem UIDataSystem { get; internal set; }
+    public static CursorPositionSystem CursorPositionSystem { get; internal set; }
     public static ManualLogSource Log => Plugin.LogInstance;
 
     public static bool HasInitialized = false;
@@ -21,6 +22,7 @@ internal class Core
         Client = __instance.World;
 
         ZoomModifierSystem = Client.GetExistingSystemManaged<ZoomModifierSystem>();
+        ZoomModifierSystem.Enabled = false;
         Systems.ModernCamera.ZoomModifierSystem = ZoomModifierSystem;
 
         PrefabCollectionSystem = Client.GetExistingSystemManaged<PrefabCollectionSystem>();
@@ -28,6 +30,9 @@ internal class Core
 
         UIDataSystem = Client.GetExistingSystemManaged<UIDataSystem>();
         Systems.ModernCamera.UIDataSystem = UIDataSystem;
+
+        CursorPositionSystem = Client.GetExistingSystemManaged<CursorPositionSystem>();
+        Systems.ModernCamera.CursorPositionSystem = CursorPositionSystem;
 
         HasInitialized = true;
     }

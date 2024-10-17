@@ -23,7 +23,7 @@ internal static class EscapeMenuViewPatch
         if (!IsEscapeMenuOpen)
         {
             IsEscapeMenuOpen = true;
-            StateUtilities.IsMenuOpen = true;
+            CameraStateUtilities.IsMenuOpen = true;
         }
     }
     static void Disable()
@@ -33,7 +33,7 @@ internal static class EscapeMenuViewPatch
         if (IsEscapeMenuOpen)
         {
             IsEscapeMenuOpen = false;
-            StateUtilities.IsMenuOpen = false;
+            CameraStateUtilities.IsMenuOpen = false;
         }
     }
 }

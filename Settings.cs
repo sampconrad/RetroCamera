@@ -1,9 +1,11 @@
 ﻿using ModernCamera.Configuration;
 using ModernCamera.Patches;
+using ModernCamera.Utilities;
 using UnityEngine;
-using UnityEngine.UI;
-using static ModernCamera.Utilities.StateUtilities;
-using Keybinding = ModernCamera.Configuration.Keybinding;
+using static ModernCamera.Configuration.KeybindActions;
+using static ModernCamera.Configuration.KeybindCategories;
+using static ModernCamera.Configuration.OptionCategories;
+using static ModernCamera.Utilities.CameraStateUtilities;
 
 namespace ModernCamera;
 internal static class Settings
@@ -38,7 +40,7 @@ internal static class Settings
     public static float HeadHeightOffset = 1.05f;
     public static float ShoulderRightOffset = 0.8f;
 
-    const float ZoomOffset = 2;
+    const float ZoomOffset = 2f;
 
     public static readonly Dictionary<string, Vector2> FirstPersonShapeshiftOffsets = new()
     {
@@ -78,9 +80,9 @@ internal static class Settings
     static SliderOption OverTheShoulderXOption;
     static SliderOption OverTheShoulderYOption;
 
-    static Keybinding EnabledKeybind;
-    static Keybinding ActionModeKeybind;
-    static Keybinding HideUIKeybind;
+    static KeybindMapping EnabledKeybind;
+    static KeybindMapping ActionModeKeybind;
+    static KeybindMapping HideUIKeybind;
     public static void Initialize()
     {
         SetupOptions();
@@ -91,33 +93,33 @@ internal static class Settings
     public static void AddHideUIListener(KeyEvent action) => HideUIKeybind.AddKeyDownListener(action);
     static void SetupOptions()
     {
-        OptionCategory optionCategory = OptionManager.AddCategory("ModernCamera");
+        OptionCategory optionCategory = OptionsManager.AddCategory("ModernCamera");
 
         EnabledOption = optionCategory.AddToggle("moderncamera.enabled", "Enabled", true);
-        FirstPersonEnabledOption = optionCategory.AddToggle("moderncamera.firstperson", "Enable First Person", true);
-        DefaultBuildModeOption = optionCategory.AddToggle("moderncamera.defaultbuildmode", "Use Default Build Mode Camera", true);
-        AlwaysShowCrosshairOption = optionCategory.AddToggle("moderncamera.alwaysshowcrosshair", "Always show Crosshair", false);
-        ActionModeCrosshairOption = optionCategory.AddToggle("moderncamera.actionmodecrosshair", "Show Crosshair in Action Mode", false);
+        FirstPersonEnabledOption = optionCategory.AddToggle("moderncamera.firstperson", "FirstPerson", true);
+        DefaultBuildModeOption = optionCategory.AddToggle("moderncamera.defaultbuildmode", "DefaultBuildModeCamera", true);
+        AlwaysShowCrosshairOption = optionCategory.AddToggle("moderncamera.alwaysshowcrosshair", "AlwaysShowCrosshair", false);
+        ActionModeCrosshairOption = optionCategory.AddToggle("moderncamera.actionmodecrosshair", "ActionModeCrosshair", false);
         FieldOfViewOption = optionCategory.AddSlider("moderncamera.fieldofview", "Field of View", 50, 90, 60);
 
-        optionCategory.AddDivider("ThirdPersonAiming");
+        optionCategory.AddDivider("ThirdPersonAiming"); // "ThirdPersonAiming" Divider: Index 0 (First in the list)
         CameraAimModeOption = optionCategory.AddDropdown("moderncamera.aimmode", "Aim Mode", (int)CameraAimMode.Default, Enum.GetNames(typeof(CameraAimMode)));
         AimOffsetXOption = optionCategory.AddSlider("moderncamera.aimoffsetx", "Screen X% Offset ", -25, 25, 0);
         AimOffsetYOption = optionCategory.AddSlider("moderncamera.aimoffsety", "Screen Y% Offset", -25, 25, 0);
 
-        optionCategory.AddDivider("ThirdPersonZoom");
+        optionCategory.AddDivider("ThirdPersonZoom"); // "ThirdPersonZoom" Divider: Index 3 (After 3 entries)
         MinZoomOption = optionCategory.AddSlider("moderncamera.minzoom", "Min Zoom", 1, 18, 2);
         MaxZoomOption = optionCategory.AddSlider("moderncamera.maxzoom", "Max Zoom", 3, 20, 18);
         LockCameraZoomOption = optionCategory.AddToggle("moderncamera.lockzoom", "Lock Camera Zoom", false);
         LockCameraZoomDistanceOption = optionCategory.AddSlider("moderncamera.lockzoomdistance", "Locked Camera Zoom Distance", 6, 20, 15);
-
-        optionCategory.AddDivider("ThirdPersonPitch");
-        MinPitchOption = optionCategory.AddSlider("moderncamera.minpitch", "Min Pitch", 0, 90, 9);
-        MaxPitchOption = optionCategory.AddSlider("moderncamera.maxpitch", "Max Pitch", 0, 90, 90);
+         
+        optionCategory.AddDivider("ThirdPersonPitch"); // "ThirdPersonPitch" Divider: Index 7 (After 4 more entries)
+        MinPitchOption = optionCategory.AddSlider("moderncamera.minpitch", "MinPitch", 0, 90, 9);
+        MaxPitchOption = optionCategory.AddSlider("moderncamera.maxpitch", "MaxPitch", 0, 90, 90);
         LockCamerMenuOptionstchOption = optionCategory.AddToggle("moderncamera.lockpitch", "Lock Camera Pitch", false);
         LockCamerMenuOptionstchAngleOption = optionCategory.AddSlider("moderncamera.lockpitchangle", "Locked Camera Pitch Angle", 0, 90, 60);
 
-        optionCategory.AddDivider("OverShoulder");
+        optionCategory.AddDivider("OverShoulder"); // "OverShoulder" Divider: Index 11 (After 4 more entries)
         OverTheShoulderOption = optionCategory.AddToggle("moderncamera.overtheshoulder", "Use Over the Shoulder Offset", false);
         OverTheShoulderXOption = optionCategory.AddSlider("moderncamera.overtheshoulderx", "X Offset", 0.5f, 4, 1);
         OverTheShoulderYOption = optionCategory.AddSlider("moderncamera.overtheshouldery", "Y Offset", 1, 8, 1);
@@ -154,13 +156,13 @@ internal static class Settings
                 MaxPitchOption.SetValue(MinPitchOption.MinValue);
         });
 
-        OptionManager.SaveOptions();
+        PersistenceUtilities.SaveOptions();
     }
     static void SetupKeybinds()
     {
-        KeybindingCategory keybindingCategory = KeybindingManager.AddCategory("ModernCamera");
+        KeybindCategory keybindingCategory = KeybindsManager.AddCategory("ModernCamera");
 
-        EnabledKeybind = keybindingCategory.AddKeyBinding("moderncamera.enabled", "ModernCamera", "Toggle Modern Camera", KeyCode.Comma);
+        EnabledKeybind = keybindingCategory.AddKeyBinding("moderncamera.enabled", "ModernCamera", "ToggleModernCamera", KeyCode.Comma);
         EnabledKeybind.AddKeyDownListener(() =>
         {
             Core.Log.LogInfo(keybindingCategory.Name + " Enabled: " + !Enabled);
@@ -168,7 +170,7 @@ internal static class Settings
             EnabledOption.SetValue(!Enabled);
         });
 
-        ActionModeKeybind = keybindingCategory.AddKeyBinding("moderncamera.actionmode", "ModernCamera", "Toggle Action Mode", KeyCode.Period);
+        ActionModeKeybind = keybindingCategory.AddKeyBinding("moderncamera.actionmode", "ModernCamera", "ToggleActionMode", KeyCode.Period);
         ActionModeKeybind.AddKeyDownListener(() =>
         {
             if (Enabled && !IsFirstPerson)
@@ -188,18 +190,6 @@ internal static class Settings
 
         HideUIKeybind = keybindingCategory.AddKeyBinding("moderncamera.hideui", "ModernCamera", "Hide UI", KeyCode.Slash);
 
-        /*
-        HideUIKeybind.AddKeyDownListener(() =>
-        {
-            if (Enabled)
-            {
-                IsUIHidden = !IsUIHidden;
-            }
-        });
-        */
-        // DefaultControls
-
-        KeybindingManager.SaveKeybindingCategories();
-        KeybindingManager.SaveKeybindings();
-    }        
+        PersistenceUtilities.SaveKeybinds();
+    }
 }

@@ -9,8 +9,8 @@ internal static class InteropUtilities
         IntPtr classPtr = Il2CppClassPointerStore.GetNativeClassPointer(type);
         IntPtr methodPtr = IL2CPP.GetIl2CppMethodByToken(classPtr, methodToken);
 
-        if (methodPtr == IntPtr.Zero) throw new Exception($"Failed to get method pointer for token {methodToken} in type {type.FullName}...");
-        else if (methodPtr != IntPtr.Zero) Core.Log.LogInfo($"Detouring {type.FullName} method with token {methodToken} at {methodPtr.ToString("X")}...");
+        if (methodPtr == IntPtr.Zero) throw new Exception($"Failed to create detour for {to.Method.Name} with token {methodToken} in type {type.FullName}...");
+        else if (methodPtr != IntPtr.Zero) Core.Log.LogInfo($"Detouring {type.FullName} {to.Method.Name} with token {methodToken} at {methodPtr.ToString("X")}...");
 
         return INativeDetour.CreateAndApply(methodPtr, to, out original);
     }

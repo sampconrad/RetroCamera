@@ -3,7 +3,7 @@ using ProjectM;
 using UnityEngine;
 
 namespace ModernCamera.Utilities;
-internal static class StateUtilities
+internal static class CameraStateUtilities
 {
     public static bool IsUIHidden;
     public static bool IsFirstPerson;
@@ -18,7 +18,7 @@ internal static class StateUtilities
     public static Dictionary<BehaviourType, CameraBehaviour> CameraBehaviours = [];
     public static InputState GameplayInputState;
 
-    public static string shapeshiftName;
+    public static string ShapeshiftName;
     static int _menusOpen;
     public enum BehaviourType
     {
@@ -57,7 +57,7 @@ internal static class StateUtilities
         IsShapeshifted = false;
         IsMounted = false;
         InBuildMode = false;
-        shapeshiftName = "";
+        ShapeshiftName = "";
         ValidGameplayInputState = false;
 
         CurrentCameraBehaviour?.Deactivate();

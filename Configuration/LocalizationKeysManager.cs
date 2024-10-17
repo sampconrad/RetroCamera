@@ -3,13 +3,9 @@ using Stunlock.Localization;
 using Guid = Il2CppSystem.Guid;
 
 namespace ModernCamera.Configuration;
-internal static class LocalizationManager
+internal static class LocalizationKeysManager
 {
-    static readonly Dictionary<AssetGuid, string> AssetGuids;
-    static LocalizationManager()
-    {
-        AssetGuids = [];
-    }
+    static readonly Dictionary<AssetGuid, string> AssetGuids = [];
     public static LocalizationKey CreateKey(string value)
     {
         LocalizationKey localizationKey = new(AssetGuid.FromGuid(Guid.NewGuid()));

@@ -2,9 +2,10 @@
 using ProjectM;
 using ProjectM.Sequencer;
 using ProjectM.UI;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using static ModernCamera.Utilities.StateUtilities;
+using static ModernCamera.Utilities.CameraStateUtilities;
 
 namespace ModernCamera.Systems;
 public class ModernCamera : MonoBehaviour
@@ -17,6 +18,7 @@ public class ModernCamera : MonoBehaviour
     public static ZoomModifierSystem ZoomModifierSystem;
     public static PrefabCollectionSystem PrefabCollectionSystem;
     public static UIDataSystem UIDataSystem;
+    public static CursorPositionSystem CursorPositionSystem;
 
     static bool GameFocused;
     public static void Enabled(bool enabled)
@@ -32,6 +34,7 @@ public class ModernCamera : MonoBehaviour
     static void UpdateEnabled(bool enabled)
     {
         if (ZoomModifierSystem != null) ZoomModifierSystem.Enabled = !enabled;
+
         if (Crosshair != null) Crosshair.active = enabled && Settings.AlwaysShowCrosshair && !InBuildMode;
 
         if (!enabled)
@@ -61,30 +64,23 @@ public class ModernCamera : MonoBehaviour
     void Update()
     {
         if (!Core.HasInitialized) return;
+        else if (!GameFocused || !Settings.Enabled) return;
+        
+        if (CrosshairPrefab == null) BuildCrosshair();
 
-        if (!GameFocused || !Settings.Enabled) return;
-        else if (CrosshairPrefab == null) BuildCrosshair();
-
-        if (Core.Client.IsCreated)
+        if (GameCamera == null)
         {
-            if (GameCamera == null)
+            GameObject cameraObject = GameObject.Find("Main_GameToolCamera(Clone)");
+
+            if (cameraObject != null)
             {
-                GameObject cameraObject = GameObject.Find("Main_GameToolCamera(Clone)");
-
-                if (cameraObject != null)
-                {
-                    GameCamera = cameraObject.GetComponent<Camera>();
-                    UpdateFieldOfView(Settings.FieldOfView);
-                }
+                GameCamera = cameraObject.GetComponent<Camera>();
+                UpdateFieldOfView(Settings.FieldOfView);
             }
+        }
 
-            UpdateSystems();
-            UpdateCrosshair();
-        }
-        else
-        {
-            Cursor.visible = true;
-        }
+        UpdateSystems();
+        UpdateCrosshair();
     }
     void OnApplicationFocus(bool hasFocus)
     {
@@ -94,13 +90,11 @@ public class ModernCamera : MonoBehaviour
     {
         try
         {
-            CursorData cursorData = CursorController._CursorDatas?.FirstOrDefault(x => x.CursorType == CursorType.Game_Normal);
+            CursorData cursorData = CursorController._CursorDatas.First(x => x.CursorType == CursorType.Game_Normal);
             if (cursorData == null) return;
 
-            CrosshairPrefab = new GameObject("Crosshair")
-            {
-                active = false
-            };
+            CrosshairPrefab = new("Crosshair");
+            CrosshairPrefab.active = false;
 
             CrosshairPrefab.AddComponent<CanvasRenderer>();
             RectTransform rectTransform = CrosshairPrefab.AddComponent<RectTransform>();
@@ -132,7 +126,7 @@ public class ModernCamera : MonoBehaviour
             if (UIDataSystem.UI.BuffBarParent != null)
             {
                 IsShapeshifted = false;
-                shapeshiftName = "";
+                ShapeshiftName = "";
 
                 foreach (BuffBarEntry.Data buff in UIDataSystem.UI.BuffBarParent.BuffsSelectionGroup.Entries)
                 {
@@ -142,7 +136,7 @@ public class ModernCamera : MonoBehaviour
 
                         if (IsShapeshifted)
                         {
-                            shapeshiftName = buffName.Trim();
+                            ShapeshiftName = buffName.Trim();
                             break;
                         }
                     }
@@ -180,43 +174,29 @@ public class ModernCamera : MonoBehaviour
             {
                 GameObject uiCanvas = GameObject.Find("HUDCanvas(Clone)/Canvas");
 
-                if (!uiCanvas.TryGetComponent(out CanvasScaler)) return;
-                else
-                {
-                    Crosshair = Instantiate(CrosshairPrefab, uiCanvas.transform);
-                    Crosshair.active = true;
-                }
+                CanvasScaler = uiCanvas.GetComponent<CanvasScaler>();
+                Crosshair = Instantiate(CrosshairPrefab, uiCanvas.transform);
+                Crosshair.active = true;
             }
 
             // Locks the mouse to the center of the screen if the mouse should be locked or the camera rotate button is pressed
             if (ValidGameplayInputState &&
-                (IsMouseLocked || GameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
-                !IsMenuOpen)
+               (IsMouseLocked || GameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
+               !IsMenuOpen)
             {
                 if (IsActionMode || IsFirstPerson || Settings.CameraAimMode == CameraAimMode.Forward)
                 {
-                    // Lock the cursor to the center of the screen
-                    Cursor.lockState = CursorLockMode.Locked;
-                    Cursor.visible = false;
+                    CursorPosition cursorPosition = CursorPositionSystem._CursorPosition;
+                    float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) - Settings.AimOffsetY);
 
-                    // Optionally apply aim offsets here if needed by adjusting camera or UI
-                    // In Unity, the locked state already keeps the cursor in the center of the screen.
-                    // If there's an offset applied, you might handle it differently by adjusting the camera or aiming logic itself.
+                    cursorPosition.ScreenPosition = screenPosition;
+                    CursorPositionSystem._CursorPosition = cursorPosition;
+                    Cursor.lockState = CursorLockMode.Locked;
                 }
 
                 // Set crosshair visibility based on the camera mode
-                crosshairVisible = IsFirstPerson || IsActionMode && Settings.ActionModeCrosshair;
-
-                // Ensure the cursor remains hidden while the mouse is locked
+                crosshairVisible = IsFirstPerson || (IsActionMode && Settings.ActionModeCrosshair);
                 cursorVisible = false;
-            }
-            else
-            {
-                // If the mouse should not be locked, reset cursor state to default
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-
-                cursorVisible = true;
             }
 
             if (Crosshair != null)

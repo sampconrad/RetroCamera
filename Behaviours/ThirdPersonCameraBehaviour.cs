@@ -1,6 +1,6 @@
 ﻿using ProjectM;
 using UnityEngine;
-using static ModernCamera.Utilities.StateUtilities;
+using static ModernCamera.Utilities.CameraStateUtilities;
 
 namespace ModernCamera.Behaviours;
 internal class ThirdPersonCameraBehaviour : CameraBehaviour
@@ -28,8 +28,7 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
     {
         base.HandleInput(ref inputState);
 
-        if (Settings.LockZoom)
-            TargetZoom = Settings.LockZoomDistance;
+        if (Settings.LockZoom) TargetZoom = Settings.LockZoomDistance;
     }
     public override void UpdateCameraInputs(ref TopdownCameraState state, ref TopdownCamera data)
     {
@@ -43,6 +42,7 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
         if (Settings.OverTheShoulder && !IsShapeshifted && !IsMounted)
         {
             float lerpValue = Mathf.Max(0, state.Current.Zoom - state.ZoomSettings.MinZoom) / state.ZoomSettings.MaxZoom;
+
             state.LastTarget.NormalizedLookAtOffset.x = Mathf.Lerp(Settings.OverTheShoulderX, 0, lerpValue);
             state.LastTarget.NormalizedLookAtOffset.y = Mathf.Lerp(Settings.OverTheShoulderY, 0, lerpValue);
         }
@@ -51,6 +51,7 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
         {
             state.ZoomSettings.MaxPitch = Settings.LockPitchAngle;
             state.ZoomSettings.MinPitch = Settings.LockPitchAngle;
+
             data.BuildModeZoomSettings.MaxPitch = Settings.LockPitchAngle;
             data.BuildModeZoomSettings.MinPitch = Settings.LockPitchAngle;
         }

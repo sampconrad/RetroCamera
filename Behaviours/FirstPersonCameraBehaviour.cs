@@ -1,5 +1,5 @@
 ﻿using ProjectM;
-using static ModernCamera.Utilities.StateUtilities;
+using static ModernCamera.Utilities.CameraStateUtilities;
 
 namespace ModernCamera.Behaviours;
 internal class FirstPersonCameraBehaviour : CameraBehaviour
@@ -16,8 +16,8 @@ internal class FirstPersonCameraBehaviour : CameraBehaviour
 
         IsMouseLocked = true;
         IsFirstPerson = true;
-
         CurrentBehaviourType = BehaviourType;
+
         state.PitchPercent = 0.51f;
         TargetZoom = 0;
     }
@@ -36,13 +36,13 @@ internal class FirstPersonCameraBehaviour : CameraBehaviour
     {
         base.UpdateCameraInputs(ref state, ref data);
 
-        var forwardOffset = Settings.FirstPersonForwardOffset;
-        var headHeight = Settings.HeadHeightOffset;
+        float forwardOffset = Settings.FirstPersonForwardOffset;
+        float headHeight = Settings.HeadHeightOffset;
 
-        if (Settings.FirstPersonShapeshiftOffsets.ContainsKey(shapeshiftName))
+        if (Settings.FirstPersonShapeshiftOffsets.ContainsKey(ShapeshiftName))
         {
-            forwardOffset = Settings.FirstPersonShapeshiftOffsets[shapeshiftName].y;
-            headHeight = Settings.FirstPersonShapeshiftOffsets[shapeshiftName].x;
+            forwardOffset = Settings.FirstPersonShapeshiftOffsets[ShapeshiftName].y;
+            headHeight = Settings.FirstPersonShapeshiftOffsets[ShapeshiftName].x;
         }
 
         state.LastTarget.NormalizedLookAtOffset.z = forwardOffset;
