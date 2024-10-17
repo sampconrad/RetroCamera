@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<AssemblyName>ModernCamera</AssemblyName>
+	<Version>1.0.0</Version>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	  <RestoreSources>
+			https://api.nuget.org/v3/index.json;
+			https://nuget.bepinex.dev/v3/index.json;
+	  </RestoreSources>
+	  <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	  <BepInExPluginGuid>io.zfolmt.ModernCamera</BepInExPluginGuid>
+	  <LangVersion>preview</LangVersion>
+	  <EnablePreviewFeatures>true</EnablePreviewFeatures>
+  </PropertyGroup>
+	 
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Core" Version="6.0.0-be.668" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
+		<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
+		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" />
+    	<PackageReference Include="HarmonyX" Version="2.13.0" />
+		<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.5.802790001" />
+	</ItemGroup>
+	
+	<Target Name="BuildToClient" AfterTargets="Build">
+		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRising\BepInEx\plugins" />
+	</Target>
+
+</Project>
