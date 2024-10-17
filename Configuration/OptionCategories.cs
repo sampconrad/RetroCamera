@@ -8,10 +8,16 @@ internal class OptionCategories
     public static readonly Dictionary<string, SliderOption> SliderOptions = [];
     public static readonly Dictionary<string, DropdownOption> DropdownOptions = [];
     public static readonly Dictionary<string, string> Dividers = [];
-    public class OptionCategory(string name)
+    public class OptionCategory
     {
-        public string Name = name;
-        public LocalizationKey LocalizationKey = LocalizationKeysManager.CreateKey(name);
+        public string Name { get; internal set; }
+        public readonly LocalizationKey LocalizationKey;
+        public OptionCategory(string name)
+        {
+            Name = name;
+            LocalizationKey = LocalizationKeysManager.CreateKey(name);
+        }
+
         public readonly List<string> Options = [];
         public ToggleOption AddToggle(string name, string description, bool defaultValue)
         {
@@ -105,6 +111,7 @@ internal class OptionCategories
         }
     }
 
+    /*
     public ToggleOption GetToggle(string id)
     {
         return ToggleOptions.GetValueOrDefault(id);
@@ -129,4 +136,5 @@ internal class OptionCategories
     {
         return DropdownOptions.ContainsKey(id);
     }
+    */
 }

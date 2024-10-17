@@ -11,6 +11,16 @@ namespace ModernCamera.Patches;
 [HarmonyPatch]
 internal static class TopdownCameraSystemPatch
 {
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    unsafe delegate void HandleInput(IntPtr _this, ref InputState inputState);
+    static HandleInput HandleInputOriginal;
+    static INativeDetour HandleInputDetour;
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    unsafe delegate void UpdateCameraInputs(IntPtr _this, ref TopdownCameraState cameraState, ref TopdownCamera cameraData);
+    static UpdateCameraInputs UpdateCameraInputsOriginal;
+    static INativeDetour UpdateCameraInputsDetour;
+
     static ZoomSettings DefaultZoomSettings;
     static ZoomSettings DefaultStandardZoomSettings;
     static ZoomSettings DefaultBuildModeZoomSettings;
@@ -18,18 +28,8 @@ internal static class TopdownCameraSystemPatch
     static bool DefaultZoomSettingsSaved;
     static bool UsingDefaultZoomSettings;
 
-    // Delegates and detour handles
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    unsafe delegate void HandleInputDelegate(IntPtr _this, ref InputState inputState);
-    static HandleInputDelegate HandleInputOriginal;
-    static INativeDetour HandleInputDetour;
-    const int HandleInputToken = 100663443;
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    unsafe delegate void UpdateCameraInputsDelegate(IntPtr _this, ref TopdownCameraState cameraState, ref TopdownCamera cameraData);
-    static UpdateCameraInputsDelegate UpdateCameraInputsOriginal;
-    static INativeDetour UpdateCameraInputsDetour;
     const int UpdateCameraInputsToken = 100663445;
+    const int HandleInputToken = 100663443;
     public static unsafe void Initialize()
     {
         HandleInputDetour = Detour(typeof(TopdownCameraSystem), HandleInputToken, HandleInputPatch, out HandleInputOriginal);
@@ -39,7 +39,7 @@ internal static class TopdownCameraSystemPatch
     {
         if (Settings.Enabled)
         {
-            Core.Log.LogInfo("Handling inputs via detour...");
+            Core.Log.LogInfo("Handling input via detour...");
 
             CurrentCameraBehaviour?.HandleInput(ref inputState);
         }

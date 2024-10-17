@@ -1,5 +1,4 @@
-﻿using BepInEx.Unity.IL2CPP.Utils.Collections;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppSystem;
 using ModernCamera.Configuration;
@@ -9,6 +8,7 @@ using Stunlock.Localization;
 using StunShared.UI;
 using TMPro;
 using UnityEngine;
+using static ModernCamera.Configuration.OptionActions;
 using static ModernCamera.Configuration.OptionCategories;
 
 namespace ModernCamera.Patches;
@@ -142,8 +142,10 @@ internal static class OptionsInterfacePatch
         dividerGameObject.SetActive(true);
         return dividerGameObject;
     }
-    static Il2CppSystem.Action<T> OnChange<T>(OptionActions<T> option)
+    static Il2CppSystem.Action<T> OnChange<T>(OptionAction<T> option)
     {
+        Core.Log.LogInfo($"Option {option.Name} {option.Value}...");
+
         return (Il2CppSystem.Action<T>)(value =>
         {
             option.SetValue(value);

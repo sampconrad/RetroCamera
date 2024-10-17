@@ -1,7 +1,6 @@
-﻿using ModernCamera.Utilities;
-using ProjectM;
-using static ModernCamera.Configuration.KeybindCategories;
+﻿using ProjectM;
 using static ModernCamera.Configuration.KeybindActions;
+using static ModernCamera.Configuration.KeybindCategories;
 
 namespace ModernCamera.Configuration;
 internal static class KeybindsManager

@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
+using static ModernCamera.Configuration.OptionActions;
 
 namespace ModernCamera.Configuration;
-internal class SliderOption : OptionActions<float>
+internal class SliderOption : OptionAction<float>
 {
     public float MinValue { get; internal set; }
     public float MaxValue { get; internal set; }

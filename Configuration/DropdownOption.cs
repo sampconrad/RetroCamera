@@ -1,5 +1,7 @@
-﻿namespace ModernCamera.Configuration;
-internal class DropdownOption : OptionActions<int>
+﻿using static ModernCamera.Configuration.OptionActions;
+
+namespace ModernCamera.Configuration;
+internal class DropdownOption : OptionAction<int>
 {
     public List<string> Values;
     public DropdownOption(string name, string description, int defaultValue, string[] values) : base(name, description, defaultValue)

@@ -46,10 +46,14 @@ internal static class CameraStateUtilities
     }
     public static void RegisterCameraBehaviour(CameraBehaviour behaviour)
     {
+        Core.Log.LogInfo($"Registering camera behaviour {behaviour.BehaviourType}...");
+
         CameraBehaviours.Add(behaviour.BehaviourType, behaviour);
     }
     public static void Reset()
     {
+        Core.Log.LogInfo("Resetting camera states...");
+
         IsUIHidden = false;
         IsFirstPerson = false;
         IsActionMode = false;
