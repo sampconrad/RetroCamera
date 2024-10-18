@@ -13,24 +13,23 @@ internal static class ActionWheelSystemPatch
     [HarmonyPostfix]
     static void OnUpdatePostfix(ActionWheelSystem __instance)
     {
-        if (__instance == null) return;
-        else if (WheelVisible)
+        if (WheelVisible)
         {
             if (__instance._CurrentActiveWheel != null && !__instance._CurrentActiveWheel.IsVisible())
             {
-                CameraStateUtilities.IsMenuOpen = false;
+                CameraState.IsMenuOpen = false;
                 WheelVisible = false;
             }
             else if (__instance._CurrentActiveWheel == null)
             {
-                CameraStateUtilities.IsMenuOpen = false;
+                CameraState.IsMenuOpen = false;
                 WheelVisible = false;
             }
         }
         else if (__instance._CurrentActiveWheel != null && __instance._CurrentActiveWheel.IsVisible())
         {
             WheelVisible = true;
-            CameraStateUtilities.IsMenuOpen = true;
+            CameraState.IsMenuOpen = true;
         }
     }
 }

@@ -3,7 +3,7 @@ using ProjectM;
 using UnityEngine;
 
 namespace ModernCamera.Utilities;
-internal static class CameraStateUtilities
+internal static class CameraState
 {
     public static bool IsUIHidden;
     public static bool IsFirstPerson;

@@ -2,7 +2,8 @@
 using ModernCamera.Behaviours;
 using ProjectM;
 using System.Runtime.InteropServices;
-using static ModernCamera.Utilities.CameraStateUtilities;
+using static ModernCamera.Utilities.CameraState;
+using static ModernCamera.Utilities.NativeDetours;
 
 namespace ModernCamera.Patches;
 #nullable enable
@@ -25,12 +26,12 @@ internal static class TopdownCameraSystemPatch
     static bool DefaultZoomSettingsSaved;
     static bool UsingDefaultZoomSettings;
 
-    static readonly string HandleInputPtrString = "7FFA8331F8C0";
-    static readonly string UpdateCameraInputsPtrString = "7FFA83331E10";
+    const int HandleInputToken = 100663443;
+    const int UpdateCameraInputsToken = 100663471;
     public static unsafe void Initialize()
     {
-        HandleInputDetour = INativeDetour.CreateAndApply((IntPtr)Convert.ToInt64(HandleInputPtrString, 16), HandleInputPatch, out HandleInputOriginal);
-        UpdateCameraInputsDetour = INativeDetour.CreateAndApply((IntPtr)Convert.ToInt64(UpdateCameraInputsPtrString, 16), UpdateCameraInputsPatch, out UpdateCameraInputsOriginal);
+        HandleInputDetour = Detour(typeof(TopdownCameraSystem), HandleInputToken, HandleInputPatch, out HandleInputOriginal);
+        UpdateCameraInputsDetour = Detour(typeof(TopdownCameraSystem), UpdateCameraInputsToken, UpdateCameraInputsPatch, out UpdateCameraInputsOriginal);
     }
     static unsafe void HandleInputPatch(IntPtr _this, ref InputState inputState)
     {

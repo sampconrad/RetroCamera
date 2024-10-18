@@ -5,7 +5,7 @@ using UnityEngine;
 using static ModernCamera.Configuration.KeybindCategories;
 using static ModernCamera.Configuration.KeybindCategories.KeybindCategory;
 using static ModernCamera.Configuration.OptionCategories;
-using static ModernCamera.Utilities.CameraStateUtilities;
+using static ModernCamera.Utilities.CameraState;
 
 namespace ModernCamera;
 internal static class Settings
@@ -156,7 +156,7 @@ internal static class Settings
                 MaxPitchOption.SetValue(MinPitchOption.MinValue);
         });
 
-        PersistenceUtilities.SaveOptions();
+        Persistence.SaveOptions();
     }
     static void SetupKeybinds()
     {
@@ -190,6 +190,6 @@ internal static class Settings
 
         HideUIKeybind = keybindCategory.AddKeyBinding("moderncamera.hideui", "ModernCamera", "Hide UI", KeyCode.Slash);
 
-        PersistenceUtilities.SaveKeybinds();
+        Persistence.SaveKeybinds();
     }
 }

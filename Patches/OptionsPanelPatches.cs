@@ -3,8 +3,6 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using ModernCamera.Configuration;
 using ModernCamera.Utilities;
 using ProjectM.UI;
-using Stunlock.Localization;
-using StunShared.UI;
 using TMPro;
 using UnityEngine;
 using static ModernCamera.Configuration.OptionActions;
@@ -13,8 +11,9 @@ using static ModernCamera.Configuration.OptionCategories;
 namespace ModernCamera.Patches;
 
 [HarmonyPatch]
-internal static class OptionsInterfacePatch
+internal static class OptionsPanelPatches
 {
+    /*
     [HarmonyPatch(typeof(OptionsPanel_Interface), nameof(OptionsPanel_Interface.Start))]
     [HarmonyPostfix]
     static void Start(OptionsPanel_Interface __instance)
@@ -35,7 +34,7 @@ internal static class OptionsInterfacePatch
                     LocalizedString localizedString = LocalizedString.Create(toggleOption.DescKey);
                     SettingsEntry_Checkbox settingsEntryCheckbox = UIHelper.InstantiatePrefabUnderAnchor(__instance.CheckboxPrefab, __instance.ContentNode);
 
-                    /*
+                    
                     settingsEntryCheckbox.Initialize(
                         toggleOption.NameKey,
                         desc,
@@ -43,7 +42,7 @@ internal static class OptionsInterfacePatch
                         toggleOption.Value,
                         OnChange(toggleOption)
                     );
-                    */
+                    
 
                     settingsEntryCheckbox.HeaderText.LocalizationKey = toggleOption.NameKey;
                     settingsEntryCheckbox.Description = localizedString;
@@ -60,7 +59,7 @@ internal static class OptionsInterfacePatch
                     LocalizedString localizedString = LocalizedString.Create(toggleOption.DescKey);
                     SettingsEntry_Slider settingsEntrySlider = UIHelper.InstantiatePrefabUnderAnchor(__instance.SliderPrefab, __instance.ContentNode);
 
-                    /*
+                    
                     settingsEntrySlider.Initialize(
                         sliderOption.NameKey,
                         new Nullable_Unboxed<LocalizationKey>(sliderOption.DescKey),
@@ -73,7 +72,7 @@ internal static class OptionsInterfacePatch
                         OnChange(sliderOption),
                         fixedStepValue: sliderOption.StepValue
                     );
-                    */
+                    
 
                     settingsEntrySlider.HeaderText.LocalizationKey = sliderOption.NameKey;
                     settingsEntrySlider.Description = localizedString;
@@ -103,7 +102,7 @@ internal static class OptionsInterfacePatch
 
                     SettingsEntry_Dropdown settingsEntryDropdown = UIHelper.InstantiatePrefabUnderAnchor(__instance.DropdownPrefab, __instance.ContentNode);
 
-                    /*
+                    
                     settingsEntryDropdown.Initialize(
                         dropdownOption.NameKey,
                         descKey,
@@ -115,7 +114,7 @@ internal static class OptionsInterfacePatch
                         false,
                         false
                     );
-                    */
+                    
 
                     settingsEntryDropdown.HeaderText.LocalizationKey = dropdownOption.NameKey;
                     settingsEntryDropdown.Description = localizedString;
@@ -138,6 +137,29 @@ internal static class OptionsInterfacePatch
                         continue;
                     }
                     else __instance.EntriesSelectionGroup.AddChildren(dividerObject.transform, ref dividerIndex);
+                }
+            }
+        }
+    }
+    */
+
+    [HarmonyPatch(typeof(Options_ControlsPanel), nameof(Options_ControlsPanel.Start))]
+    [HarmonyPostfix]
+    static void StartPostfix(OptionsPanel_Interface __instance)
+    {
+        foreach (OptionCategory optionCategory in OptionsManager.OptionCategories.Values)
+        {
+            if (optionCategory.Options.Count == 0)
+            {
+                continue;
+            }
+
+            foreach (string id in optionCategory.Options)
+            {
+                if (optionCategory.TryGetSlider(id, out SliderOption sliderOption))
+                {
+                    __instance.AddSlider(sliderOption.NameKey, sliderOption.DescKey, sliderOption.MinValue, sliderOption.MaxValue, sliderOption.DefaultValue,
+                        sliderOption.Value, sliderOption.Decimals, sliderOption.Decimals == 0, OnChange(sliderOption));
                 }
             }
         }
@@ -182,7 +204,7 @@ internal static class OptionsInterfacePatch
         return (Il2CppSystem.Action<T>)(value =>
         {
             option.SetValue(value);
-            PersistenceUtilities.SaveOptions();
+            Persistence.SaveOptions();
         });
     }
     static int GetDividerIndexBasedOnName(string dividerText)

@@ -1,7 +1,7 @@
 ﻿using ModernCamera.Patches;
 using ProjectM;
 using UnityEngine;
-using static ModernCamera.Utilities.CameraStateUtilities;
+using static ModernCamera.Utilities.CameraState;
 
 namespace ModernCamera.Behaviours;
 internal abstract class CameraBehaviour

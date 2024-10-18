@@ -3,7 +3,7 @@ using ModernCamera.Configuration;
 using System.Text.Json;
 
 namespace ModernCamera.Utilities;
-internal static class PersistenceUtilities
+internal static class Persistence
 {
     static readonly JsonSerializerOptions JsonOptions = new()
     {

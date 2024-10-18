@@ -11,6 +11,6 @@ internal static class UIEntryPointPatch
     [HarmonyPostfix]
     static void AwakePostfix()
     {
-        CameraStateUtilities.Reset();
+        CameraState.Reset();
     }
 }

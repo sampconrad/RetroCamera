@@ -5,7 +5,7 @@ using ProjectM.UI;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using static ModernCamera.Utilities.CameraStateUtilities;
+using static ModernCamera.Utilities.CameraState;
 
 namespace ModernCamera.Systems;
 public class ModernCamera : MonoBehaviour

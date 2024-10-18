@@ -1,5 +1,5 @@
 ﻿using ProjectM;
-using static ModernCamera.Utilities.CameraStateUtilities;
+using static ModernCamera.Utilities.CameraState;
 
 namespace ModernCamera.Behaviours;
 internal class FirstPersonCameraBehaviour : CameraBehaviour
