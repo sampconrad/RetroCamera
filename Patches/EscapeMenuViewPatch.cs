@@ -18,8 +18,6 @@ internal static class EscapeMenuViewPatch
     static void OnDestroyPostfix() => Disable();
     static void Enable()
     {
-        Core.Log.LogInfo("EscapeMenuView.OnEnable");
-
         if (!IsEscapeMenuOpen)
         {
             IsEscapeMenuOpen = true;
@@ -28,8 +26,6 @@ internal static class EscapeMenuViewPatch
     }
     static void Disable()
     {
-        Core.Log.LogInfo("EscapeMenuView.OnDisable");
-
         if (IsEscapeMenuOpen)
         {
             IsEscapeMenuOpen = false;

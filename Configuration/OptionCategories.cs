@@ -4,10 +4,6 @@ using UnityEngine;
 namespace ModernCamera.Configuration;
 internal class OptionCategories
 {
-    public static readonly Dictionary<string, ToggleOption> ToggleOptions = [];
-    public static readonly Dictionary<string, SliderOption> SliderOptions = [];
-    public static readonly Dictionary<string, DropdownOption> DropdownOptions = [];
-    public static readonly Dictionary<string, string> Dividers = [];
     public class OptionCategory
     {
         public string Name { get; internal set; }
@@ -18,44 +14,56 @@ internal class OptionCategories
             LocalizationKey = LocalizationKeysManager.CreateKey(name);
         }
 
+        static readonly Dictionary<string, bool> Toggles = [];
+        static readonly Dictionary<string, float> Sliders = [];
+        static readonly Dictionary<string, string> Dropdowns = [];
+
+        public static readonly Dictionary<string, ToggleOption> ToggleOptions = [];
+        public static readonly Dictionary<string, SliderOption> SliderOptions = [];
+        public static readonly Dictionary<string, DropdownOption> DropdownOptions = [];
+
+        public static readonly Dictionary<string, string> Dividers = [];
         public readonly List<string> Options = [];
         public ToggleOption AddToggle(string name, string description, bool defaultValue)
         {
             ToggleOption option = new(name, description, defaultValue);
 
-            if (ToggleOptions.ContainsKey(name))
+            if (Toggles.ContainsKey(name))
             {
-                option.Value = ToggleOptions[name].Value;
+                option.Value = Toggles[name];
             }
-            else ToggleOptions.TryAdd(name, option);
 
+            ToggleOptions.TryAdd(name, option);
             Options.Add(option.Name);
+
             return option;
         }
         public SliderOption AddSlider(string name, string description, float minValue, float maxValue, float defaultValue, int decimals = default, float stepValue = default)
         {
             SliderOption option = new(name, description, minValue, maxValue, defaultValue, decimals);
 
-            if (SliderOptions.ContainsKey(name))
+            if (Sliders.ContainsKey(name))
             {
-                option.Value = Mathf.Clamp(SliderOptions[name].Value, minValue, maxValue);
+                option.Value = Mathf.Clamp(Sliders[name], minValue, maxValue);
             }
-            else SliderOptions.TryAdd(name, option);
 
+            SliderOptions.TryAdd(name, option);
             Options.Add(option.Name);
+
             return option;
         }
         public DropdownOption AddDropdown(string name, string description, int defaultValue, string[] values)
         {
             DropdownOption option = new(name, description, defaultValue, values);
 
-            if (DropdownOptions.ContainsKey(name))
+            if (Dropdowns.ContainsKey(name))
             {
-                option.Value = Mathf.Max(0, Array.IndexOf(values, DropdownOptions[name]));
+                option.Value = Mathf.Max(0, Array.IndexOf(values, Dropdowns[name]));
             }
-            else DropdownOptions.TryAdd(name, option);
 
+            DropdownOptions.TryAdd(name, option);
             Options.Add(option.Name);
+
             return option;
         }
         public void AddDivider(string name)

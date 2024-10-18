@@ -29,6 +29,11 @@ internal static class PersistenceUtilities
     {
         if (FilePaths.TryGetValue(fileKey, out string filePath))
         {
+            if (!Directory.Exists(DirectoryPath))
+            {
+                Directory.CreateDirectory(DirectoryPath);
+            }
+
             if (!File.Exists(filePath))
             {
                 File.Create(filePath).Dispose();
@@ -57,6 +62,11 @@ internal static class PersistenceUtilities
     {
         if (FilePaths.TryGetValue(fileKey, out string filePath))
         {
+            if (!Directory.Exists(DirectoryPath))
+            {
+                Directory.CreateDirectory(DirectoryPath);
+            }
+
             if (!File.Exists(filePath))
             {
                 File.Create(filePath).Dispose();

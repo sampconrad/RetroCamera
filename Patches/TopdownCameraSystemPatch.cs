@@ -1,25 +1,22 @@
 ﻿using BepInEx.Unity.IL2CPP.Hook;
-using HarmonyLib;
 using ModernCamera.Behaviours;
 using ProjectM;
 using System.Runtime.InteropServices;
-using static ModernCamera.Utilities.InteropUtilities;
 using static ModernCamera.Utilities.CameraStateUtilities;
 
 namespace ModernCamera.Patches;
-
-[HarmonyPatch]
+#nullable enable
 internal static class TopdownCameraSystemPatch
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     unsafe delegate void HandleInput(IntPtr _this, ref InputState inputState);
-    static HandleInput HandleInputOriginal;
-    static INativeDetour HandleInputDetour;
+    static HandleInput? HandleInputOriginal;
+    static INativeDetour? HandleInputDetour;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     unsafe delegate void UpdateCameraInputs(IntPtr _this, ref TopdownCameraState cameraState, ref TopdownCamera cameraData);
-    static UpdateCameraInputs UpdateCameraInputsOriginal;
-    static INativeDetour UpdateCameraInputsDetour;
+    static UpdateCameraInputs? UpdateCameraInputsOriginal;
+    static INativeDetour? UpdateCameraInputsDetour;
 
     static ZoomSettings DefaultZoomSettings;
     static ZoomSettings DefaultStandardZoomSettings;
@@ -28,19 +25,17 @@ internal static class TopdownCameraSystemPatch
     static bool DefaultZoomSettingsSaved;
     static bool UsingDefaultZoomSettings;
 
-    const int UpdateCameraInputsToken = 100663445;
-    const int HandleInputToken = 100663443;
+    static readonly string HandleInputPtrString = "7FFA8331F8C0";
+    static readonly string UpdateCameraInputsPtrString = "7FFA83331E10";
     public static unsafe void Initialize()
     {
-        HandleInputDetour = Detour(typeof(TopdownCameraSystem), HandleInputToken, HandleInputPatch, out HandleInputOriginal);
-        UpdateCameraInputsDetour = Detour(typeof(TopdownCameraSystem), UpdateCameraInputsToken, UpdateCameraInputsPatch, out UpdateCameraInputsOriginal);
+        HandleInputDetour = INativeDetour.CreateAndApply((IntPtr)Convert.ToInt64(HandleInputPtrString, 16), HandleInputPatch, out HandleInputOriginal);
+        UpdateCameraInputsDetour = INativeDetour.CreateAndApply((IntPtr)Convert.ToInt64(UpdateCameraInputsPtrString, 16), UpdateCameraInputsPatch, out UpdateCameraInputsOriginal);
     }
     static unsafe void HandleInputPatch(IntPtr _this, ref InputState inputState)
     {
         if (Settings.Enabled)
         {
-            Core.Log.LogInfo("Handling input via detour...");
-
             CurrentCameraBehaviour?.HandleInput(ref inputState);
         }
 
@@ -50,8 +45,6 @@ internal static class TopdownCameraSystemPatch
     {
         if (Settings.Enabled)
         {
-            Core.Log.LogInfo("Updating camera inputs via detour...");
-
             if (!DefaultZoomSettingsSaved)
             {
                 DefaultZoomSettings = cameraState.ZoomSettings;
@@ -80,7 +73,7 @@ internal static class TopdownCameraSystemPatch
             }
 
             // Update current camera behaviour
-            if (!CurrentCameraBehaviour!.Active) CurrentCameraBehaviour?.Activate(ref cameraState);
+            if (!CurrentCameraBehaviour!.Active) CurrentCameraBehaviour!.Activate(ref cameraState);
 
             CurrentCameraBehaviour!.UpdateCameraInputs(ref cameraState, ref cameraData);
             cameraData.StandardZoomSettings = cameraState.ZoomSettings;
@@ -101,12 +94,5 @@ internal static class TopdownCameraSystemPatch
     {
         HandleInputDetour?.Dispose();
         UpdateCameraInputsDetour?.Dispose();
-    }
-
-    [HarmonyPatch(typeof(TopdownCameraSystem), nameof(TopdownCameraSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(TopdownCameraSystem __instance)
-    {
-        if (Settings.Enabled) __instance._ZoomModifierSystem._ZoomModifiers.Clear();
     }
 }

@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Il2CppSystem;
 using ModernCamera.Configuration;
 using ModernCamera.Utilities;
 using ProjectM.UI;
@@ -34,9 +33,9 @@ internal static class OptionsInterfacePatch
                 if (optionCategory.TryGetToggle(id, out ToggleOption toggleOption))
                 {
                     LocalizedString localizedString = LocalizedString.Create(toggleOption.DescKey);
-                    Il2CppSystem.Nullable<LocalizedString> desc = new(localizedString);
-
                     SettingsEntry_Checkbox settingsEntryCheckbox = UIHelper.InstantiatePrefabUnderAnchor(__instance.CheckboxPrefab, __instance.ContentNode);
+
+                    /*
                     settingsEntryCheckbox.Initialize(
                         toggleOption.NameKey,
                         desc,
@@ -44,13 +43,24 @@ internal static class OptionsInterfacePatch
                         toggleOption.Value,
                         OnChange(toggleOption)
                     );
+                    */
+
+                    settingsEntryCheckbox.HeaderText.LocalizationKey = toggleOption.NameKey;
+                    settingsEntryCheckbox.Description = localizedString;
+                    settingsEntryCheckbox._DefaultValue = toggleOption.DefaultValue;
+                    settingsEntryCheckbox._InitValue = toggleOption.Value;
+                    settingsEntryCheckbox.OnChangeAction = OnChange(toggleOption);
+                    settingsEntryCheckbox.enabled = true;
 
                     SettingsEntryBase settingsEntryBase = settingsEntryCheckbox;
-                    __instance.EntriesSelectionGroup.AddEntry(ref settingsEntryBase);
+                    __instance.EntriesSelectionGroup.AddEntry(ref settingsEntryBase, true);
                 }
                 else if (optionCategory.TryGetSlider(id, out SliderOption sliderOption))
                 {
+                    LocalizedString localizedString = LocalizedString.Create(toggleOption.DescKey);
                     SettingsEntry_Slider settingsEntrySlider = UIHelper.InstantiatePrefabUnderAnchor(__instance.SliderPrefab, __instance.ContentNode);
+
+                    /*
                     settingsEntrySlider.Initialize(
                         sliderOption.NameKey,
                         new Nullable_Unboxed<LocalizationKey>(sliderOption.DescKey),
@@ -63,14 +73,27 @@ internal static class OptionsInterfacePatch
                         OnChange(sliderOption),
                         fixedStepValue: sliderOption.StepValue
                     );
+                    */
+
+                    settingsEntrySlider.HeaderText.LocalizationKey = sliderOption.NameKey;
+                    settingsEntrySlider.Description = localizedString;
+                    settingsEntrySlider.Slider.minValue = sliderOption.MinValue;
+                    settingsEntrySlider.Slider.maxValue = sliderOption.MaxValue;
+                    settingsEntrySlider._DefaultValue = sliderOption.DefaultValue;
+                    settingsEntrySlider._InitValue = sliderOption.Value;
+                    settingsEntrySlider._Decimals = sliderOption.Decimals;
+                    settingsEntrySlider.Slider.wholeNumbers = sliderOption.Decimals == 0;
+                    settingsEntrySlider.OnChangeAction = OnChange(sliderOption);
+                    settingsEntrySlider.Slider.SetStepSize(sliderOption.StepValue);
+                    settingsEntrySlider.enabled = true;
 
                     SettingsEntryBase settingsEntryBase = settingsEntrySlider;
-                    __instance.EntriesSelectionGroup.AddEntry(ref settingsEntryBase);
+                    __instance.EntriesSelectionGroup.AddEntry(ref settingsEntryBase, true);
                 }
                 else if (optionCategory.TryGetDropdown(id, out DropdownOption dropdownOption))
                 {
                     LocalizedString localizedString = LocalizedString.Create(dropdownOption.DescKey);
-                    Il2CppSystem.Nullable<LocalizedString> descKey = new(localizedString);
+                    //Il2CppSystem.Nullable<LocalizedString> descKey = new(localizedString);
 
                     Il2CppSystem.Collections.Generic.List<string> options = new(dropdownOption.Values.Count);
                     foreach (string option in dropdownOption.Values)
@@ -79,6 +102,8 @@ internal static class OptionsInterfacePatch
                     }
 
                     SettingsEntry_Dropdown settingsEntryDropdown = UIHelper.InstantiatePrefabUnderAnchor(__instance.DropdownPrefab, __instance.ContentNode);
+
+                    /*
                     settingsEntryDropdown.Initialize(
                         dropdownOption.NameKey,
                         descKey,
@@ -90,6 +115,14 @@ internal static class OptionsInterfacePatch
                         false,
                         false
                     );
+                    */
+
+                    settingsEntryDropdown.HeaderText.LocalizationKey = dropdownOption.NameKey;
+                    settingsEntryDropdown.Description = localizedString;
+                    settingsEntryDropdown.SetOptions(options, dropdownOption.Value);
+                    settingsEntryDropdown._DefaultValue = dropdownOption.DefaultValue;
+                    settingsEntryDropdown.OnChangeAction = OnChange(dropdownOption);
+                    settingsEntryDropdown.enabled = true;
 
                     SettingsEntryBase settingsEntryBase = settingsEntryDropdown;
                     __instance.EntriesSelectionGroup.AddEntry(ref settingsEntryBase);

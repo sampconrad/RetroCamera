@@ -20,7 +20,7 @@ public class ModernCamera : MonoBehaviour
     public static UIDataSystem UIDataSystem;
     public static CursorPositionSystem CursorPositionSystem;
 
-    static bool GameFocused;
+    static bool GameFocused = true;
     public static void Enabled(bool enabled)
     {
         Settings.Enabled = enabled;
@@ -65,7 +65,7 @@ public class ModernCamera : MonoBehaviour
     {
         if (!Core.HasInitialized) return;
         else if (!GameFocused || !Settings.Enabled) return;
-        
+
         if (CrosshairPrefab == null) BuildCrosshair();
 
         if (GameCamera == null)

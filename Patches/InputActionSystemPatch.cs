@@ -2,14 +2,22 @@
 using ModernCamera.Configuration;
 using ProjectM;
 using UnityEngine.InputSystem;
-using static ModernCamera.Configuration.KeybindActions;
+using UnityEngine;
 using static ModernCamera.Configuration.KeybindCategories;
+using static ModernCamera.Configuration.KeybindCategories.KeybindCategory;
 
 namespace ModernCamera.Patches;
 
 [HarmonyPatch]
 internal static class InputActionSystemPatch
 {
+    [HarmonyPatch(typeof(TopdownCameraSystem), nameof(TopdownCameraSystem.OnUpdate))]
+    [HarmonyPrefix]
+    static void OnUpdatePrefix(TopdownCameraSystem __instance)
+    {
+        if (Settings.Enabled) __instance._ZoomModifierSystem._ZoomModifiers.Clear();
+    }
+
     [HarmonyPatch(typeof(InputActionSystem), nameof(InputActionSystem.OnCreate))]
     [HarmonyPostfix]
     static void OnCreatePostfix(InputActionSystem __instance)
@@ -30,12 +38,24 @@ internal static class InputActionSystemPatch
     {
         foreach (KeybindMapping keybind in KeybindsManager.KeybindsById.Values)
         {
-            if (keybind.IsDown) keybind.OnKeyDown();
-            if (keybind.IsPressed) keybind.OnKeyPressed();
-            if (keybind.IsUp) keybind.OnKeyUp();
+            if (IsKeybindDown(keybind)) keybind.OnKeyDown();
+            if (IsKeybindUp(keybind)) keybind.OnKeyUp();
+            if (IsKeybindPressed(keybind)) keybind.OnKeyPressed();
         }
     }
-    
+    static bool IsKeybindDown(KeybindMapping keybind)
+    {
+        return Input.GetKey(keybind.Primary) || Input.GetKey(keybind.Secondary);
+    }
+    static bool IsKeybindUp(KeybindMapping keybind)
+    {
+        return Input.GetKeyUp(keybind.Primary) || Input.GetKeyUp(keybind.Secondary);
+    }
+    static bool IsKeybindPressed(KeybindMapping keybind)
+    {
+        return Input.GetKeyDown(keybind.Primary) || Input.GetKeyDown(keybind.Secondary);
+    }
+
     /*
     [HarmonyPatch(typeof(InputActionSystem), nameof(InputActionSystem.ModifyInputActionBinding), typeof(ButtonInputAction), typeof(bool), typeof(Il2CppSystem.Action<bool>), typeof(Il2CppSystem.Action<bool, bool>), typeof(OnRebindCollision), typeof(Nullable_Unboxed<ControllerType>))]
     [HarmonyPrefix]

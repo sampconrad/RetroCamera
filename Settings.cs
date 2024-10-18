@@ -2,8 +2,8 @@
 using ModernCamera.Patches;
 using ModernCamera.Utilities;
 using UnityEngine;
-using static ModernCamera.Configuration.KeybindActions;
 using static ModernCamera.Configuration.KeybindCategories;
+using static ModernCamera.Configuration.KeybindCategories.KeybindCategory;
 using static ModernCamera.Configuration.OptionCategories;
 using static ModernCamera.Utilities.CameraStateUtilities;
 
@@ -160,17 +160,17 @@ internal static class Settings
     }
     static void SetupKeybinds()
     {
-        KeybindCategory keybindingCategory = KeybindsManager.AddCategory("ModernCamera");
+        KeybindCategory keybindCategory = KeybindsManager.AddCategory("ModernCamera");
 
-        EnabledKeybind = keybindingCategory.AddKeyBinding("moderncamera.enabled", "ModernCamera", "ToggleModernCamera", KeyCode.Comma);
+        EnabledKeybind = keybindCategory.AddKeyBinding("moderncamera.enabled", "ModernCamera", "ToggleModernCamera", KeyCode.Comma);
         EnabledKeybind.AddKeyDownListener(() =>
         {
-            Core.Log.LogInfo(keybindingCategory.Name + " Enabled: " + !Enabled);
+            Core.Log.LogInfo(keybindCategory.Name + " Enabled: " + !Enabled);
 
             EnabledOption.SetValue(!Enabled);
         });
 
-        ActionModeKeybind = keybindingCategory.AddKeyBinding("moderncamera.actionmode", "ModernCamera", "ToggleActionMode", KeyCode.Period);
+        ActionModeKeybind = keybindCategory.AddKeyBinding("moderncamera.actionmode", "ModernCamera", "ToggleActionMode", KeyCode.Period);
         ActionModeKeybind.AddKeyDownListener(() =>
         {
             if (Enabled && !IsFirstPerson)
@@ -188,7 +188,7 @@ internal static class Settings
             }
         });
 
-        HideUIKeybind = keybindingCategory.AddKeyBinding("moderncamera.hideui", "ModernCamera", "Hide UI", KeyCode.Slash);
+        HideUIKeybind = keybindCategory.AddKeyBinding("moderncamera.hideui", "ModernCamera", "Hide UI", KeyCode.Slash);
 
         PersistenceUtilities.SaveKeybinds();
     }

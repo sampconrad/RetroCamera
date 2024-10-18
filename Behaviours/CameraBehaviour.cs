@@ -16,14 +16,10 @@ internal abstract class CameraBehaviour
     protected static bool IsBuildSettingsSet;
     public virtual void Activate(ref TopdownCameraState state)
     {
-        Core.Log.LogInfo($"Activating camera behaviour {BehaviourType}...");
-
         Active = true;
     }
     public virtual void Deactivate()
     {
-        Core.Log.LogInfo($"Deactivating camera behaviour {BehaviourType}...");
-
         TargetZoom = Settings.MaxZoom / 2f;
         Active = false;
     }
@@ -36,8 +32,6 @@ internal abstract class CameraBehaviour
         {
             if (EscapeMenuViewPatch.IsEscapeMenuOpen)
             {
-                Core.Log.LogInfo("EscapeMenuView is open, closing it...");
-
                 IsMenuOpen = false;
                 EscapeMenuViewPatch.IsEscapeMenuOpen = false;
             }
@@ -45,8 +39,6 @@ internal abstract class CameraBehaviour
 
         if (IsMouseLocked && !IsMenuOpen && !inputState.IsInputPressed(ButtonInputAction.RotateCamera))
         {
-            Core.Log.LogInfo("Rotating mouse with movement during lock... (maybe?)");
-
             inputState.InputsPressed.m_ListData->AddNoResize(ButtonInputAction.RotateCamera);
         }
 
@@ -55,8 +47,6 @@ internal abstract class CameraBehaviour
 
         if (zoomValue != 0 && (!InBuildMode || !Settings.DefaultBuildMode))
         {
-            Core.Log.LogInfo("Consuming zoom for camera...");
-
             // Consume zoom input for the camera
             var zoomAmount = Mathf.Lerp(.25f, 1.5f, Mathf.Max(0, TargetZoom - Settings.MinZoom) / Settings.MaxZoom);
             var zoomChange = inputState.GetAnalogValue(AnalogInputAction.ZoomCamera) > 0 ? zoomAmount : -zoomAmount;
@@ -72,8 +62,6 @@ internal abstract class CameraBehaviour
     }
     public virtual void UpdateCameraInputs(ref TopdownCameraState state, ref TopdownCamera data)
     {
-        Core.Log.LogInfo($"Updating camera inputs for behaviour {BehaviourType}...");
-
         InBuildMode = state.InBuildMode;
 
         if (!IsBuildSettingsSet)
@@ -89,8 +77,6 @@ internal abstract class CameraBehaviour
         // Manually set zoom if not in build mode
         if (!state.InBuildMode || !Settings.DefaultBuildMode)
         {
-            Core.Log.LogInfo("Modifying camera zoom settings outside build mode...");
-
             data.BuildModeZoomSettings.MaxPitch = DefaultMaxPitch;
             data.BuildModeZoomSettings.MinPitch = DefaultMinPitch;
 
@@ -101,7 +87,6 @@ internal abstract class CameraBehaviour
         // Use default build mode zoom
         if (state.InBuildMode && Settings.DefaultBuildMode)
         {
-            Core.Log.LogInfo("Restoring camera zoom settings for build mode...");
             data.BuildModeZoomSettings = BuildModeZoomSettings;
 
             state.LastTarget.Zoom = data.BuildModeZoomDistance;
