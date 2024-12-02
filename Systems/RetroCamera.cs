@@ -1,14 +1,14 @@
-﻿using ModernCamera.Behaviours;
+﻿using RetroCamera.Behaviours;
 using ProjectM;
 using ProjectM.Sequencer;
 using ProjectM.UI;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
-using static ModernCamera.Utilities.CameraState;
+using static RetroCamera.Utilities.CameraState;
 
-namespace ModernCamera.Systems;
-public class ModernCamera : MonoBehaviour
+namespace RetroCamera.Systems;
+public class RetroCamera : MonoBehaviour
 {
     static GameObject CrosshairPrefab;
     static GameObject Crosshair;

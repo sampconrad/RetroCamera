@@ -1,12 +1,12 @@
 ﻿using HarmonyLib;
-using ModernCamera.Configuration;
+using RetroCamera.Configuration;
 using ProjectM;
 using UnityEngine.InputSystem;
 using UnityEngine;
-using static ModernCamera.Configuration.KeybindCategories;
-using static ModernCamera.Configuration.KeybindCategories.KeybindCategory;
+using static RetroCamera.Configuration.KeybindCategories;
+using static RetroCamera.Configuration.KeybindCategories.KeybindCategory;
 
-namespace ModernCamera.Patches;
+namespace RetroCamera.Patches;
 
 [HarmonyPatch]
 internal static class InputActionSystemPatch

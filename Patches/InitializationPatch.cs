@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using ProjectM;
 
-namespace ModernCamera.Patches;
+namespace RetroCamera.Patches;
 
 [HarmonyPatch]
 internal static class InitializationPatch

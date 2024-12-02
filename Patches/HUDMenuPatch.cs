@@ -1,8 +1,8 @@
 ﻿using HarmonyLib;
 using ProjectM.UI;
-using ModernCamera.Utilities;
+using RetroCamera.Utilities;
 
-namespace ModernCamera.Patches;
+namespace RetroCamera.Patches;
 
 [HarmonyPatch]
 internal static class HUDMenuPatch

@@ -1,19 +1,21 @@
 ﻿using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using ModernCamera.Configuration;
-using ModernCamera.Utilities;
+using RetroCamera.Configuration;
+using RetroCamera.Utilities;
 using ProjectM.UI;
 using TMPro;
 using UnityEngine;
-using static ModernCamera.Configuration.OptionActions;
-using static ModernCamera.Configuration.OptionCategories;
+using static RetroCamera.Configuration.OptionActions;
+using static RetroCamera.Configuration.OptionCategories;
+using StunShared.UI;
 
-namespace ModernCamera.Patches;
+namespace RetroCamera.Patches;
 
+/*
 [HarmonyPatch]
 internal static class OptionsPanelPatches
 {
-    /*
+    
     [HarmonyPatch(typeof(OptionsPanel_Interface), nameof(OptionsPanel_Interface.Start))]
     [HarmonyPostfix]
     static void Start(OptionsPanel_Interface __instance)
@@ -141,7 +143,7 @@ internal static class OptionsPanelPatches
             }
         }
     }
-    */
+    
 
     [HarmonyPatch(typeof(Options_ControlsPanel), nameof(Options_ControlsPanel.Start))]
     [HarmonyPostfix]
@@ -222,3 +224,4 @@ internal static class OptionsPanelPatches
             return -1;
     }
 }
+*/

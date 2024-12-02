@@ -1,8 +1,8 @@
 ﻿using HarmonyLib;
-using ModernCamera.Utilities;
+using RetroCamera.Utilities;
 using ProjectM;
 
-namespace ModernCamera.Patches;
+namespace RetroCamera.Patches;
 
 [HarmonyPatch]
 internal static class GameplayInputSystemPatch

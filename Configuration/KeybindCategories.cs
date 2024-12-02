@@ -3,9 +3,9 @@ using Stunlock.Localization;
 using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static ModernCamera.Configuration.KeybindsManager;
+using static RetroCamera.Configuration.KeybindsManager;
 
-namespace ModernCamera.Configuration;
+namespace RetroCamera.Configuration;
 
 public delegate void KeyEvent();
 internal class KeybindCategories

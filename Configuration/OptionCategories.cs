@@ -1,7 +1,7 @@
 ﻿using Stunlock.Localization;
 using UnityEngine;
 
-namespace ModernCamera.Configuration;
+namespace RetroCamera.Configuration;
 internal class OptionCategories
 {
     public class OptionCategory

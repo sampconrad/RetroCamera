@@ -1,8 +1,8 @@
-﻿using ModernCamera.Behaviours;
+﻿using RetroCamera.Behaviours;
 using ProjectM;
 using UnityEngine;
 
-namespace ModernCamera.Utilities;
+namespace RetroCamera.Utilities;
 internal static class CameraState
 {
     public static bool IsUIHidden;

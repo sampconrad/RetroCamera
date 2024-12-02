@@ -1,10 +1,10 @@
 ﻿using HarmonyLib;
-using ModernCamera.Configuration;
+using RetroCamera.Configuration;
 using ProjectM.UI;
 using StunShared.UI;
 using UnityEngine.InputSystem;
 
-namespace ModernCamera.Patches;
+namespace RetroCamera.Patches;
 
 /*
 [HarmonyPatch]

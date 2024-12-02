@@ -1,8 +1,8 @@
 ﻿using ProjectM;
-using static ModernCamera.Configuration.KeybindCategories;
-using static ModernCamera.Configuration.KeybindCategories.KeybindCategory;
+using static RetroCamera.Configuration.KeybindCategories;
+using static RetroCamera.Configuration.KeybindCategories.KeybindCategory;
 
-namespace ModernCamera.Configuration;
+namespace RetroCamera.Configuration;
 internal static class KeybindsManager
 {
     public static Dictionary<string, KeybindCategory> KeybindCategories = [];

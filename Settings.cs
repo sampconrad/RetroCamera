@@ -1,13 +1,13 @@
-﻿using ModernCamera.Configuration;
-using ModernCamera.Patches;
-using ModernCamera.Utilities;
+﻿using RetroCamera.Configuration;
+using RetroCamera.Patches;
+using RetroCamera.Utilities;
 using UnityEngine;
-using static ModernCamera.Configuration.KeybindCategories;
-using static ModernCamera.Configuration.KeybindCategories.KeybindCategory;
-using static ModernCamera.Configuration.OptionCategories;
-using static ModernCamera.Utilities.CameraState;
+using static RetroCamera.Configuration.KeybindCategories;
+using static RetroCamera.Configuration.KeybindCategories.KeybindCategory;
+using static RetroCamera.Configuration.OptionCategories;
+using static RetroCamera.Utilities.CameraState;
 
-namespace ModernCamera;
+namespace RetroCamera;
 internal static class Settings
 {
     public static bool Enabled { get => EnabledOption.Value; set => EnabledOption.SetValue(value); }
@@ -93,36 +93,36 @@ internal static class Settings
     public static void AddHideUIListener(KeyEvent action) => HideUIKeybind.AddKeyDownListener(action);
     static void SetupOptions()
     {
-        OptionCategory optionCategory = OptionsManager.AddCategory("ModernCamera");
+        OptionCategory optionCategory = OptionsManager.AddCategory("RetroCamera");
 
-        EnabledOption = optionCategory.AddToggle("moderncamera.enabled", "Enabled", true);
-        FirstPersonEnabledOption = optionCategory.AddToggle("moderncamera.firstperson", "FirstPerson", true);
-        DefaultBuildModeOption = optionCategory.AddToggle("moderncamera.defaultbuildmode", "DefaultBuildModeCamera", true);
-        AlwaysShowCrosshairOption = optionCategory.AddToggle("moderncamera.alwaysshowcrosshair", "AlwaysShowCrosshair", false);
-        ActionModeCrosshairOption = optionCategory.AddToggle("moderncamera.actionmodecrosshair", "ActionModeCrosshair", false);
-        FieldOfViewOption = optionCategory.AddSlider("moderncamera.fieldofview", "Field of View", 50, 90, 60);
+        EnabledOption = optionCategory.AddToggle("retrocamera.enabled", "Enabled", true);
+        FirstPersonEnabledOption = optionCategory.AddToggle("retrocamera.firstperson", "FirstPerson", true);
+        DefaultBuildModeOption = optionCategory.AddToggle("retrocamera.defaultbuildmode", "DefaultBuildModeCamera", true);
+        AlwaysShowCrosshairOption = optionCategory.AddToggle("retrocamera.alwaysshowcrosshair", "AlwaysShowCrosshair", false);
+        ActionModeCrosshairOption = optionCategory.AddToggle("retrocamera.actionmodecrosshair", "ActionModeCrosshair", false);
+        FieldOfViewOption = optionCategory.AddSlider("retrocamera.fieldofview", "Field of View", 50, 90, 60);
 
         optionCategory.AddDivider("ThirdPersonAiming"); // "ThirdPersonAiming" Divider: Index 0 (First in the list)
-        CameraAimModeOption = optionCategory.AddDropdown("moderncamera.aimmode", "Aim Mode", (int)CameraAimMode.Default, Enum.GetNames(typeof(CameraAimMode)));
-        AimOffsetXOption = optionCategory.AddSlider("moderncamera.aimoffsetx", "Screen X% Offset ", -25, 25, 0);
-        AimOffsetYOption = optionCategory.AddSlider("moderncamera.aimoffsety", "Screen Y% Offset", -25, 25, 0);
+        CameraAimModeOption = optionCategory.AddDropdown("retrocamera.aimmode", "Aim Mode", (int)CameraAimMode.Default, Enum.GetNames(typeof(CameraAimMode)));
+        AimOffsetXOption = optionCategory.AddSlider("retrocamera.aimoffsetx", "Screen X% Offset ", -25, 25, 0);
+        AimOffsetYOption = optionCategory.AddSlider("retrocamera.aimoffsety", "Screen Y% Offset", -25, 25, 0);
 
         optionCategory.AddDivider("ThirdPersonZoom"); // "ThirdPersonZoom" Divider: Index 3 (After 3 entries)
-        MinZoomOption = optionCategory.AddSlider("moderncamera.minzoom", "Min Zoom", 1, 18, 2);
-        MaxZoomOption = optionCategory.AddSlider("moderncamera.maxzoom", "Max Zoom", 3, 20, 18);
-        LockCameraZoomOption = optionCategory.AddToggle("moderncamera.lockzoom", "Lock Camera Zoom", false);
-        LockCameraZoomDistanceOption = optionCategory.AddSlider("moderncamera.lockzoomdistance", "Locked Camera Zoom Distance", 6, 20, 15);
+        MinZoomOption = optionCategory.AddSlider("retrocamera.minzoom", "Min Zoom", 1, 18, 2);
+        MaxZoomOption = optionCategory.AddSlider("retrocamera.maxzoom", "Max Zoom", 3, 20, 18);
+        LockCameraZoomOption = optionCategory.AddToggle("retrocamera.lockzoom", "Lock Camera Zoom", false);
+        LockCameraZoomDistanceOption = optionCategory.AddSlider("retrocamera.lockzoomdistance", "Locked Camera Zoom Distance", 6, 20, 15);
          
         optionCategory.AddDivider("ThirdPersonPitch"); // "ThirdPersonPitch" Divider: Index 7 (After 4 more entries)
-        MinPitchOption = optionCategory.AddSlider("moderncamera.minpitch", "MinPitch", 0, 90, 9);
-        MaxPitchOption = optionCategory.AddSlider("moderncamera.maxpitch", "MaxPitch", 0, 90, 90);
-        LockCamerMenuOptionstchOption = optionCategory.AddToggle("moderncamera.lockpitch", "Lock Camera Pitch", false);
-        LockCamerMenuOptionstchAngleOption = optionCategory.AddSlider("moderncamera.lockpitchangle", "Locked Camera Pitch Angle", 0, 90, 60);
+        MinPitchOption = optionCategory.AddSlider("retrocamera.minpitch", "MinPitch", 0, 90, 9);
+        MaxPitchOption = optionCategory.AddSlider("retrocamera.maxpitch", "MaxPitch", 0, 90, 90);
+        LockCamerMenuOptionstchOption = optionCategory.AddToggle("retrocamera.lockpitch", "Lock Camera Pitch", false);
+        LockCamerMenuOptionstchAngleOption = optionCategory.AddSlider("retrocamera.lockpitchangle", "Locked Camera Pitch Angle", 0, 90, 60);
 
         optionCategory.AddDivider("OverShoulder"); // "OverShoulder" Divider: Index 11 (After 4 more entries)
-        OverTheShoulderOption = optionCategory.AddToggle("moderncamera.overtheshoulder", "Use Over the Shoulder Offset", false);
-        OverTheShoulderXOption = optionCategory.AddSlider("moderncamera.overtheshoulderx", "X Offset", 0.5f, 4, 1);
-        OverTheShoulderYOption = optionCategory.AddSlider("moderncamera.overtheshouldery", "Y Offset", 1, 8, 1);
+        OverTheShoulderOption = optionCategory.AddToggle("retrocamera.overtheshoulder", "Use Over the Shoulder Offset", false);
+        OverTheShoulderXOption = optionCategory.AddSlider("retrocamera.overtheshoulderx", "X Offset", 0.5f, 4, 1);
+        OverTheShoulderYOption = optionCategory.AddSlider("retrocamera.overtheshouldery", "Y Offset", 1, 8, 1);
 
         MinZoomOption.AddListener(value =>
         {
@@ -160,9 +160,9 @@ internal static class Settings
     }
     static void SetupKeybinds()
     {
-        KeybindCategory keybindCategory = KeybindsManager.AddCategory("ModernCamera");
+        KeybindCategory keybindCategory = KeybindsManager.AddCategory("RetroCamera");
 
-        EnabledKeybind = keybindCategory.AddKeyBinding("moderncamera.enabled", "ModernCamera", "ToggleModernCamera", KeyCode.Comma);
+        EnabledKeybind = keybindCategory.AddKeyBinding("retrocamera.enabled", "RetroCamera", "ToggleRetroCamera", KeyCode.Comma);
         EnabledKeybind.AddKeyDownListener(() =>
         {
             Core.Log.LogInfo(keybindCategory.Name + " Enabled: " + !Enabled);
@@ -170,7 +170,7 @@ internal static class Settings
             EnabledOption.SetValue(!Enabled);
         });
 
-        ActionModeKeybind = keybindCategory.AddKeyBinding("moderncamera.actionmode", "ModernCamera", "ToggleActionMode", KeyCode.Period);
+        ActionModeKeybind = keybindCategory.AddKeyBinding("retrocamera.actionmode", "RetroCamera", "ToggleActionMode", KeyCode.Period);
         ActionModeKeybind.AddKeyDownListener(() =>
         {
             if (Enabled && !IsFirstPerson)
@@ -188,7 +188,7 @@ internal static class Settings
             }
         });
 
-        HideUIKeybind = keybindCategory.AddKeyBinding("moderncamera.hideui", "ModernCamera", "Hide UI", KeyCode.Slash);
+        HideUIKeybind = keybindCategory.AddKeyBinding("retrocamera.hideui", "RetroCamera", "Hide UI", KeyCode.Slash);
 
         Persistence.SaveKeybinds();
     }

@@ -1,6 +1,6 @@
 ﻿using Stunlock.Localization;
 
-namespace ModernCamera.Configuration;
+namespace RetroCamera.Configuration;
 
 public delegate void OnChange<T>(T value);
 internal class OptionActions

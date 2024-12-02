@@ -1,6 +1,6 @@
-﻿using static ModernCamera.Configuration.OptionCategories;
+﻿using static RetroCamera.Configuration.OptionCategories;
 
-namespace ModernCamera.Configuration;
+namespace RetroCamera.Configuration;
 internal static class OptionsManager
 {
     public static Dictionary<string, OptionCategory> OptionCategories = [];

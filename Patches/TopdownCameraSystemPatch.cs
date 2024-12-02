@@ -1,11 +1,12 @@
 ﻿using BepInEx.Unity.IL2CPP.Hook;
-using ModernCamera.Behaviours;
+using RetroCamera.Behaviours;
 using ProjectM;
 using System.Runtime.InteropServices;
-using static ModernCamera.Utilities.CameraState;
-using static ModernCamera.Utilities.NativeDetours;
+using static RetroCamera.Utilities.CameraState;
+using static RetroCamera.Utilities.NativeDetour;
+using RetroCamera.Utilities;
 
-namespace ModernCamera.Patches;
+namespace RetroCamera.Patches;
 #nullable enable
 internal static class TopdownCameraSystemPatch
 {
@@ -26,12 +27,13 @@ internal static class TopdownCameraSystemPatch
     static bool DefaultZoomSettingsSaved;
     static bool UsingDefaultZoomSettings;
 
-    const int HandleInputToken = 100663443;
-    const int UpdateCameraInputsToken = 100663471;
     public static unsafe void Initialize()
     {
-        HandleInputDetour = Detour(typeof(TopdownCameraSystem), HandleInputToken, HandleInputPatch, out HandleInputOriginal);
-        UpdateCameraInputsDetour = Detour(typeof(TopdownCameraSystem), UpdateCameraInputsToken, UpdateCameraInputsPatch, out UpdateCameraInputsOriginal);
+        //HandleInputDetour = HandleInputDetour(HandleInputToken, HandleInputPatch, out HandleInputOriginal);
+        //UpdateCameraInputsDetour = UpdateCameraInputsDetour(UpdateCameraInputsToken, UpdateCameraInputsPatch, out UpdateCameraInputsOriginal);
+
+        HandleInputDetour = NativeDetour.Create(typeof(TopdownCameraSystem), "HandleInput", HandleInputPatch, out HandleInputOriginal);
+        UpdateCameraInputsDetour = NativeDetour.Create(typeof(TopdownCameraSystem), "UpdateCameraInputs", "OriginalLambdaBody", UpdateCameraInputsPatch, out UpdateCameraInputsOriginal);
     }
     static unsafe void HandleInputPatch(IntPtr _this, ref InputState inputState)
     {

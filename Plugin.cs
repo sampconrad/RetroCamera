@@ -2,10 +2,10 @@ using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
-using ModernCamera.Patches;
+using RetroCamera.Patches;
 using System.Reflection;
 
-namespace ModernCamera;
+namespace RetroCamera;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 internal class Plugin : BasePlugin
@@ -18,9 +18,8 @@ internal class Plugin : BasePlugin
         Instance = this;
 
         Settings.Initialize();
-        AddComponent<Systems.ModernCamera>();
+        AddComponent<Systems.RetroCamera>();
 
-        TopdownCameraSystemPatch.Initialize();
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
         Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] loaded on client!");

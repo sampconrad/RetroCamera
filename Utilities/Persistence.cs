@@ -1,8 +1,8 @@
 ﻿using BepInEx;
-using ModernCamera.Configuration;
+using RetroCamera.Configuration;
 using System.Text.Json;
 
-namespace ModernCamera.Utilities;
+namespace RetroCamera.Utilities;
 internal static class Persistence
 {
     static readonly JsonSerializerOptions JsonOptions = new()

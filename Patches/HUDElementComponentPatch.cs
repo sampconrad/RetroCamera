@@ -2,7 +2,7 @@
 using ProjectM.UI;
 using UnityEngine;
 
-namespace ModernCamera.Patches;
+namespace RetroCamera.Patches;
 
 [HarmonyPatch]
 internal static class HUDElementComponentPatch

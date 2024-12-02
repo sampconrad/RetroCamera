@@ -2,13 +2,15 @@ using BepInEx.Logging;
 using ProjectM;
 using ProjectM.Sequencer;
 using ProjectM.UI;
+using RetroCamera.Patches;
 using Unity.Entities;
 
-namespace ModernCamera;
+namespace RetroCamera;
 internal class Core
 {
     public static World Client;
     public static ZoomModifierSystem ZoomModifierSystem { get; internal set; }
+    public static TopdownCameraSystem TopdownCameraSystem { get; internal set; }
     public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
     public static UIDataSystem UIDataSystem { get; internal set; }
     public static CursorPositionSystem CursorPositionSystem { get; internal set; }
@@ -23,16 +25,20 @@ internal class Core
 
         ZoomModifierSystem = Client.GetExistingSystemManaged<ZoomModifierSystem>();
         ZoomModifierSystem.Enabled = false;
-        Systems.ModernCamera.ZoomModifierSystem = ZoomModifierSystem;
+        Systems.RetroCamera.ZoomModifierSystem = ZoomModifierSystem;
+
+        TopdownCameraSystem = Client.GetExistingSystemManaged<TopdownCameraSystem>();
 
         PrefabCollectionSystem = Client.GetExistingSystemManaged<PrefabCollectionSystem>();
-        Systems.ModernCamera.PrefabCollectionSystem = PrefabCollectionSystem;
+        Systems.RetroCamera.PrefabCollectionSystem = PrefabCollectionSystem;
 
         UIDataSystem = Client.GetExistingSystemManaged<UIDataSystem>();
-        Systems.ModernCamera.UIDataSystem = UIDataSystem;
+        Systems.RetroCamera.UIDataSystem = UIDataSystem;
 
         CursorPositionSystem = Client.GetExistingSystemManaged<CursorPositionSystem>();
-        Systems.ModernCamera.CursorPositionSystem = CursorPositionSystem;
+        Systems.RetroCamera.CursorPositionSystem = CursorPositionSystem;
+
+        TopdownCameraSystemPatch.Initialize();
 
         HasInitialized = true;
     }

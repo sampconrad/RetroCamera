@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using static ModernCamera.Configuration.OptionActions;
+using static RetroCamera.Configuration.OptionActions;
 
-namespace ModernCamera.Configuration;
+namespace RetroCamera.Configuration;
 internal class SliderOption : OptionAction<float>
 {
     public float MinValue { get; internal set; }

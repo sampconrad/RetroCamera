@@ -1,8 +1,8 @@
 ﻿using ProjectM;
 using UnityEngine;
-using static ModernCamera.Utilities.CameraState;
+using static RetroCamera.Utilities.CameraState;
 
-namespace ModernCamera.Behaviours;
+namespace RetroCamera.Behaviours;
 internal class ThirdPersonCameraBehaviour : CameraBehaviour
 {
     float LastPitchPercent = float.PositiveInfinity;

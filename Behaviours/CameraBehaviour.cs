@@ -1,9 +1,9 @@
-﻿using ModernCamera.Patches;
+﻿using RetroCamera.Patches;
 using ProjectM;
 using UnityEngine;
-using static ModernCamera.Utilities.CameraState;
+using static RetroCamera.Utilities.CameraState;
 
-namespace ModernCamera.Behaviours;
+namespace RetroCamera.Behaviours;
 internal abstract class CameraBehaviour
 {
     public BehaviourType BehaviourType;
