@@ -45,7 +45,7 @@ internal static class InputActionSystemPatch
     }
     static bool IsKeybindDown(KeybindMapping keybind)
     {
-        return Input.GetKey(keybind.Primary) || Input.GetKey(keybind.Secondary);
+        return Input.GetKeyDown(keybind.Primary) || Input.GetKeyDown(keybind.Secondary);
     }
     static bool IsKeybindUp(KeybindMapping keybind)
     {
@@ -53,7 +53,7 @@ internal static class InputActionSystemPatch
     }
     static bool IsKeybindPressed(KeybindMapping keybind)
     {
-        return Input.GetKeyDown(keybind.Primary) || Input.GetKeyDown(keybind.Secondary);
+        return Input.GetKey(keybind.Primary) || Input.GetKey(keybind.Secondary);
     }
 
     /*
