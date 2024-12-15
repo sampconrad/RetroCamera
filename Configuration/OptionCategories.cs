@@ -11,7 +11,7 @@ internal class OptionCategories
         public OptionCategory(string name)
         {
             Name = name;
-            LocalizationKey = LocalizationKeysManager.CreateKey(name);
+            LocalizationKey = LocalizationKeyManager.CreateKey(name);
         }
 
         static readonly Dictionary<string, bool> Toggles = [];

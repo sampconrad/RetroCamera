@@ -20,8 +20,8 @@ internal class OptionActions
             Description = description;
             DefaultValue = defaultValue;
             Value = defaultValue;
-            NameKey = LocalizationKeysManager.CreateKey(name);
-            DescKey = LocalizationKeysManager.CreateKey(description);
+            NameKey = LocalizationKeyManager.CreateKey(name);
+            DescKey = LocalizationKeyManager.CreateKey(description);
         }
 
         public event OnChange<T> OnChange = delegate { };

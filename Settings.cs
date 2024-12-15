@@ -162,7 +162,7 @@ internal static class Settings
     {
         KeybindCategory keybindCategory = KeybindsManager.AddCategory("RetroCamera");
 
-        EnabledKeybind = keybindCategory.AddKeyBinding("retrocamera.enabled", "RetroCamera", "ToggleRetroCamera", KeyCode.Comma);
+        EnabledKeybind = keybindCategory.AddKeyBinding("retrocamera.enabled", "RetroCamera", "ToggleRetroCamera", KeyCode.LeftBracket);
         EnabledKeybind.AddKeyDownListener(() =>
         {
             Core.Log.LogInfo(keybindCategory.Name + " Enabled: " + !Enabled);
@@ -170,7 +170,7 @@ internal static class Settings
             EnabledOption.SetValue(!Enabled);
         });
 
-        ActionModeKeybind = keybindCategory.AddKeyBinding("retrocamera.actionmode", "RetroCamera", "ToggleActionMode", KeyCode.Period);
+        ActionModeKeybind = keybindCategory.AddKeyBinding("retrocamera.actionmode", "RetroCamera", "ToggleActionMode", KeyCode.RightBracket);
         ActionModeKeybind.AddKeyDownListener(() =>
         {
             if (Enabled && !IsFirstPerson)
@@ -188,7 +188,7 @@ internal static class Settings
             }
         });
 
-        HideUIKeybind = keybindCategory.AddKeyBinding("retrocamera.hideui", "RetroCamera", "Hide UI", KeyCode.Slash);
+        HideUIKeybind = keybindCategory.AddKeyBinding("retrocamera.hideui", "RetroCamera", "HideUI", KeyCode.Backslash);
 
         Persistence.SaveKeybinds();
     }

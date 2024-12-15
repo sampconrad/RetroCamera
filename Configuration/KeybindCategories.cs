@@ -19,7 +19,7 @@ internal class KeybindCategories
         {
             Name = name;
             InputActionMap = new(name);  // Initialize here, in the constructor
-            NameKey = LocalizationKeysManager.CreateKey(name);
+            NameKey = LocalizationKeyManager.CreateKey(name);
         }
         // Nested KeybindMapping class
         public class KeybindMapping

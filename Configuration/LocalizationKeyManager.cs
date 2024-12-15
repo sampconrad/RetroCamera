@@ -3,7 +3,7 @@ using Stunlock.Localization;
 using Guid = Il2CppSystem.Guid;
 
 namespace RetroCamera.Configuration;
-internal static class LocalizationKeysManager
+internal static class LocalizationKeyManager
 {
     static readonly Dictionary<AssetGuid, string> AssetGuids = [];
     public static LocalizationKey CreateKey(string value)
