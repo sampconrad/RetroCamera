@@ -13,7 +13,7 @@ namespace RetroCamera.Utilities;
 /// We on-demand disassemble the method and find the correct method pointer. - Deca
 internal static class Il2CppMethodResolver
 {
-    private static ulong ExtractTargetAddress(in Instruction instruction)
+    static ulong ExtractTargetAddress(in Instruction instruction)
     {
         return instruction.Op0Kind switch
         {
@@ -23,7 +23,7 @@ internal static class Il2CppMethodResolver
         };
     }
 
-    private static unsafe IntPtr ResolveMethodPointer(IntPtr methodPointer)
+    static unsafe IntPtr ResolveMethodPointer(IntPtr methodPointer)
     {
         var stream = new UnmanagedMemoryStream((byte*)methodPointer, 256, 256, FileAccess.Read);
         var codeReader = new StreamCodeReader(stream);
