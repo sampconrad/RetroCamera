@@ -1,7 +1,7 @@
-﻿using RetroCamera.Behaviours;
-using ProjectM;
+﻿using ProjectM;
 using ProjectM.Sequencer;
 using ProjectM.UI;
+using RetroCamera.Behaviours;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -93,8 +93,10 @@ public class RetroCamera : MonoBehaviour
             CursorData cursorData = CursorController._CursorDatas.First(x => x.CursorType == CursorType.Game_Normal);
             if (cursorData == null) return;
 
-            CrosshairPrefab = new("Crosshair");
-            CrosshairPrefab.active = false;
+            CrosshairPrefab = new("Crosshair")
+            {
+                active = false
+            };
 
             CrosshairPrefab.AddComponent<CanvasRenderer>();
             RectTransform rectTransform = CrosshairPrefab.AddComponent<RectTransform>();
@@ -173,6 +175,8 @@ public class RetroCamera : MonoBehaviour
             if (Crosshair == null && CrosshairPrefab != null)
             {
                 GameObject uiCanvas = GameObject.Find("HUDCanvas(Clone)/Canvas");
+
+                if (uiCanvas == null) return;
 
                 CanvasScaler = uiCanvas.GetComponent<CanvasScaler>();
                 Crosshair = Instantiate(CrosshairPrefab, uiCanvas.transform);
