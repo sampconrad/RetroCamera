@@ -1,5 +1,5 @@
-﻿using RetroCamera.Patches;
-using ProjectM;
+﻿using ProjectM;
+using RetroCamera.Patches;
 using UnityEngine;
 using static RetroCamera.Utilities.CameraState;
 
@@ -11,16 +11,16 @@ internal abstract class CameraBehaviour
     public float DefaultMinPitch;
     public bool Active;
 
-    protected static float TargetZoom = Settings.MaxZoom / 2f;
-    protected static ZoomSettings BuildModeZoomSettings;
-    protected static bool IsBuildSettingsSet;
+    protected static float _targetZoom = Settings.MaxZoom / 2f;
+    protected static ZoomSettings _buildModeZoomSettings;
+    protected static bool _isBuildSettingsSet;
     public virtual void Activate(ref TopdownCameraState state)
     {
         Active = true;
     }
     public virtual void Deactivate()
     {
-        TargetZoom = Settings.MaxZoom / 2f;
+        _targetZoom = Settings.MaxZoom / 2f;
         Active = false;
     }
     public virtual bool ShouldActivate(ref TopdownCameraState state) => false;
@@ -37,7 +37,7 @@ internal abstract class CameraBehaviour
             }
         }
 
-        if (IsMouseLocked && !IsMenuOpen && !inputState.IsInputPressed(ButtonInputAction.RotateCamera))
+        if (_isMouseLocked && !IsMenuOpen && !inputState.IsInputPressed(ButtonInputAction.RotateCamera))
         {
             inputState.InputsPressed.m_ListData->AddNoResize(ButtonInputAction.RotateCamera);
         }
@@ -45,29 +45,29 @@ internal abstract class CameraBehaviour
         // Manually manage camera zoom
         float zoomValue = inputState.GetAnalogValue(AnalogInputAction.ZoomCamera);
 
-        if (zoomValue != 0 && (!InBuildMode || !Settings.DefaultBuildMode))
+        if (zoomValue != 0 && (!_inBuildMode || !Settings.DefaultBuildMode))
         {
             // Consume zoom input for the camera
-            var zoomAmount = Mathf.Lerp(.25f, 1.5f, Mathf.Max(0, TargetZoom - Settings.MinZoom) / Settings.MaxZoom);
+            var zoomAmount = Mathf.Lerp(.25f, 1.5f, Mathf.Max(0, _targetZoom - Settings.MinZoom) / Settings.MaxZoom);
             var zoomChange = inputState.GetAnalogValue(AnalogInputAction.ZoomCamera) > 0 ? zoomAmount : -zoomAmount;
 
-            if ((TargetZoom > Settings.MinZoom && TargetZoom + zoomChange < Settings.MinZoom) || (IsFirstPerson && zoomChange > 0)) TargetZoom = Settings.MinZoom;
-            else TargetZoom = Mathf.Clamp(TargetZoom + zoomChange, Settings.FirstPersonEnabled ? 0 : Settings.MinZoom, Settings.MaxZoom);
+            if ((_targetZoom > Settings.MinZoom && _targetZoom + zoomChange < Settings.MinZoom) || (_isFirstPerson && zoomChange > 0)) _targetZoom = Settings.MinZoom;
+            else _targetZoom = Mathf.Clamp(_targetZoom + zoomChange, Settings.FirstPersonEnabled ? 0 : Settings.MinZoom, Settings.MaxZoom);
 
             inputState.SetAnalogValue(AnalogInputAction.ZoomCamera, 0);
         }
 
         // Update zoom if MaxZoom is changed
-        if (TargetZoom > Settings.MaxZoom) TargetZoom = Settings.MaxZoom;
+        if (_targetZoom > Settings.MaxZoom) _targetZoom = Settings.MaxZoom;
     }
     public virtual void UpdateCameraInputs(ref TopdownCameraState state, ref TopdownCamera data)
     {
-        InBuildMode = state.InBuildMode;
+        _inBuildMode = state.InBuildMode;
 
-        if (!IsBuildSettingsSet)
+        if (!_isBuildSettingsSet)
         {
-            BuildModeZoomSettings = data.BuildModeZoomSettings;
-            IsBuildSettingsSet = true;
+            _buildModeZoomSettings = data.BuildModeZoomSettings;
+            _isBuildSettingsSet = true;
         }
 
         // Set camera behaviour pitch settings
@@ -80,14 +80,14 @@ internal abstract class CameraBehaviour
             data.BuildModeZoomSettings.MaxPitch = DefaultMaxPitch;
             data.BuildModeZoomSettings.MinPitch = DefaultMinPitch;
 
-            state.LastTarget.Zoom = TargetZoom;
-            state.Target.Zoom = TargetZoom;
+            state.LastTarget.Zoom = _targetZoom;
+            state.Target.Zoom = _targetZoom;
         }
 
         // Use default build mode zoom
         if (state.InBuildMode && Settings.DefaultBuildMode)
         {
-            data.BuildModeZoomSettings = BuildModeZoomSettings;
+            data.BuildModeZoomSettings = _buildModeZoomSettings;
 
             state.LastTarget.Zoom = data.BuildModeZoomDistance;
             state.Target.Zoom = data.BuildModeZoomDistance;

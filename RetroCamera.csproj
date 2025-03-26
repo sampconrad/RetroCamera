@@ -17,11 +17,9 @@
   </PropertyGroup>
 	 
 	<ItemGroup>
-		<PackageReference Include="BepInEx.Core" Version="6.0.0-be.668" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-		<PackageReference Include="BepInEx.Unity.Common" Version="6.0.0-be.668" />
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" />
-		<PackageReference Include="VRising.Unhollowed.Client" Version="1.0.5.802790001" />
+		<PackageReference Include="VRising.Unhollowed" Version="1.0.10.1" />
 	</ItemGroup>
 	
 	<Target Name="BuildToClient" AfterTargets="Build">

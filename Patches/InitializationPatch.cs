@@ -12,11 +12,11 @@ internal static class InitializationPatch
     {
         try
         {
-            if (__instance.GameDataInitialized && !Core.HasInitialized)
+            if (__instance.GameDataInitialized && !Core._initialized)
             {
                 Core.Initialize(__instance);
 
-                if (Core.HasInitialized)
+                if (Core._initialized)
                 {
                     Core.Log.LogInfo($"|{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] initialized on client!");
                 }

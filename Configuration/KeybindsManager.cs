@@ -5,12 +5,12 @@ using static RetroCamera.Configuration.KeybindCategories.KeybindCategory;
 namespace RetroCamera.Configuration;
 internal static class KeybindsManager
 {
-    public static Dictionary<string, KeybindCategory> KeybindCategories = [];
+    public static Dictionary<string, KeybindCategory> _keybindCategories = [];
 
-    public static Dictionary<string, KeybindMapping> KeybindsById = [];
-    public static readonly Dictionary<int, KeybindMapping> KeybindsByGuid = [];
+    public static Dictionary<string, Keybind> _keybindsByName = [];
+    public static readonly Dictionary<int, Keybind> KeybindsByGuid = [];
 
-    public static readonly Dictionary<ButtonInputAction, KeybindMapping> KeybindsByFlag = [];
+    public static readonly Dictionary<ButtonInputAction, Keybind> KeybindsByFlag = [];
     public static readonly Dictionary<ButtonInputAction, string> IdentifiersByFlag = [];
     public static readonly Dictionary<string, ButtonInputAction> FlagsByIndentifier = [];
     public struct KeybindingDescription
@@ -20,15 +20,15 @@ internal static class KeybindsManager
         public string Description;
         public UnityEngine.KeyCode DefaultKeybind;
     }
-    public static KeybindMapping Register(KeybindingDescription description)
+    public static Keybind Register(KeybindingDescription description)
     {
-        if (KeybindsById.ContainsKey(description.Name)) throw new ArgumentException($"Keybinding with id {description.Name} already registered!");
+        if (_keybindsByName.ContainsKey(description.Name)) throw new ArgumentException($"Keybinding with id {description.Name} already registered!");
 
         // Create the KeybindMapping instance
-        KeybindMapping keybinding = new(description);
+        Keybind keybinding = new(description);
 
         // Store the Id, Guid, and Flag paired with the KeybindMapping
-        KeybindsById.TryAdd(description.Name, keybinding);
+        _keybindsByName.TryAdd(description.Name, keybinding);
         KeybindsByGuid.TryAdd(keybinding.AssetGuid, keybinding);
         KeybindsByFlag.TryAdd(keybinding.InputFlag, keybinding);
         IdentifiersByFlag.TryAdd(keybinding.InputFlag, description.Name);
@@ -36,27 +36,27 @@ internal static class KeybindsManager
 
         return keybinding;
     }
-    public static void Unregister(KeybindMapping keybinding)
+    public static void Unregister(Keybind keybinding)
     {
-        if (!KeybindsById.ContainsKey(keybinding.Description.Name))
+        if (!_keybindsByName.ContainsKey(keybinding.Description.Name))
         {
             throw new ArgumentException("There was no keybinding with id " + keybinding.Description.Name + " registered");
         }
 
         KeybindsByFlag.Remove(keybinding.InputFlag);
         KeybindsByGuid.Remove(keybinding.AssetGuid);
-        KeybindsById.Remove(keybinding.Description.Name);
+        _keybindsByName.Remove(keybinding.Description.Name);
         IdentifiersByFlag.Remove(keybinding.InputFlag);
         FlagsByIndentifier.Remove(keybinding.Description.Name);
     }
     public static KeybindCategory AddCategory(string name)
     {
-        if (!KeybindCategories.ContainsKey(name))
+        if (!_keybindCategories.ContainsKey(name))
         {
             KeybindCategory keybindCategory = new(name);
-            KeybindCategories[name] = keybindCategory;
+            _keybindCategories[name] = keybindCategory;
         }
 
-        return KeybindCategories[name];
+        return _keybindCategories[name];
     }
 }

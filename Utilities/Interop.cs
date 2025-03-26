@@ -6,11 +6,7 @@ using System.Reflection;
 
 namespace RetroCamera.Utilities;
 
-/// Code stolen/adapted from code by Kasuromi.
-/// Harmony currently resolves the wrong method pointer for structs with
-/// instance methods, since il2cpp generates an unboxing trampoline for them.
-///
-/// We on-demand disassemble the method and find the correct method pointer. - Deca
+/// Bloodstone Interop Method Resolver (thank you Deca!)
 internal static class Il2CppMethodResolver
 {
     static ulong ExtractTargetAddress(in Instruction instruction)
@@ -55,22 +51,14 @@ internal static class Il2CppMethodResolver
 
         return methodPointer;
     }
-
     public static unsafe IntPtr ResolveFromMethodInfo(INativeMethodInfoStruct methodInfo)
     {
         return ResolveMethodPointer(methodInfo.MethodPointer);
     }
-
     public static unsafe IntPtr ResolveFromMethodInfo(MethodInfo method)
     {
-        var methodInfoField = Il2CppInteropUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(method);
-        if (methodInfoField == null)
-            throw new Exception($"Couldn't obtain method info for {method}");
-
+        var methodInfoField = Il2CppInteropUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(method) ?? throw new Exception($"Couldn't obtain method info for {method}");
         var il2cppMethod = UnityVersionHandler.Wrap((Il2CppMethodInfo*)(IntPtr)(methodInfoField.GetValue(null) ?? IntPtr.Zero));
-        if (il2cppMethod == null)
-            throw new Exception($"Method info for {method} is invalid");
-
-        return ResolveFromMethodInfo(il2cppMethod);
+        return il2cppMethod == null ? throw new Exception($"Method info for {method} is invalid") : ResolveFromMethodInfo(il2cppMethod);
     }
 }

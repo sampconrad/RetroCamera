@@ -10,17 +10,22 @@ using static RetroCamera.Utilities.CameraState;
 namespace RetroCamera.Systems;
 public class RetroCamera : MonoBehaviour
 {
-    static GameObject CrosshairPrefab;
-    static GameObject Crosshair;
-    static CanvasScaler CanvasScaler;
-    static Camera GameCamera;
+    static GameObject _crosshairPrefab;
+    static GameObject _crosshair;
+    static CanvasScaler _canvasScaler;
+    static Camera _gameCamera;
 
-    public static ZoomModifierSystem ZoomModifierSystem;
-    public static PrefabCollectionSystem PrefabCollectionSystem;
-    public static UIDataSystem UIDataSystem;
-    public static CursorPositionSystem CursorPositionSystem;
+    public static ZoomModifierSystem _zoomModifierSystem;
+    public static PrefabCollectionSystem _prefabCollectionSystem;
+    public static UIDataSystem _uiDataSystem;
+    public static CursorPositionSystem _cursorPositionSystem;
 
-    static bool GameFocused = true;
+    public static GameObject _chatWindow;
+    public static HUDChatWindow _hudChatWindow;
+
+    public static bool _chatScroll;
+
+    static bool _gameFocused = true;
     public static void Enabled(bool enabled)
     {
         Settings.Enabled = enabled;
@@ -28,14 +33,14 @@ public class RetroCamera : MonoBehaviour
     }
     public static void ActionMode(bool enabled)
     {
-        IsMouseLocked = enabled;
-        IsActionMode = enabled;
+        _isMouseLocked = enabled;
+        _isActionMode = enabled;
     }
     static void UpdateEnabled(bool enabled)
     {
-        if (ZoomModifierSystem != null) ZoomModifierSystem.Enabled = !enabled;
+        if (_zoomModifierSystem != null) _zoomModifierSystem.Enabled = !enabled;
 
-        if (Crosshair != null) Crosshair.active = enabled && Settings.AlwaysShowCrosshair && !InBuildMode;
+        if (_crosshair != null) _crosshair.active = enabled && Settings.AlwaysShowCrosshair && !_inBuildMode;
 
         if (!enabled)
         {
@@ -45,12 +50,12 @@ public class RetroCamera : MonoBehaviour
     }
     static void UpdateFieldOfView(float fov)
     {
-        if (GameCamera != null) GameCamera.fieldOfView = fov;
+        if (_gameCamera != null) _gameCamera.fieldOfView = fov;
     }
     static void ToggleUI()
     {
-        IsUIHidden = !IsUIHidden;
-        DisableUISettings.SetHideHUD(IsUIHidden, Core.Client);
+        _isUIHidden = !_isUIHidden;
+        DisableUISettings.SetHideHUD(_isUIHidden, Core.Client);
     }
     void Awake()
     {
@@ -63,28 +68,45 @@ public class RetroCamera : MonoBehaviour
     }
     void Update()
     {
-        if (!Core.HasInitialized) return;
-        else if (!GameFocused || !Settings.Enabled) return;
+        if (!Core._initialized) return;
+        else if (!_gameFocused || !Settings.Enabled) return;
 
-        if (CrosshairPrefab == null) BuildCrosshair();
+        if (_crosshairPrefab == null) BuildCrosshair();
 
-        if (GameCamera == null)
+        if (_gameCamera == null)
         {
             GameObject cameraObject = GameObject.Find("Main_GameToolCamera(Clone)");
 
             if (cameraObject != null)
             {
-                GameCamera = cameraObject.GetComponent<Camera>();
+                _gameCamera = cameraObject.GetComponent<Camera>();
                 UpdateFieldOfView(Settings.FieldOfView);
             }
         }
+
+        /*
+        if (_chatWindow == null)
+        {
+            GameObject chatWindowObject = GameObject.Find("ChatWindow(Clone)");
+
+            if (chatWindowObject != null)
+            {
+                _chatWindow = chatWindowObject;
+                _hudChatWindow = _chatWindow.GetComponent<HUDChatWindow>();
+            }
+            else
+            {
+                Core.Log.LogWarning("ChatWindow(Clone) not found!");
+            }
+        }
+        */
 
         UpdateSystems();
         UpdateCrosshair();
     }
     void OnApplicationFocus(bool hasFocus)
     {
-        GameFocused = hasFocus;
+        _gameFocused = hasFocus;
     }
     static void BuildCrosshair()
     {
@@ -93,13 +115,13 @@ public class RetroCamera : MonoBehaviour
             CursorData cursorData = CursorController._CursorDatas.First(x => x.CursorType == CursorType.Game_Normal);
             if (cursorData == null) return;
 
-            CrosshairPrefab = new("Crosshair")
+            _crosshairPrefab = new("Crosshair")
             {
                 active = false
             };
 
-            CrosshairPrefab.AddComponent<CanvasRenderer>();
-            RectTransform rectTransform = CrosshairPrefab.AddComponent<RectTransform>();
+            _crosshairPrefab.AddComponent<CanvasRenderer>();
+            RectTransform rectTransform = _crosshairPrefab.AddComponent<RectTransform>();
 
             rectTransform.transform.SetSiblingIndex(1);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -109,10 +131,10 @@ public class RetroCamera : MonoBehaviour
             rectTransform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
             rectTransform.localPosition = new Vector3(0, 0, 0);
 
-            Image image = CrosshairPrefab.AddComponent<Image>();
+            Image image = _crosshairPrefab.AddComponent<Image>();
             image.sprite = Sprite.Create(cursorData.Texture, new Rect(0, 0, cursorData.Texture.width, cursorData.Texture.height), new Vector2(0.5f, 0.5f), 100f);
 
-            CrosshairPrefab.active = false;
+            _crosshairPrefab.active = false;
         }
         catch (Exception ex)
         {
@@ -121,41 +143,41 @@ public class RetroCamera : MonoBehaviour
     }
     static void UpdateSystems()
     {
-        if (UIDataSystem == null || PrefabCollectionSystem == null) return;
+        if (_uiDataSystem == null || _prefabCollectionSystem == null) return;
 
         try
         {
-            if (UIDataSystem.UI.BuffBarParent != null)
+            if (_uiDataSystem.UI.BuffBarParent != null)
             {
-                IsShapeshifted = false;
-                ShapeshiftName = "";
+                _isShapeshifted = false;
+                _shapeshiftName = "";
 
-                foreach (BuffBarEntry.Data buff in UIDataSystem.UI.BuffBarParent.BuffsSelectionGroup.Entries)
+                foreach (BuffBarEntry.Data buff in _uiDataSystem.UI.BuffBarParent.BuffsSelectionGroup.Entries)
                 {
-                    if (PrefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(buff.PrefabGUID, out string buffName))
+                    if (_prefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(buff.PrefabGUID, out string buffName))
                     {
-                        IsShapeshifted = buffName.Contains("shapeshift", StringComparison.OrdinalIgnoreCase);
+                        _isShapeshifted = buffName.Contains("shapeshift", StringComparison.OrdinalIgnoreCase);
 
-                        if (IsShapeshifted)
+                        if (_isShapeshifted)
                         {
-                            ShapeshiftName = buffName.Trim();
+                            _shapeshiftName = buffName.Trim();
                             break;
                         }
                     }
                 }
             }
 
-            if (UIDataSystem.UI.AbilityBar != null)
+            if (_uiDataSystem.UI.AbilityBar != null)
             {
-                IsMounted = false;
+                _isMounted = false;
 
-                foreach (AbilityBarEntry abilityBarEntry in UIDataSystem.UI.AbilityBar.Entries)
+                foreach (AbilityBarEntry abilityBarEntry in _uiDataSystem.UI.AbilityBar.Entries)
                 {
-                    if (PrefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(abilityBarEntry.AbilityId, out string abilityName))
+                    if (_prefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(abilityBarEntry.AbilityId, out string abilityName))
                     {
-                        IsMounted = abilityName.Contains("mounted", StringComparison.OrdinalIgnoreCase);
+                        _isMounted = abilityName.Contains("mounted", StringComparison.OrdinalIgnoreCase);
 
-                        if (IsMounted) break;
+                        if (_isMounted) break;
                     }
                 }
             }
@@ -172,52 +194,52 @@ public class RetroCamera : MonoBehaviour
             bool cursorVisible = true;
             bool crosshairVisible = false;
 
-            if (Crosshair == null && CrosshairPrefab != null)
+            if (_crosshair == null && _crosshairPrefab != null)
             {
                 GameObject uiCanvas = GameObject.Find("HUDCanvas(Clone)/Canvas");
 
                 if (uiCanvas == null) return;
 
-                CanvasScaler = uiCanvas.GetComponent<CanvasScaler>();
-                Crosshair = Instantiate(CrosshairPrefab, uiCanvas.transform);
-                Crosshair.active = true;
+                _canvasScaler = uiCanvas.GetComponent<CanvasScaler>();
+                _crosshair = Instantiate(_crosshairPrefab, uiCanvas.transform);
+                _crosshair.active = true;
             }
 
             // Locks the mouse to the center of the screen if the mouse should be locked or the camera rotate button is pressed
-            if (ValidGameplayInputState &&
-               (IsMouseLocked || GameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
+            if (_validGameplayInputState &&
+               (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
                !IsMenuOpen)
             {
-                if (IsActionMode || IsFirstPerson || Settings.CameraAimMode == CameraAimMode.Forward)
+                if (_isActionMode || _isFirstPerson || Settings.CameraAimMode == CameraAimMode.Forward)
                 {
-                    CursorPosition cursorPosition = CursorPositionSystem._CursorPosition;
+                    CursorPosition cursorPosition = _cursorPositionSystem._CursorPosition;
                     float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) - Settings.AimOffsetY);
 
                     cursorPosition.ScreenPosition = screenPosition;
-                    CursorPositionSystem._CursorPosition = cursorPosition;
+                    _cursorPositionSystem._CursorPosition = cursorPosition;
                     Cursor.lockState = CursorLockMode.Locked;
                 }
 
                 // Set crosshair visibility based on the camera mode
-                crosshairVisible = IsFirstPerson || (IsActionMode && Settings.ActionModeCrosshair);
+                crosshairVisible = _isFirstPerson || (_isActionMode && Settings.ActionModeCrosshair);
                 cursorVisible = false;
             }
 
-            if (Crosshair != null)
+            if (_crosshair != null)
             {
-                Crosshair.active = (crosshairVisible || Settings.AlwaysShowCrosshair) && !InBuildMode;
+                _crosshair.active = (crosshairVisible || Settings.AlwaysShowCrosshair) && !_inBuildMode;
 
-                if (IsFirstPerson)
+                if (_isFirstPerson)
                 {
-                    Crosshair.transform.localPosition = Vector3.zero;
+                    _crosshair.transform.localPosition = Vector3.zero;
                 }
                 else
                 {
-                    if (CanvasScaler != null)
+                    if (_canvasScaler != null)
                     {
-                        Crosshair.transform.localPosition = new Vector3(
-                            Settings.AimOffsetX * (CanvasScaler.referenceResolution.x / Screen.width),
-                            Settings.AimOffsetY * (CanvasScaler.referenceResolution.y / Screen.height),
+                        _crosshair.transform.localPosition = new Vector3(
+                            Settings.AimOffsetX * (_canvasScaler.referenceResolution.x / Screen.width),
+                            Settings.AimOffsetY * (_canvasScaler.referenceResolution.y / Screen.height),
                             0
                         );
                     }

@@ -4,19 +4,13 @@ using UnityEngine;
 namespace RetroCamera.Configuration;
 internal class OptionCategories
 {
-    public class OptionCategory
+    public class OptionCategory(string name)
     {
-        public string Name { get; internal set; }
-        public readonly LocalizationKey LocalizationKey;
-        public OptionCategory(string name)
-        {
-            Name = name;
-            LocalizationKey = LocalizationKeyManager.CreateKey(name);
-        }
-
-        static readonly Dictionary<string, bool> Toggles = [];
-        static readonly Dictionary<string, float> Sliders = [];
-        static readonly Dictionary<string, string> Dropdowns = [];
+        public string Name { get; internal set; } = name;
+        public readonly LocalizationKey LocalizationKey = LocalizationKeyManager.CreateKey(name);
+        static readonly Dictionary<string, bool> _toggles = [];
+        static readonly Dictionary<string, float> _sliders = [];
+        static readonly Dictionary<string, string> _dropdowns = [];
 
         public static readonly Dictionary<string, ToggleOption> ToggleOptions = [];
         public static readonly Dictionary<string, SliderOption> SliderOptions = [];
@@ -28,9 +22,9 @@ internal class OptionCategories
         {
             ToggleOption option = new(name, description, defaultValue);
 
-            if (Toggles.ContainsKey(name))
+            if (_toggles.ContainsKey(name))
             {
-                option.Value = Toggles[name];
+                option.Value = _toggles[name];
             }
 
             ToggleOptions.TryAdd(name, option);
@@ -42,9 +36,9 @@ internal class OptionCategories
         {
             SliderOption option = new(name, description, minValue, maxValue, defaultValue, decimals);
 
-            if (Sliders.ContainsKey(name))
+            if (_sliders.ContainsKey(name))
             {
-                option.Value = Mathf.Clamp(Sliders[name], minValue, maxValue);
+                option.Value = Mathf.Clamp(_sliders[name], minValue, maxValue);
             }
 
             SliderOptions.TryAdd(name, option);
@@ -56,9 +50,9 @@ internal class OptionCategories
         {
             DropdownOption option = new(name, description, defaultValue, values);
 
-            if (Dropdowns.ContainsKey(name))
+            if (_dropdowns.ContainsKey(name))
             {
-                option.Value = Mathf.Max(0, Array.IndexOf(values, Dropdowns[name]));
+                option.Value = Mathf.Max(0, Array.IndexOf(values, _dropdowns[name]));
             }
 
             DropdownOptions.TryAdd(name, option);
@@ -73,7 +67,7 @@ internal class OptionCategories
             Dividers.TryAdd(id, name);
             Options.Add(id);
         }
-        public bool TryGetToggle(string id, out ToggleOption option)
+        public static bool TryGetToggle(string id, out ToggleOption option)
         {
             if (!ToggleOptions.ContainsKey(id))
             {
@@ -84,7 +78,7 @@ internal class OptionCategories
             option = ToggleOptions[id];
             return true;
         }
-        public bool TryGetSlider(string id, out SliderOption option)
+        public static bool TryGetSlider(string id, out SliderOption option)
         {
             if (!SliderOptions.ContainsKey(id))
             {
@@ -95,7 +89,7 @@ internal class OptionCategories
             option = SliderOptions[id];
             return true;
         }
-        public bool TryGetDropdown(string id, out DropdownOption option)
+        public static bool TryGetDropdown(string id, out DropdownOption option)
         {
             if (!DropdownOptions.ContainsKey(id))
             {
@@ -106,7 +100,7 @@ internal class OptionCategories
             option = DropdownOptions[id];
             return true;
         }
-        public bool TryGetDivider(string id, out string text)
+        public static bool TryGetDivider(string id, out string text)
         {
             if (!Dividers.ContainsKey(id))
             {

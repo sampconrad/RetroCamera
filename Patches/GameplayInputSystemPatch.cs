@@ -11,11 +11,11 @@ internal static class GameplayInputSystemPatch
     [HarmonyPrefix]
     static unsafe void HandleInputPrefix(ref InputState inputState)
     {
-        CameraState.ValidGameplayInputState = true;
-        CameraState.GameplayInputState = inputState;
+        CameraState._validGameplayInputState = true;
+        CameraState._gameplayInputState = inputState;
 
         if (!Settings.Enabled) return;
-        else if (CameraState.IsMouseLocked && !CameraState.IsMenuOpen && !inputState.IsInputPressed(ButtonInputAction.RotateCamera))
+        else if (CameraState._isMouseLocked && !CameraState.IsMenuOpen && !inputState.IsInputPressed(ButtonInputAction.RotateCamera))
         {
             inputState.InputsPressed.m_ListData->AddNoResize(ButtonInputAction.RotateCamera);
         }

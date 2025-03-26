@@ -14,38 +14,38 @@ internal class FirstPersonCameraBehaviour : CameraBehaviour
     {
         base.Activate(ref state);
 
-        IsMouseLocked = true;
-        IsFirstPerson = true;
-        CurrentBehaviourType = BehaviourType;
+        _isMouseLocked = true;
+        _isFirstPerson = true;
+        _currentBehaviourType = BehaviourType;
 
         state.PitchPercent = 0.51f;
-        TargetZoom = 0;
+        _targetZoom = 0;
     }
     public override void Deactivate()
     {
         base.Deactivate();
 
-        if (!IsActionMode) IsMouseLocked = false;
-        IsFirstPerson = false;
+        if (!_isActionMode) _isMouseLocked = false;
+        _isFirstPerson = false;
     }
     public override bool ShouldActivate(ref TopdownCameraState state)
     {
-        return Settings.FirstPersonEnabled && CurrentBehaviourType != BehaviourType && TargetZoom < Settings.MinZoom;
+        return Settings.FirstPersonEnabled && _currentBehaviourType != BehaviourType && _targetZoom < Settings.MinZoom;
     }
     public override void UpdateCameraInputs(ref TopdownCameraState state, ref TopdownCamera data)
     {
         base.UpdateCameraInputs(ref state, ref data);
 
-        float forwardOffset = Settings.FirstPersonForwardOffset;
-        float headHeight = Settings.HeadHeightOffset;
+        float forwardOffset = Settings._firstPersonForwardOffset;
+        float headHeight = Settings._headHeightOffset;
 
-        if (Settings.FirstPersonShapeshiftOffsets.ContainsKey(ShapeshiftName))
+        if (Settings.FirstPersonShapeshiftOffsets.ContainsKey(_shapeshiftName))
         {
-            forwardOffset = Settings.FirstPersonShapeshiftOffsets[ShapeshiftName].y;
-            headHeight = Settings.FirstPersonShapeshiftOffsets[ShapeshiftName].x;
+            forwardOffset = Settings.FirstPersonShapeshiftOffsets[_shapeshiftName].y;
+            headHeight = Settings.FirstPersonShapeshiftOffsets[_shapeshiftName].x;
         }
 
         state.LastTarget.NormalizedLookAtOffset.z = forwardOffset;
-        state.LastTarget.NormalizedLookAtOffset.y = IsMounted ? headHeight + Settings.MountedOffset : headHeight;
+        state.LastTarget.NormalizedLookAtOffset.y = _isMounted ? headHeight + Settings._mountedOffset : headHeight;
     }
 }

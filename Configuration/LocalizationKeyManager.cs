@@ -5,21 +5,21 @@ using Guid = Il2CppSystem.Guid;
 namespace RetroCamera.Configuration;
 internal static class LocalizationKeyManager
 {
-    static readonly Dictionary<AssetGuid, string> AssetGuids = [];
+    static readonly Dictionary<AssetGuid, string> _assetGuids = [];
     public static LocalizationKey CreateKey(string value)
     {
         LocalizationKey localizationKey = new(AssetGuid.FromGuid(Guid.NewGuid()));
 
         if (!HasKey(localizationKey))
         {
-            AssetGuids.TryAdd(localizationKey.GetGuid(), value);
+            _assetGuids.TryAdd(localizationKey.GetGuid(), value);
         }
 
         return localizationKey;
     }
     public static bool HasKey(LocalizationKey key)
     {
-        return AssetGuids.ContainsKey(key.GetGuid());
+        return _assetGuids.ContainsKey(key.GetGuid());
     }
 
     // Currently unused methods for localizationKeys and assetGuids

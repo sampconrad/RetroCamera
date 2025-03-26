@@ -7,28 +7,28 @@ namespace RetroCamera.Patches;
 [HarmonyPatch]
 internal static class ActionWheelSystemPatch
 {
-    public static bool WheelVisible = false;
+    public static bool _wheelVisible = false;
 
     [HarmonyPatch(typeof(ActionWheelSystem), nameof(ActionWheelSystem.OnUpdate))]
     [HarmonyPostfix]
     static void OnUpdatePostfix(ActionWheelSystem __instance)
     {
-        if (WheelVisible)
+        if (_wheelVisible)
         {
             if (__instance._CurrentActiveWheel != null && !__instance._CurrentActiveWheel.IsVisible())
             {
                 CameraState.IsMenuOpen = false;
-                WheelVisible = false;
+                _wheelVisible = false;
             }
             else if (__instance._CurrentActiveWheel == null)
             {
                 CameraState.IsMenuOpen = false;
-                WheelVisible = false;
+                _wheelVisible = false;
             }
         }
         else if (__instance._CurrentActiveWheel != null && __instance._CurrentActiveWheel.IsVisible())
         {
-            WheelVisible = true;
+            _wheelVisible = true;
             CameraState.IsMenuOpen = true;
         }
     }

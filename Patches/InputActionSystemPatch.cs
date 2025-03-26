@@ -24,7 +24,7 @@ internal static class InputActionSystemPatch
     {
         __instance._LoadedInputActions.Disable();
 
-        foreach (KeybindCategory keybindingCategory in KeybindsManager.KeybindCategories.Values)
+        foreach (KeybindCategory keybindingCategory in KeybindsManager._keybindCategories.Values)
         {
             __instance._LoadedInputActions.AddActionMap(keybindingCategory.InputActionMap);
         }
@@ -36,22 +36,22 @@ internal static class InputActionSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix()
     {
-        foreach (KeybindMapping keybind in KeybindsManager.KeybindsById.Values)
+        foreach (Keybind keybind in KeybindsManager._keybindsByName.Values)
         {
             if (IsKeybindDown(keybind)) keybind.OnKeyDown();
             if (IsKeybindUp(keybind)) keybind.OnKeyUp();
             if (IsKeybindPressed(keybind)) keybind.OnKeyPressed();
         }
     }
-    static bool IsKeybindDown(KeybindMapping keybind)
+    static bool IsKeybindDown(Keybind keybind)
     {
         return Input.GetKeyDown(keybind.Primary) || Input.GetKeyDown(keybind.Secondary);
     }
-    static bool IsKeybindUp(KeybindMapping keybind)
+    static bool IsKeybindUp(Keybind keybind)
     {
         return Input.GetKeyUp(keybind.Primary) || Input.GetKeyUp(keybind.Secondary);
     }
-    static bool IsKeybindPressed(KeybindMapping keybind)
+    static bool IsKeybindPressed(Keybind keybind)
     {
         return Input.GetKey(keybind.Primary) || Input.GetKey(keybind.Secondary);
     }

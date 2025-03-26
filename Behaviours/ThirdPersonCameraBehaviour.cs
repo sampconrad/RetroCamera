@@ -5,7 +5,7 @@ using static RetroCamera.Utilities.CameraState;
 namespace RetroCamera.Behaviours;
 internal class ThirdPersonCameraBehaviour : CameraBehaviour
 {
-    float LastPitchPercent = float.PositiveInfinity;
+    float _lastPitchPercent = float.PositiveInfinity;
     public ThirdPersonCameraBehaviour()
     {
         BehaviourType = BehaviourType.ThirdPerson;
@@ -14,21 +14,21 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
     {
         base.Activate(ref state);
 
-        if (CurrentBehaviourType == BehaviourType) TargetZoom = Settings.MaxZoom / 2;
-        else TargetZoom = Settings.MinZoom;
+        if (_currentBehaviourType == BehaviourType) _targetZoom = Settings.MaxZoom / 2;
+        else _targetZoom = Settings.MinZoom;
 
-        CurrentBehaviourType = BehaviourType;
-        state.PitchPercent = LastPitchPercent == float.PositiveInfinity ? 0.5f : LastPitchPercent;
+        _currentBehaviourType = BehaviourType;
+        state.PitchPercent = _lastPitchPercent == float.PositiveInfinity ? 0.5f : _lastPitchPercent;
     }
     public override bool ShouldActivate(ref TopdownCameraState state)
     {
-        return CurrentBehaviourType != BehaviourType && TargetZoom > 0;
+        return _currentBehaviourType != BehaviourType && _targetZoom > 0;
     }
     public override void HandleInput(ref InputState inputState)
     {
         base.HandleInput(ref inputState);
 
-        if (Settings.LockZoom) TargetZoom = Settings.LockZoomDistance;
+        if (Settings.LockZoom) _targetZoom = Settings.LockZoomDistance;
     }
     public override void UpdateCameraInputs(ref TopdownCameraState state, ref TopdownCamera data)
     {
@@ -37,9 +37,9 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
 
         base.UpdateCameraInputs(ref state, ref data);
 
-        state.LastTarget.NormalizedLookAtOffset.y = IsMounted ? Settings.HeadHeightOffset + Settings.MountedOffset : Settings.HeadHeightOffset;
+        state.LastTarget.NormalizedLookAtOffset.y = _isMounted ? Settings._headHeightOffset + Settings._mountedOffset : Settings._headHeightOffset;
 
-        if (Settings.OverTheShoulder && !IsShapeshifted && !IsMounted)
+        if (Settings.OverTheShoulder && !_isShapeshifted && !_isMounted)
         {
             float lerpValue = Mathf.Max(0, state.Current.Zoom - state.ZoomSettings.MinZoom) / state.ZoomSettings.MaxZoom;
 
@@ -56,6 +56,6 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
             data.BuildModeZoomSettings.MinPitch = Settings.LockPitchAngle;
         }
 
-        LastPitchPercent = state.PitchPercent;
+        _lastPitchPercent = state.PitchPercent;
     }
 }

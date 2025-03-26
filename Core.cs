@@ -16,30 +16,30 @@ internal class Core
     public static CursorPositionSystem CursorPositionSystem { get; internal set; }
     public static ManualLogSource Log => Plugin.LogInstance;
 
-    public static bool HasInitialized = false;
+    public static bool _initialized = false;
     public static void Initialize(GameDataManager __instance)
     {
-        if (HasInitialized) return;
+        if (_initialized) return;
 
         Client = __instance.World;
 
         ZoomModifierSystem = Client.GetExistingSystemManaged<ZoomModifierSystem>();
         ZoomModifierSystem.Enabled = false;
-        Systems.RetroCamera.ZoomModifierSystem = ZoomModifierSystem;
+        Systems.RetroCamera._zoomModifierSystem = ZoomModifierSystem;
 
         TopdownCameraSystem = Client.GetExistingSystemManaged<TopdownCameraSystem>();
 
         PrefabCollectionSystem = Client.GetExistingSystemManaged<PrefabCollectionSystem>();
-        Systems.RetroCamera.PrefabCollectionSystem = PrefabCollectionSystem;
+        Systems.RetroCamera._prefabCollectionSystem = PrefabCollectionSystem;
 
         UIDataSystem = Client.GetExistingSystemManaged<UIDataSystem>();
-        Systems.RetroCamera.UIDataSystem = UIDataSystem;
+        Systems.RetroCamera._uiDataSystem = UIDataSystem;
 
         CursorPositionSystem = Client.GetExistingSystemManaged<CursorPositionSystem>();
-        Systems.RetroCamera.CursorPositionSystem = CursorPositionSystem;
+        Systems.RetroCamera._cursorPositionSystem = CursorPositionSystem;
 
         TopdownCameraSystemPatch.Initialize();
 
-        HasInitialized = true;
+        _initialized = true;
     }
 }

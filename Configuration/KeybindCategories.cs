@@ -7,50 +7,39 @@ using static RetroCamera.Configuration.KeybindsManager;
 
 namespace RetroCamera.Configuration;
 
-public delegate void KeyEvent();
+public delegate void KeyEventHandler();
 internal class KeybindCategories
 {
-    public class KeybindCategory
+    public class KeybindCategory(string name)
     {
-        public string Name;
-        public InputActionMap InputActionMap;
-        public LocalizationKey NameKey;
-        public KeybindCategory(string name)
+        public string Name = name;
+        public InputActionMap InputActionMap = new(name);
+        public LocalizationKey NameKey = LocalizationKeyManager.CreateKey(name);
+        // public LocalizationKey DescriptionKey = LocalizationKeyManager.CreateKey(name + "_Description");
+        public class Keybind(KeybindingDescription description)
         {
-            Name = name;
-            InputActionMap = new(name);  // Initialize here, in the constructor
-            NameKey = LocalizationKeyManager.CreateKey(name);
+            public KeybindingDescription Description = description;
+
+            public KeyCode Primary = description.DefaultKeybind;
+            public KeyCode Secondary = KeyCode.None;
+            public string PrimaryName => Primary.ToString();
+            public string SecondaryName => Secondary.ToString();
+
+            public ButtonInputAction InputFlag = ComputeInputFlag(description.Name);
+            public int AssetGuid = ComputeAssetGuid(description.Name);
+
+            public event KeyEventHandler KeyPressedHandler = delegate { };
+            public event KeyEventHandler KeyDownHandler = delegate { };
+            public event KeyEventHandler KeyUpHandler = delegate { };
+
+            public void AddKeyPressedListener(KeyEventHandler action) => KeyPressedHandler += action;
+            public void AddKeyDownListener(KeyEventHandler action) => KeyDownHandler += action;
+            public void AddKeyUpListener(KeyEventHandler action) => KeyUpHandler += action;
+            public void OnKeyPressed() => KeyPressedHandler();
+            public void OnKeyDown() => KeyDownHandler();
+            public void OnKeyUp() => KeyUpHandler();
         }
-        // Nested KeybindMapping class
-        public class KeybindMapping
-        {
-            public KeybindingDescription Description;
-            public KeyCode Primary;
-            public KeyCode Secondary;
-            public ButtonInputAction InputFlag;
-            public int AssetGuid;
-
-            public event KeyEvent KeyPressed = delegate { };
-            public event KeyEvent KeyDown = delegate { };
-            public event KeyEvent KeyUp = delegate { };
-
-            public KeybindMapping(KeybindingDescription description)
-            {
-                Description = description;
-                Primary = description.DefaultKeybind;
-                Secondary = KeyCode.None;
-                InputFlag = ComputeInputFlag(description.Name);
-                AssetGuid = ComputeAssetGuid(description.Name);
-            }
-
-            public void AddKeyPressedListener(KeyEvent action) => KeyPressed += action;
-            public void AddKeyDownListener(KeyEvent action) => KeyDown += action;
-            public void AddKeyUpListener(KeyEvent action) => KeyUp += action;
-            public void OnKeyPressed() => KeyPressed();
-            public void OnKeyDown() => KeyDown();
-            public void OnKeyUp() => KeyUp();
-        }
-        public KeybindMapping AddKeyBinding(string name, string category, string description, KeyCode keyCode)
+        public static Keybind AddKeyBinding(string name, string category, string description, KeyCode keyCode)
         {
             KeybindingDescription keybindingDescription = new()
             {
@@ -60,7 +49,7 @@ internal class KeybindCategories
                 DefaultKeybind = keyCode
             };
 
-            KeybindMapping keybinding = Register(keybindingDescription);
+            Keybind keybinding = Register(keybindingDescription);
             return keybinding;
         }
     }

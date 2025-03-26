@@ -1,10 +1,9 @@
 ﻿using BepInEx.Unity.IL2CPP.Hook;
 using HarmonyLib;
-using Il2CppInterop.Runtime;
 using System.Reflection;
 
 namespace RetroCamera.Utilities;
-internal static class NativeDetour
+internal static class Detour
 {
     /*
     public static INativeDetour HandleInputDetour<T>(int methodToken, T to, out T original) where T : Delegate

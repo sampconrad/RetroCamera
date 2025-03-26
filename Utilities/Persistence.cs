@@ -5,33 +5,33 @@ using System.Text.Json;
 namespace RetroCamera.Utilities;
 internal static class Persistence
 {
-    static readonly JsonSerializerOptions JsonOptions = new()
+    static readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true,
         IncludeFields = true
     };
 
-    static readonly string DirectoryPath = Path.Join(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
+    static readonly string _directoryPath = Path.Join(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
 
-    static readonly string KeybindMappingsJson = Path.Combine(DirectoryPath, "KeybindMappings.json");
-    static readonly string OptionCategoriesJson = Path.Combine(DirectoryPath, "OptionCategories.json");
+    static readonly string _keybindMappingsJson = Path.Combine(_directoryPath, "KeybindMappings.json");
+    static readonly string _optionCategoriesJson = Path.Combine(_directoryPath, "OptionCategories.json");
 
     static readonly Dictionary<string, string> FilePaths = new()
     {
-        {"KeybindMappings", KeybindMappingsJson },
-        {"OptionCategories", OptionCategoriesJson }
+        {"KeybindMappings", _keybindMappingsJson },
+        {"OptionCategories", _optionCategoriesJson }
     };
-    public static void LoadKeybinds() => LoadDictionary(ref KeybindsManager.KeybindsById, "KeybindMappings");
-    public static void SaveKeybinds() => SaveDictionary(KeybindsManager.KeybindsById, "KeybindMappings");
-    public static void LoadOptions() => LoadDictionary(ref OptionsManager.OptionCategories, "OptionCategories");
-    public static void SaveOptions() => SaveDictionary(OptionsManager.OptionCategories, "OptionCategories");
+    public static void LoadKeybinds() => LoadDictionary(ref KeybindsManager._keybindsByName, "KeybindMappings");
+    public static void SaveKeybinds() => SaveDictionary(KeybindsManager._keybindsByName, "KeybindMappings");
+    public static void LoadOptions() => LoadDictionary(ref OptionsManager._optionCategories, "OptionCategories");
+    public static void SaveOptions() => SaveDictionary(OptionsManager._optionCategories, "OptionCategories");
     static void LoadDictionary<T, U>(ref Dictionary<T, U> fileData, string fileKey)
     {
         if (FilePaths.TryGetValue(fileKey, out string filePath))
         {
-            if (!Directory.Exists(DirectoryPath))
+            if (!Directory.Exists(_directoryPath))
             {
-                Directory.CreateDirectory(DirectoryPath);
+                Directory.CreateDirectory(_directoryPath);
             }
 
             if (!File.Exists(filePath))
@@ -49,7 +49,7 @@ internal static class Persistence
                 }
                 else
                 {
-                    fileData = JsonSerializer.Deserialize<Dictionary<T, U>>(fileText, JsonOptions);
+                    fileData = JsonSerializer.Deserialize<Dictionary<T, U>>(fileText, _jsonOptions);
                 }
             }
             catch (IOException ex)
@@ -62,9 +62,9 @@ internal static class Persistence
     {
         if (FilePaths.TryGetValue(fileKey, out string filePath))
         {
-            if (!Directory.Exists(DirectoryPath))
+            if (!Directory.Exists(_directoryPath))
             {
-                Directory.CreateDirectory(DirectoryPath);
+                Directory.CreateDirectory(_directoryPath);
             }
 
             if (!File.Exists(filePath))
@@ -74,7 +74,7 @@ internal static class Persistence
 
             try
             {
-                string fileText = JsonSerializer.Serialize(fileData, JsonOptions);
+                string fileText = JsonSerializer.Serialize(fileData, _jsonOptions);
 
                 if (fileText.IsNullOrWhiteSpace())
                 {
