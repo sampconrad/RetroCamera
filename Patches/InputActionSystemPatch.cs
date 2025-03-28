@@ -3,8 +3,8 @@ using RetroCamera.Configuration;
 using ProjectM;
 using UnityEngine.InputSystem;
 using UnityEngine;
-using static RetroCamera.Configuration.KeybindCategories;
-using static RetroCamera.Configuration.KeybindCategories.KeybindCategory;
+using static RetroCamera.Configuration.Keybinding;
+using static RetroCamera.Configuration.Keybinding.Keybinding;
 
 namespace RetroCamera.Patches;
 
@@ -24,7 +24,7 @@ internal static class InputActionSystemPatch
     {
         __instance._LoadedInputActions.Disable();
 
-        foreach (KeybindCategory keybindingCategory in KeybindsManager._keybindCategories.Values)
+        foreach (Configuration.Keybinding.Keybinding keybindingCategory in KeybindManager.KeybindCategoriesByName.Values)
         {
             __instance._LoadedInputActions.AddActionMap(keybindingCategory.InputActionMap);
         }
@@ -36,7 +36,7 @@ internal static class InputActionSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix()
     {
-        foreach (Keybind keybind in KeybindsManager._keybindsByName.Values)
+        foreach (Keybind keybind in KeybindManager.KeybindsByName.Values)
         {
             if (IsKeybindDown(keybind)) keybind.OnKeyDown();
             if (IsKeybindUp(keybind)) keybind.OnKeyUp();

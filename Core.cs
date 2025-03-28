@@ -1,14 +1,19 @@
 using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP.Utils.Collections;
 using ProjectM;
+using ProjectM.Physics;
 using ProjectM.Sequencer;
 using ProjectM.UI;
 using RetroCamera.Patches;
+using System.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace RetroCamera;
 internal class Core
 {
-    public static World Client;
+    public static World _client;
+    public static EntityManager EntityManager => _client.EntityManager;
     public static ZoomModifierSystem ZoomModifierSystem { get; internal set; }
     public static TopdownCameraSystem TopdownCameraSystem { get; internal set; }
     public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
@@ -16,30 +21,46 @@ internal class Core
     public static CursorPositionSystem CursorPositionSystem { get; internal set; }
     public static ManualLogSource Log => Plugin.LogInstance;
 
+    static MonoBehaviour _monoBehaviour;
+
     public static bool _initialized = false;
     public static void Initialize(GameDataManager __instance)
     {
         if (_initialized) return;
 
-        Client = __instance.World;
+        _client = __instance.World;
 
-        ZoomModifierSystem = Client.GetExistingSystemManaged<ZoomModifierSystem>();
+        // ProjectM.Scripting.GameManager_Shared
+        // ProjectM.Scripting.Game.SpellMods.TryApplyPrefabGUIDSpellMods
+
+        ZoomModifierSystem = _client.GetExistingSystemManaged<ZoomModifierSystem>();
         ZoomModifierSystem.Enabled = false;
         Systems.RetroCamera._zoomModifierSystem = ZoomModifierSystem;
 
-        TopdownCameraSystem = Client.GetExistingSystemManaged<TopdownCameraSystem>();
+        TopdownCameraSystem = _client.GetExistingSystemManaged<TopdownCameraSystem>();
 
-        PrefabCollectionSystem = Client.GetExistingSystemManaged<PrefabCollectionSystem>();
+        PrefabCollectionSystem = _client.GetExistingSystemManaged<PrefabCollectionSystem>();
         Systems.RetroCamera._prefabCollectionSystem = PrefabCollectionSystem;
 
-        UIDataSystem = Client.GetExistingSystemManaged<UIDataSystem>();
+        UIDataSystem = _client.GetExistingSystemManaged<UIDataSystem>();
         Systems.RetroCamera._uiDataSystem = UIDataSystem;
 
-        CursorPositionSystem = Client.GetExistingSystemManaged<CursorPositionSystem>();
+        CursorPositionSystem = _client.GetExistingSystemManaged<CursorPositionSystem>();
         Systems.RetroCamera._cursorPositionSystem = CursorPositionSystem;
 
         TopdownCameraSystemPatch.Initialize();
 
         _initialized = true;
+    }
+    public static Coroutine StartCoroutine(IEnumerator routine)
+    {
+        if (_monoBehaviour == null)
+        {
+            var go = new GameObject("RetroCamera");
+            _monoBehaviour = go.AddComponent<IgnorePhysicsDebugSystem>();
+            UnityEngine.Object.DontDestroyOnLoad(go);
+        }
+
+        return _monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
     }
 }

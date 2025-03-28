@@ -55,7 +55,7 @@ public class RetroCamera : MonoBehaviour
     static void ToggleUI()
     {
         _isUIHidden = !_isUIHidden;
-        DisableUISettings.SetHideHUD(_isUIHidden, Core.Client);
+        DisableUISettings.SetHideHUD(_isUIHidden, Core._client);
     }
     void Awake()
     {
@@ -64,7 +64,7 @@ public class RetroCamera : MonoBehaviour
 
         Settings.AddEnabledListener(UpdateEnabled);
         Settings.AddFieldOfViewListener(UpdateFieldOfView);
-        Settings.AddHideUIListener(ToggleUI);
+        Settings.AddHideHUDListener(ToggleUI);
     }
     void Update()
     {
@@ -75,13 +75,7 @@ public class RetroCamera : MonoBehaviour
 
         if (_gameCamera == null)
         {
-            GameObject cameraObject = GameObject.Find("Main_GameToolCamera(Clone)");
-
-            if (cameraObject != null)
-            {
-                _gameCamera = cameraObject.GetComponent<Camera>();
-                UpdateFieldOfView(Settings.FieldOfView);
-            }
+            _gameCamera = CameraManager.GetCamera();
         }
 
         /*

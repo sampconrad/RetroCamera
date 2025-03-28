@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
-using static RetroCamera.Configuration.OptionActions;
+using static RetroCamera.Configuration.SettingEvents;
 
 namespace RetroCamera.Configuration;
-internal class SliderOption : OptionAction<float>
+
+[Serializable]
+internal class Slider : ChangeSetting<float>
 {
     public float MinValue { get; internal set; }
     public float MaxValue { get; internal set; }
@@ -10,7 +12,7 @@ internal class SliderOption : OptionAction<float>
     public int Decimals { get; internal set; }
     public float StepValue { get; internal set; }
 
-    public SliderOption(string text, string description, float minValue, float maxValue, float defaultvalue, int decimals = default, float stepValue = default) : base(text, description, defaultvalue)
+    public Slider(string text, string description, float minValue, float maxValue, float defaultvalue, int decimals = default, float stepValue = default) : base(text, description, defaultvalue)
     {
         MinValue = minValue;
         MaxValue = maxValue;

@@ -1,12 +1,15 @@
-﻿using static RetroCamera.Configuration.OptionActions;
+﻿using static RetroCamera.Configuration.SettingEvents;
 
 namespace RetroCamera.Configuration;
-internal class DropdownOption : OptionAction<int>
+
+[Serializable]
+internal class Dropdown : ChangeSetting<int>
 {
     public List<string> Values;
-    public DropdownOption(string name, string description, int defaultValue, string[] values) : base(name, description, defaultValue)
+    public Dropdown(string name, string description, int defaultValue, string[] values) : base(name, description, defaultValue)
     {
         Values = [];
+
         foreach (var v in values)
         {
             Values.Add(v);
