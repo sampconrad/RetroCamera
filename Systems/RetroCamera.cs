@@ -52,19 +52,27 @@ public class RetroCamera : MonoBehaviour
     {
         if (_gameCamera != null) _gameCamera.fieldOfView = fov;
     }
-    static void ToggleUI()
+    static void ToggleHUD()
     {
         _isUIHidden = !_isUIHidden;
         DisableUISettings.SetHideHUD(_isUIHidden, Core._client);
     }
     void Awake()
     {
+        Settings.Initialize();
+        RegisterBehaviours();
+        AddListeners();
+    }
+    static void RegisterBehaviours()
+    {
         RegisterCameraBehaviour(new FirstPersonCameraBehaviour());
         RegisterCameraBehaviour(new ThirdPersonCameraBehaviour());
-
+    }
+    static void AddListeners()
+    {
         Settings.AddEnabledListener(UpdateEnabled);
         Settings.AddFieldOfViewListener(UpdateFieldOfView);
-        Settings.AddHideHUDListener(ToggleUI);
+        Settings.AddHideHUDListener(ToggleHUD);
     }
     void Update()
     {
@@ -78,7 +86,6 @@ public class RetroCamera : MonoBehaviour
             _gameCamera = CameraManager.GetCamera();
         }
 
-        /*
         if (_chatWindow == null)
         {
             GameObject chatWindowObject = GameObject.Find("ChatWindow(Clone)");
@@ -93,7 +100,6 @@ public class RetroCamera : MonoBehaviour
                 Core.Log.LogWarning("ChatWindow(Clone) not found!");
             }
         }
-        */
 
         UpdateSystems();
         UpdateCrosshair();

@@ -13,7 +13,7 @@ internal abstract class CameraBehaviour
 
     protected static float _targetZoom = Settings.MaxZoom / 2f;
     protected static ZoomSettings _buildModeZoomSettings;
-    protected static bool IsBuildSettingsSet;
+    protected static bool _isBuildSettingsSet;
     public virtual void Activate(ref TopdownCameraState state)
     {
         Active = true;
@@ -64,10 +64,10 @@ internal abstract class CameraBehaviour
     {
         _inBuildMode = state.InBuildMode;
 
-        if (!IsBuildSettingsSet)
+        if (!_isBuildSettingsSet)
         {
             _buildModeZoomSettings = data.BuildModeZoomSettings;
-            IsBuildSettingsSet = true;
+            _isBuildSettingsSet = true;
         }
 
         // Set camera behaviour pitch settings

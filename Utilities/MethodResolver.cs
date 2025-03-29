@@ -6,8 +6,8 @@ using System.Reflection;
 
 namespace RetroCamera.Utilities;
 
-/// Bloodstone Interop Method Resolver (thank you Deca!)
-internal static class Il2CppMethodResolver
+/// Bloodstone IL2CPP Method Resolver (thank you Deca!)
+internal static class MethodResolver
 {
     static ulong ExtractTargetAddress(in Instruction instruction)
     {

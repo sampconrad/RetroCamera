@@ -1,7 +1,10 @@
 ﻿using BepInEx;
 using RetroCamera.Configuration;
 using System.Text.Json;
-using static RetroCamera.Configuration.Keybinding.Keybinding;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using static RetroCamera.Configuration.OptionsManager;
+using static RetroCamera.Configuration.KeybindsManager;
 
 namespace RetroCamera.Utilities;
 internal static class Persistence
@@ -9,26 +12,27 @@ internal static class Persistence
     static readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true,
-        IncludeFields = true
+        IncludeFields = true,
+        Converters = { new MenuOptionJsonConverter() }
     };
 
     static readonly string _directoryPath = Path.Join(Paths.ConfigPath, MyPluginInfo.PLUGIN_NAME);
 
     const string KEYBINDS_KEY = "Keybinds";
-    const string SETTINGS_KEY = "Settings";
+    const string OPTIONS_KEY = "Options";
 
     static readonly string _keybindsJson = Path.Combine(_directoryPath, $"{KEYBINDS_KEY}.json");
-    static readonly string _settingsJson = Path.Combine(_directoryPath, $"{SETTINGS_KEY}.json");
+    static readonly string _settingsJson = Path.Combine(_directoryPath, $"{OPTIONS_KEY}.json");
 
     static readonly Dictionary<string, string> _filePaths = new()
     {
         {KEYBINDS_KEY, _keybindsJson },
-        {SETTINGS_KEY, _settingsJson }
+        {OPTIONS_KEY, _settingsJson }
     };
-    public static void SaveKeybinds() => SaveDictionary(KeybindManager.KeybindsByName, KEYBINDS_KEY);
-    public static void SaveOptions() => SaveDictionary(OptionManager.OptionGroupSettingsByName, SETTINGS_KEY);
-    public static Dictionary<string, Keybind> LoadKeybinds() => LoadDictionary<string, Keybind>(KEYBINDS_KEY);
-    public static Dictionary<string, OptionSettings> LoadOptions() => LoadDictionary<string, OptionSettings>(SETTINGS_KEY);
+    public static void SaveKeybinds() => SaveDictionary(Keybinds, KEYBINDS_KEY);
+    public static void SaveOptions() => SaveDictionary(Options, OPTIONS_KEY);
+    public static Dictionary<string, Keybinding> LoadKeybinds() => LoadDictionary<string, Keybinding>(KEYBINDS_KEY);
+    public static Dictionary<string, MenuOption> LoadOptions() => LoadDictionary<string, MenuOption>(OPTIONS_KEY);
     static Dictionary<T, U> LoadDictionary<T, U>(string fileKey)
     {
         if (!_filePaths.TryGetValue(fileKey, out string filePath)) return null;
@@ -72,77 +76,34 @@ internal static class Persistence
             Core.Log.LogWarning($"Failed to serialize {fileKey} contents: {ex.Message}");
         }
     }
-
-    /*
-    public static void LoadKeybinds() => LoadDictionary(ref KeybindsManager.KeybindsByName, "KeybindMappings");
-    public static void SaveKeybinds() => SaveDictionary<string, KeybindCategories.KeybindCategory.Keybind>(KeybindsManager.KeybindsByName, "KeybindMappings");
-    public static void LoadOptions() => LoadDictionary(ref OptionsManager._optionCategories, "OptionCategories");
-    public static void SaveOptions() => SaveDictionary(OptionsManager._optionCategories, "OptionCategories");
-    static void LoadDictionary<T, U>(ref Dictionary<T, U> fileData, string fileKey)
+}
+internal class MenuOptionJsonConverter : JsonConverter<MenuOption>
+{
+    const string TYPE_PROPERTY = "OptionType";
+    public override MenuOption Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (FilePaths.TryGetValue(fileKey, out string filePath))
+        using var jsonDoc = JsonDocument.ParseValue(ref reader);
+        var root = jsonDoc.RootElement;
+
+        if (!root.TryGetProperty(TYPE_PROPERTY, out var typeProp))
+            throw new JsonException($"Missing '{TYPE_PROPERTY}' in MenuOption JSON converter!");
+
+        var typeName = typeProp.GetString();
+
+        return typeName switch
         {
-            if (!Directory.Exists(_directoryPath))
-            {
-                Directory.CreateDirectory(_directoryPath);
-            }
-
-            if (!File.Exists(filePath))
-            {
-                File.Create(filePath).Dispose();
-            }
-
-            try
-            {
-                string fileText = File.ReadAllText(filePath);
-
-                if (fileText.IsNullOrWhiteSpace())
-                {
-                    fileData = [];
-                }
-                else
-                {
-                    fileData = JsonSerializer.Deserialize<Dictionary<T, U>>(fileText, _jsonOptions);
-                }
-            }
-            catch (IOException ex)
-            {
-                Core.Log.LogWarning($"Failed to deserialize {fileKey} contents: {ex.Message}");
-            }
-        }
+            nameof(Toggle) => JsonSerializer.Deserialize<Toggle>(root.GetRawText(), options),
+            nameof(Slider) => JsonSerializer.Deserialize<Slider>(root.GetRawText(), options),
+            nameof(Dropdown) => JsonSerializer.Deserialize<Dropdown>(root.GetRawText(), options),
+            _ => throw new JsonException($"Unknown MenuOption type '{typeName}'")
+        };
     }
-    static void SaveDictionary<T, U>(Dictionary<T, U> fileData, string fileKey)
+    public override void Write(Utf8JsonWriter writer, MenuOption value, JsonSerializerOptions options)
     {
-        if (FilePaths.TryGetValue(fileKey, out string filePath))
-        {
-            if (!Directory.Exists(_directoryPath))
-            {
-                Directory.CreateDirectory(_directoryPath);
-            }
+        using var jsonDoc = JsonSerializer.SerializeToDocument(value, value.GetType(), options);
+        var jsonObj = JsonNode.Parse(jsonDoc.RootElement.GetRawText())!.AsObject();
 
-            if (!File.Exists(filePath))
-            {
-                File.Create(filePath).Dispose();
-            }
-
-            try
-            {
-                string fileText = JsonSerializer.Serialize(fileData, _jsonOptions);
-
-                if (fileText.IsNullOrWhiteSpace())
-                {
-                    fileData = [];
-                }
-                else
-                {
-                    File.WriteAllText(filePath, fileText);
-                }
-            }
-            catch (IOException ex)
-            {
-                Core.Log.LogWarning($"Failed to serialize {fileKey} contents: {ex.Message}");
-            }
-        }
+        jsonObj[TYPE_PROPERTY] = value.GetType().Name;
+        jsonObj.WriteTo(writer, options);
     }
-    */
 }

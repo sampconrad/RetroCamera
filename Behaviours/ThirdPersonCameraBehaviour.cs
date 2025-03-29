@@ -37,7 +37,7 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
 
         base.UpdateCameraInputs(ref state, ref data);
 
-        state.LastTarget.NormalizedLookAtOffset.y = _isMounted ? Settings._headHeightOffset + Settings._mountedOffset : Settings._headHeightOffset;
+        state.LastTarget.NormalizedLookAtOffset.y = _isMounted ? Settings.HEAD_HEIGHT_OFFSET + Settings.MOUNTED_OFFSET : Settings.HEAD_HEIGHT_OFFSET;
 
         if (Settings.OverTheShoulder && !_isShapeshifted && !_isMounted)
         {

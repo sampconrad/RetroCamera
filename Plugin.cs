@@ -17,7 +17,7 @@ internal class Plugin : BasePlugin
     {
         Instance = this;
 
-        Settings.Initialize();
+        // Settings.Initialize();
         AddComponent<Systems.RetroCamera>();
 
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());

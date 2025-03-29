@@ -31,8 +31,8 @@ internal static class TopdownCameraSystemPatch
         //HandleInputDetour = HandleInputDetour(HandleInputToken, HandleInputPatch, out HandleInputOriginal);
         //UpdateCameraInputsDetour = UpdateCameraInputsDetour(UpdateCameraInputsToken, UpdateCameraInputsPatch, out UpdateCameraInputsOriginal);
 
-        _handleInputDetour = Detour.Create(typeof(TopdownCameraSystem), "HandleInput", HandleInputPatch, out _handleInputOriginal);
-        _updateCameraInputsDetour = Detour.Create(typeof(TopdownCameraSystem), "UpdateCameraInputs", "OriginalLambdaBody", UpdateCameraInputsPatch, out _updateCameraInputsOriginal);
+        _handleInputDetour = NativeDetour.Create(typeof(TopdownCameraSystem), "HandleInput", HandleInputPatch, out _handleInputOriginal);
+        _updateCameraInputsDetour = NativeDetour.Create(typeof(TopdownCameraSystem), "UpdateCameraInputs", "OriginalLambdaBody", UpdateCameraInputsPatch, out _updateCameraInputsOriginal);
     }
     static unsafe void HandleInputPatch(IntPtr _this, ref InputState inputState)
     {

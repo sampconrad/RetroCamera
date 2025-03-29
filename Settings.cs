@@ -1,10 +1,13 @@
 ﻿using RetroCamera.Configuration;
 using RetroCamera.Patches;
 using UnityEngine;
-using static RetroCamera.Configuration.Keybinding;
-using static RetroCamera.Configuration.Keybinding.Keybinding;
 using static RetroCamera.Utilities.CameraState;
 using static RetroCamera.Utilities.Persistence;
+using static RetroCamera.Configuration.OptionsManager;
+using BoolChanged = RetroCamera.Configuration.MenuOption<bool>.OptionChangedHandler<bool>;
+using FloatChanged = RetroCamera.Configuration.MenuOption<float>.OptionChangedHandler<float>;
+using static RetroCamera.Configuration.KeybindsManager;
+using static RetroCamera.Configuration.Keybinding;
 
 namespace RetroCamera;
 internal static class Settings
@@ -30,10 +33,10 @@ internal static class Settings
     public static float OverTheShoulderX { get => _overTheShoulderXOption.Value; set => _overTheShoulderXOption.SetValue(value); }
     public static float OverTheShoulderY { get => _overTheShoulderYOption.Value; set => _overTheShoulderYOption.SetValue(value); }
 
-    public static float _firstPersonForwardOffset = 1.65f;
-    public static float _mountedOffset = 1.6f;
-    public static float _headHeightOffset = 1.05f;
-    public static float _shoulderRightOffset = 0.8f;
+    public const float FIRST_PERSON_FORWARD_OFFSET = 1.65f;
+    public const float MOUNTED_OFFSET = 1.6f;
+    public const float HEAD_HEIGHT_OFFSET = 1.05f;
+    public const float SHOULDER_RIGHT_OFFSET = 0.8f;
 
     const float ZOOM_OFFSET = 2f;
 
@@ -75,100 +78,65 @@ internal static class Settings
     static Slider _overTheShoulderXOption;
     static Slider _overTheShoulderYOption;
 
-    static Keybind _enabledKeybind;
-    static Keybind _actionModeKeybind;
-    static Keybind _hideHUDKeybind;
-    // static Keybind _holdToScrollKeybind;
-
-    const string ENABLE_KEY = "Enable";
-    const string ACTION_KEY = "Action Mode";
-    const string HUD_KEY = "Toggle HUD";
+    static Keybinding _enabledKeybind;
+    static Keybinding _actionModeKeybind;
+    static Keybinding _hideHUDKeybind;
     public static void Initialize()
     {
         try
         {
-            if (!SetupSavedOptions()) SetupDefaultOptions();
-            if (!SetupSavedKeybinds()) SetupDefaultKeybinds();
+            RegisterOptions();
+            RegisterKeybinds();
+
+            TryLoadOptions();
+            TryLoadKeybinds();
+
+            SaveOptions();
+            SaveKeybinds();
         }
         catch (Exception ex)
         {
             Core.Log.LogError(ex);
         }
     }
-    public static void AddEnabledListener(SettingChangedHandler<bool> action) => _enabledOption.AddListener(action);
-    public static void AddFieldOfViewListener(SettingChangedHandler<float> action) => _fieldOfViewOption.AddListener(action);
-    public static void AddHideHUDListener(KeybindHandler action) => _hideHUDKeybind.AddKeyDownListener(action);
-    static void SetupDefaultOptions()
+    public static void AddEnabledListener(BoolChanged handler) =>
+    _enabledOption.AddListener(handler);
+    public static void AddFieldOfViewListener(FloatChanged handler) =>
+        _fieldOfViewOption.AddListener(handler);
+    public static void AddHideHUDListener(KeyHandler action) => 
+        _hideHUDKeybind.AddKeyDownListener(action);
+    static void RegisterOptions()
     {
-        OptionSettings optionCategory = OptionManager.AddCategory("Retro Camera");
+        Core.Log.LogWarning("Registering options...");
 
-        // Basic enable/disable toggle for the RetroCamera system
-        _enabledOption = optionCategory.AddToggle("Enabled", "Enable or disable RetroCamera", true);
+        _enabledOption = AddToggle("Enabled", "Enable or disable RetroCamera", true);
+        _firstPersonEnabledOption = AddToggle("First Person", "Enable zooming in far enough for first-person view", true);
+        _defaultBuildModeOption = AddToggle("Build Mode", "Use RetroCamera in build mode", true);
+        _alwaysShowCrosshairOption = AddToggle("Always Show Crosshair", "Keep crosshair visible always", false);
+        _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
+        _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
 
-        // Enables zooming in far enough to support first-person perspective
-        _firstPersonEnabledOption = optionCategory.AddToggle("First Person", "Toggle being able to zoom in far enough for first person view/perspective", true);
+        AddDivider("Third Person Aiming");
+        _cameraAimModeOption = AddDropdown("Aiming Mode", "Ability aiming style", (int)CameraAimMode.Default, Enum.GetNames(typeof(CameraAimMode)));
+        _aimOffsetXOption = AddSlider("Aiming Horizontal Offset", "Aim horizontal offset", -25f, 25f, 0f);
+        _aimOffsetYOption = AddSlider("Aiming Vertical Offset", "Aim vertical offset", -25f, 25f, 0f);
 
-        // Overrides the default camera behavior when entering build mode
-        _defaultBuildModeOption = optionCategory.AddToggle("Build Mode", "Toggle using RetroCamera behaviour during build mode", true);
+        AddDivider("Third Person Zoom");
+        _minZoomOption = AddSlider("Min Zoom", "Minimum zoom", 1f, 15f, 1f);
+        _maxZoomOption = AddSlider("Max Zoom", "Maximum zoom", 5f, 20f, 15f);
+        _lockCameraZoomOption = AddToggle("Lock Zoom", "Lock zoom distance", false);
+        _lockCameraZoomDistanceOption = AddSlider("Locked Zoom Distance", "Fixed zoom distance when locked", 1f, 20f, 15f);
 
-        // Keeps the crosshair visible at all times, regardless of camera mode or zoom
-        _alwaysShowCrosshairOption = optionCategory.AddToggle("Always Show Crosshair", "Keeps crosshair visible even when zoomed out or idle", false);
+        AddDivider("Third Person Pitch");
+        _minPitchOption = AddSlider("Min Pitch", "Minimum camera pitch", 0f, 90f, 10f);
+        _maxPitchOption = AddSlider("Max Pitch", "Maximum camera pitch", 0f, 90f, 90f);
+        _lockCamerMenuOptionstchOption = AddToggle("Lock Pitch", "Lock camera pitch", false);
+        _lockCamerMenuOptionstchAngleOption = AddSlider("Locked Pitch Angle", "Fixed pitch angle when locked", 0f, 90f, 60f);
 
-        // Displays the crosshair only when performing combat or interaction actions
-        _actionModeCrosshairOption = optionCategory.AddToggle("Action Mode Crosshair", "Shows the crosshair during action mode if not already always showing", false);
-
-        // Adjusts the field of view (FOV) for the camera
-        _fieldOfViewOption = optionCategory.AddSlider("FOV", "Adjust camera field of view", 50, 90, 60);
-
-        optionCategory.AddDivider("Third Person Aiming");
-
-        // Sets the aiming behavior for third person (e.g., classic, over-the-shoulder)
-        _cameraAimModeOption = optionCategory.AddDropdown("Aiming Mode", "Select the aiming style used for abilities", (int)CameraAimMode.Default, Enum.GetNames(typeof(CameraAimMode)));
-
-        // Shifts the camera's aim left or right relative to center
-        _aimOffsetXOption = optionCategory.AddSlider("Horizontal Offset", "Adjust the horizontal aiming position offset", -25, 25, 0);
-
-        // Raises or lowers the aim point relative to center
-        _aimOffsetYOption = optionCategory.AddSlider("Vertical Offset", "Adjust the vertical aiming position offset", -25, 25, 0);
-
-        optionCategory.AddDivider("Third Person Zoom");
-
-        // Minimum allowed zoom distance from the character
-        _minZoomOption = optionCategory.AddSlider("Min Zoom", "Sets how close the camera can zoom in to the player", 1, 18, 2);
-
-        // Maximum allowed zoom distance from the character
-        _maxZoomOption = optionCategory.AddSlider("Max Zoom", "Sets how far the camera can zoom out from the player", 3, 20, 18);
-
-        // Prevents the player from changing the zoom level dynamically
-        _lockCameraZoomOption = optionCategory.AddToggle("Lock Zoom", "Locks camera zoom at a fixed distance", false);
-
-        // Defines the exact zoom distance used when zoom is locked
-        _lockCameraZoomDistanceOption = optionCategory.AddSlider("Locked Zoom Distance", "Zoom distance to maintain when locked", 6, 20, 15);
-
-        optionCategory.AddDivider("Third Person Pitch");
-
-        // Lowest pitch angle the camera can rotate down to
-        _minPitchOption = optionCategory.AddSlider("Min Pitch", "Restricts how far the camera can tilt downward", 0, 90, 9);
-
-        // Highest pitch angle the camera can rotate upward
-        _maxPitchOption = optionCategory.AddSlider("Max Pitch", "Restricts how far the camera can tilt upward", 0, 90, 90);
-
-        // Disables camera pitch movement, forcing it to remain fixed
-        _lockCamerMenuOptionstchOption = optionCategory.AddToggle("Lock Pitch", "Locks camera pitch at a fixed angle", false);
-
-        // Sets the pitch angle used when camera pitch is locked
-        _lockCamerMenuOptionstchAngleOption = optionCategory.AddSlider("Locked Pitch Angle", "Pitch angle to maintain when locked", 0, 90, 60);
-
-        optionCategory.AddDivider("Over Shoulder");
-
-        // Activates camera offset for over-the-shoulder perspective
-        _overTheShoulderOption = optionCategory.AddToggle("Enable Shoulder Offset", "Enables third-person over-the-shoulder view offset", false);
-
-        // Adjusts the horizontal distance from the character in over-the-shoulder mode
-        _overTheShoulderXOption = optionCategory.AddSlider("Horizontal Offset", "Controls sideways camera position offset for shoulder view", 0.5f, 4, 1);
-
-        // Adjusts the vertical camera height in over-the-shoulder mode
-        _overTheShoulderYOption = optionCategory.AddSlider("Vertical Offset", "Controls upward/downward camera position offset for shoulder view", 1, 8, 1);
+        AddDivider("Over Shoulder");
+        _overTheShoulderOption = AddToggle("Enable Shoulder Offset", "Enable over-the-shoulder camera", false);
+        _overTheShoulderXOption = AddSlider("Shoulder Horizontal Offset", "Shoulder view horizontal offset", 1f, 4f, 1f);
+        _overTheShoulderYOption = AddSlider("Shoulder Vertical Offset", "Shoulder view vertical offset", 1f, 8f, 1f);
 
         _minZoomOption.AddListener(value =>
         {
@@ -201,142 +169,56 @@ internal static class Settings
             else if (value < _minPitchOption.MinValue)
                 _maxPitchOption.SetValue(_minPitchOption.MinValue);
         });
-
-        SaveOptions();
     }
-    static void SetupDefaultKeybinds()
+    static void RegisterKeybinds()
     {
-        Configuration.Keybinding.Keybinding keybindCategory = KeybindManager.AddCategory("Retro Camera");
+        Core.Log.LogWarning("Registering keybinds...");
 
-        _enabledKeybind = AddKeyBinding(ENABLE_KEY, "Retro Camera", "Enable RetroCamera functions", KeyCode.LeftBracket);
+        _enabledKeybind = AddKeybind("Toggle Camera", "Toggle between RetroCamera and default camera", KeyCode.LeftBracket);
         _enabledKeybind.AddKeyDownListener(() =>
         {
-            // Core.Log.LogInfo(keybindCategory.Name + " Enabled: " + !Enabled);
-
             _enabledOption.SetValue(!Enabled);
         });
 
-        _actionModeKeybind = AddKeyBinding(ACTION_KEY, "Retro Camera", "Toggle action mode", KeyCode.RightBracket);
+        _actionModeKeybind = AddKeybind("Action Mode", "Toggle action mode", KeyCode.RightBracket);
         _actionModeKeybind.AddKeyDownListener(() =>
         {
             if (Enabled && !_isFirstPerson)
             {
-                // Core.Log.LogInfo($"Start: Action Mode: {_isActionMode}; Mouse Locked: {_isMouseLocked}; Wheel Visible: {ActionWheelSystemPatch._wheelVisible}; IsMenuOpen: {IsMenuOpen}");
-
                 _isMouseLocked = !_isMouseLocked;
                 _isActionMode = !_isActionMode;
-
                 if (IsMenuOpen) IsMenuOpen = false;
-
                 if (ActionWheelSystemPatch._wheelVisible) ActionWheelSystemPatch._wheelVisible = false;
-
-                // Core.Log.LogInfo($"End: Action Mode: {_isActionMode}; Mouse Locked: {_isMouseLocked}; Wheel Visible: {ActionWheelSystemPatch._wheelVisible}; IsMenuOpen: {IsMenuOpen}");
             }
         });
 
-        _hideHUDKeybind = AddKeyBinding(HUD_KEY, "Retro Camera", "Toggle HUD visibility", KeyCode.Backslash);
-
-        /*
-        _holdToScrollKeybind = keybindCategory.AddKeyBinding("retrocamera.holdtoscroll", "RetroCamera", "HoldToScroll", KeyCode.RightAlt);
-        _holdToScrollKeybind.AddKeyPressedListener(() =>
-        {
-            _chatScroll = true; // stop zooming in and out while held, act as if mouse is hovering over scrollbar in chat window
-            LockZoom = true;
-            _hudChatWindow.ScrollView.m_VerticalScrollbar.isPointerInside = true;
-        });
-
-        _holdToScrollKeybind.AddKeyUpListener(() =>
-        {
-            _chatScroll = false;
-            LockZoom = false;
-            _hudChatWindow.ScrollView.m_VerticalScrollbar.isPointerInside = false;
-        });
-        */
-
-        SaveKeybinds();
+        _hideHUDKeybind = AddKeybind("Toggle HUD", "Toggle HUD visibility", KeyCode.Backslash);
     }
-    public static bool SetupSavedKeybinds()
-    {
-        var loaded = LoadKeybinds();
-        if (loaded != null)
-        {
-
-            return true;
-        }
-
-        return false;
-    }
-    public static bool SetupSavedOptions()
+    public static bool TryLoadOptions()
     {
         var loaded = LoadOptions();
-        if (loaded != null)
+        if (loaded == null)
+            return false;
+
+        foreach (var (key, loadedOption) in loaded)
         {
-            OptionSettings optionCategory = OptionManager.AddCategory("Retro Camera");
-
-            _enabledOption = optionCategory.AddToggle("Enabled", "Enable or disable RetroCamera", true);
-            _firstPersonEnabledOption = optionCategory.AddToggle("First Person", "Toggle being able to zoom in far enough for first person view/perspective", true);
-            _defaultBuildModeOption = optionCategory.AddToggle("Build Mode", "Toggle using RetroCamera behaviour during build mode", true);
-            _alwaysShowCrosshairOption = optionCategory.AddToggle("Always Show Crosshair", "Keeps crosshair visible even when zoomed out or idle", false);
-            _actionModeCrosshairOption = optionCategory.AddToggle("Action Mode Crosshair", "Shows the crosshair during action mode if not already always showing", false);
-            _fieldOfViewOption = optionCategory.AddSlider("FOV", "Adjust camera field of view", 50, 90, 60);
-            optionCategory.AddDivider("Third Person Aiming");
-
-            _cameraAimModeOption = optionCategory.AddDropdown("Aiming Mode", "Select the aiming style used for abilities", (int)CameraAimMode.Default, Enum.GetNames(typeof(CameraAimMode)));
-            _aimOffsetXOption = optionCategory.AddSlider("Horizontal Offset", "Adjust the horizontal aiming position offset", -25, 25, 0);
-            _aimOffsetYOption = optionCategory.AddSlider("Vertical Offset", "Adjust the vertical aiming position offset", -25, 25, 0);
-            optionCategory.AddDivider("Third Person Zoom");
-
-            _minZoomOption = optionCategory.AddSlider("Min Zoom", "Sets how close the camera can zoom in to the player", 1, 18, 2);
-            _maxZoomOption = optionCategory.AddSlider("Max Zoom", "Sets how far the camera can zoom out from the player", 3, 20, 18);
-            _lockCameraZoomOption = optionCategory.AddToggle("Lock Zoom", "Locks camera zoom at a fixed distance", false);
-            _lockCameraZoomDistanceOption = optionCategory.AddSlider("Locked Zoom Distance", "Zoom distance to maintain when locked", 6, 20, 15);
-            optionCategory.AddDivider("Third Person Pitch");
-
-            _minPitchOption = optionCategory.AddSlider("Min Pitch", "Restricts how far the camera can tilt downward", 0, 90, 9);
-            _maxPitchOption = optionCategory.AddSlider("Max Pitch", "Restricts how far the camera can tilt upward", 0, 90, 90);
-            _lockCamerMenuOptionstchOption = optionCategory.AddToggle("Lock Pitch", "Locks camera pitch at a fixed angle", false);
-            _lockCamerMenuOptionstchAngleOption = optionCategory.AddSlider("Locked Pitch Angle", "Pitch angle to maintain when locked", 0, 90, 60);
-            optionCategory.AddDivider("Over Shoulder");
-
-            _overTheShoulderOption = optionCategory.AddToggle("Enable Shoulder Offset", "Enables third-person over-the-shoulder view offset", false);
-            _overTheShoulderXOption = optionCategory.AddSlider("Horizontal Offset", "Controls sideways camera position offset for shoulder view", 0.5f, 4, 1);
-            _overTheShoulderYOption = optionCategory.AddSlider("Vertical Offset", "Controls upward/downward camera position offset for shoulder view", 1, 8, 1);
-
-            _minZoomOption.AddListener(value =>
-            {
-                if (value + ZOOM_OFFSET > MaxZoom && value + ZOOM_OFFSET < _maxZoomOption.MaxValue)
-                    _maxZoomOption.SetValue(value + ZOOM_OFFSET);
-                else if (value + ZOOM_OFFSET > _maxZoomOption.MaxValue)
-                    _minZoomOption.SetValue(_maxZoomOption.MaxValue - ZOOM_OFFSET);
-            });
-
-            _maxZoomOption.AddListener(value =>
-            {
-                if (value - ZOOM_OFFSET < MinZoom && value - ZOOM_OFFSET > _minZoomOption.MinValue)
-                    _minZoomOption.SetValue(value - ZOOM_OFFSET);
-                else if (value - ZOOM_OFFSET < _minZoomOption.MinValue)
-                    _maxZoomOption.SetValue(_minZoomOption.MinValue + ZOOM_OFFSET);
-            });
-
-            _minPitchOption.AddListener(value =>
-            {
-                if (value > _maxPitchOption.Value && value < _maxPitchOption.MaxValue)
-                    _maxPitchOption.SetValue(value);
-                else if (value > _maxPitchOption.MaxValue)
-                    _minPitchOption.SetValue(_maxPitchOption.MaxValue);
-            });
-
-            _maxPitchOption.AddListener(value =>
-            {
-                if (value < _minPitchOption.Value && value > _minPitchOption.MinValue)
-                    _minPitchOption.SetValue(value);
-                else if (value < _minPitchOption.MinValue)
-                    _maxPitchOption.SetValue(_minPitchOption.MinValue);
-            });
-
-            return true;
+            if (Options.TryGetValue(key, out var registeredOption))
+                registeredOption.ApplySaved(loadedOption);
         }
 
-        return false;
+        return true;
+    }
+    public static bool TryLoadKeybinds()
+    {
+        var loaded = LoadKeybinds();
+        if (loaded == null) return false;
+
+        foreach (var (key, loadedBind) in loaded)
+        {
+            if (Keybinds.TryGetValue(key, out var registeredBind))
+                registeredBind.ApplySaved(loadedBind);
+        }
+
+        return true;
     }
 }

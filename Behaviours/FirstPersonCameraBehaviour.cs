@@ -36,8 +36,8 @@ internal class FirstPersonCameraBehaviour : CameraBehaviour
     {
         base.UpdateCameraInputs(ref state, ref data);
 
-        float forwardOffset = Settings._firstPersonForwardOffset;
-        float headHeight = Settings._headHeightOffset;
+        float forwardOffset = Settings.FIRST_PERSON_FORWARD_OFFSET;
+        float headHeight = Settings.HEAD_HEIGHT_OFFSET;
 
         if (Settings.FirstPersonShapeshiftOffsets.ContainsKey(_shapeshiftName))
         {
@@ -46,6 +46,6 @@ internal class FirstPersonCameraBehaviour : CameraBehaviour
         }
 
         state.LastTarget.NormalizedLookAtOffset.z = forwardOffset;
-        state.LastTarget.NormalizedLookAtOffset.y = _isMounted ? headHeight + Settings._mountedOffset : headHeight;
+        state.LastTarget.NormalizedLookAtOffset.y = _isMounted ? headHeight + Settings.MOUNTED_OFFSET : headHeight;
     }
 }

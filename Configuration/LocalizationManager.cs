@@ -7,31 +7,36 @@ using Guid = Il2CppSystem.Guid;
 namespace RetroCamera.Configuration;
 internal static class LocalizationManager
 {
-    public static readonly Dictionary<AssetGuid, string> AssetGuids = [];
-    public static LocalizationKey CreateKey(string value)
+    public const string HEADER = MyPluginInfo.PLUGIN_NAME;
+    public static LocalizationKey _sectionHeader;
+
+    static readonly Dictionary<AssetGuid, string> _assetGuids = [];
+    public static IReadOnlyDictionary<AssetGuid, string> AssetGuids => _assetGuids;
+    public static void LocalizeText()
     {
-        // LocalizationKey localizationKey = new(AssetGuid.FromGuid(Guid.NewGuid()));
-        // AssetGuid assetGuid = localizationKey.GetGuid();
+        _sectionHeader = GetLocalizationKey(HEADER);
 
-        AssetGuid assetGuid = GetAssetGuid(value);
-        AssetGuids.TryAdd(assetGuid, value);
-
-        /*
-        if (Localization.Initialized) Localization._LocalizedStrings.TryAdd(assetGuid, value);
-        else
+        foreach (var keyValuePair in AssetGuids)
         {
-            Core.Log.LogWarning("[LocalizationKeyManager] Localization isn't initialized yet!");
-        }
-        */
+            AssetGuid assetGuid = keyValuePair.Key;
+            string localizedString = keyValuePair.Value;
 
-        return new(assetGuid);
+            Localization._LocalizedStrings.TryAdd(assetGuid, localizedString);
+        }
     }
-    static AssetGuid GetAssetGuid(string combinedHashString)
+    static AssetGuid GetAssetGuid(string text)
     {
         using SHA256 sha256 = SHA256.Create();
-        byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(combinedHashString));
+        byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
 
         Guid uniqueGuid = new(hashBytes[..16]);
         return AssetGuid.FromGuid(uniqueGuid);
+    }
+    public static LocalizationKey GetLocalizationKey(string value)
+    {
+        AssetGuid assetGuid = GetAssetGuid(value);
+        _assetGuids.TryAdd(assetGuid, value);
+
+        return new(assetGuid);
     }
 }

@@ -1,10 +1,8 @@
 ﻿using HarmonyLib;
-using RetroCamera.Configuration;
 using ProjectM;
-using UnityEngine.InputSystem;
+using RetroCamera.Configuration;
 using UnityEngine;
-using static RetroCamera.Configuration.Keybinding;
-using static RetroCamera.Configuration.Keybinding.Keybinding;
+using UnityEngine.InputSystem;
 
 namespace RetroCamera.Patches;
 
@@ -24,10 +22,8 @@ internal static class InputActionSystemPatch
     {
         __instance._LoadedInputActions.Disable();
 
-        foreach (Configuration.Keybinding.Keybinding keybindingCategory in KeybindManager.KeybindCategoriesByName.Values)
-        {
-            __instance._LoadedInputActions.AddActionMap(keybindingCategory.InputActionMap);
-        }
+        InputActionMap inputActionMap = new(LocalizationManager.HEADER);
+        __instance._LoadedInputActions.AddActionMap(inputActionMap);
 
         __instance._LoadedInputActions.Enable();
     }
@@ -36,41 +32,23 @@ internal static class InputActionSystemPatch
     [HarmonyPrefix]
     static void OnUpdatePrefix()
     {
-        foreach (Keybind keybind in KeybindManager.KeybindsByName.Values)
+        foreach (Keybinding keybind in KeybindsManager.Keybinds.Values)
         {
-            if (IsKeybindDown(keybind)) keybind.OnKeyDown();
-            if (IsKeybindUp(keybind)) keybind.OnKeyUp();
-            if (IsKeybindPressed(keybind)) keybind.OnKeyPressed();
+            if (IsKeybindDown(keybind)) keybind.KeyDown();
+            if (IsKeybindUp(keybind)) keybind.KeyUp();
+            if (IsKeybindPressed(keybind)) keybind.KeyPressed();
         }
     }
-    static bool IsKeybindDown(Keybind keybind)
+    static bool IsKeybindDown(Keybinding keybind)
     {
         return Input.GetKeyDown(keybind.Primary) || Input.GetKeyDown(keybind.Secondary);
     }
-    static bool IsKeybindUp(Keybind keybind)
+    static bool IsKeybindUp(Keybinding keybind)
     {
         return Input.GetKeyUp(keybind.Primary) || Input.GetKeyUp(keybind.Secondary);
     }
-    static bool IsKeybindPressed(Keybind keybind)
+    static bool IsKeybindPressed(Keybinding keybind)
     {
         return Input.GetKey(keybind.Primary) || Input.GetKey(keybind.Secondary);
     }
-
-    /*
-    [HarmonyPatch(typeof(InputActionSystem), nameof(InputActionSystem.ModifyInputActionBinding), typeof(ButtonInputAction), typeof(bool), typeof(Il2CppSystem.Action<bool>), typeof(Il2CppSystem.Action<bool, bool>), typeof(OnRebindCollision), typeof(Nullable_Unboxed<ControllerType>))]
-    [HarmonyPrefix]
-    static void ModifyInputActionBindingPrefix(ButtonInputAction buttonInput, bool modifyPrimary, ref Il2CppSystem.Action<bool> onComplete, ref Il2CppSystem.Action<bool, bool> onCancel, OnRebindCollision onCollision, Nullable_Unboxed<ControllerType> overrideControllerType)
-    {
-        KeybindMapping keybinding = KeybindsManager.GetKeybinding(buttonInput);
-        if (keybinding == null) return;
-
-        Il2CppSystem.Action<InputActionRebindingExtensions.RebindingOperation> rebindOnComplete = new(onComplete.Target, onComplete.method);
-        Il2CppSystem.Action<InputActionRebindingExtensions.RebindingOperation> rebindOnCancel = new(onCancel.Target, onCancel.method);
-
-        keybinding.StartRebinding(modifyPrimary, rebindOnComplete, rebindOnCancel);
-
-        KeybindsManager.SaveKeybindingCategories();
-        KeybindsManager.SaveKeybindings();
-    }
-    */
 }
