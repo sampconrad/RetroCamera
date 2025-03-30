@@ -80,7 +80,8 @@ internal static class Settings
 
     static Keybinding _enabledKeybind;
     static Keybinding _actionModeKeybind;
-    static Keybinding _hideHUDKeybind;
+    static Keybinding _toggleHUDKeybind;
+    static Keybinding _toggleFogKeybind;
     public static void Initialize()
     {
         try
@@ -104,10 +105,12 @@ internal static class Settings
     public static void AddFieldOfViewListener(FloatChanged handler) =>
         _fieldOfViewOption.AddListener(handler);
     public static void AddHideHUDListener(KeyHandler action) => 
-        _hideHUDKeybind.AddKeyDownListener(action);
+        _toggleHUDKeybind.AddKeyDownListener(action);
+    public static void AddHideFogListener(KeyHandler action) =>
+        _toggleFogKeybind.AddKeyDownListener(action);
     static void RegisterOptions()
     {
-        Core.Log.LogWarning("Registering options...");
+        // Core.Log.LogWarning("Registering options...");
 
         _enabledOption = AddToggle("Enabled", "Enable or disable RetroCamera", true);
         _firstPersonEnabledOption = AddToggle("First Person", "Enable zooming in far enough for first-person view", true);
@@ -172,7 +175,7 @@ internal static class Settings
     }
     static void RegisterKeybinds()
     {
-        Core.Log.LogWarning("Registering keybinds...");
+        // Core.Log.LogWarning("Registering keybinds...");
 
         _enabledKeybind = AddKeybind("Toggle Camera", "Toggle between RetroCamera and default camera", KeyCode.LeftBracket);
         _enabledKeybind.AddKeyDownListener(() =>
@@ -187,12 +190,15 @@ internal static class Settings
             {
                 _isMouseLocked = !_isMouseLocked;
                 _isActionMode = !_isActionMode;
+
                 if (IsMenuOpen) IsMenuOpen = false;
                 if (ActionWheelSystemPatch._wheelVisible) ActionWheelSystemPatch._wheelVisible = false;
             }
         });
 
-        _hideHUDKeybind = AddKeybind("Toggle HUD", "Toggle HUD visibility", KeyCode.Backslash);
+        _toggleHUDKeybind = AddKeybind("Toggle HUD", "Toggle HUD visibility", KeyCode.Minus);
+
+        _toggleFogKeybind = AddKeybind("Toggle Fog", "Toggle visibility of fog and clouds", KeyCode.Equals);
     }
     public static bool TryLoadOptions()
     {

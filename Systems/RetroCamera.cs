@@ -57,11 +57,13 @@ public class RetroCamera : MonoBehaviour
         _isUIHidden = !_isUIHidden;
         DisableUISettings.SetHideHUD(_isUIHidden, Core._client);
     }
+    static void ToggleFog() => Utilities.ClearSkies.ToggleFog();
     void Awake()
     {
         Settings.Initialize();
         RegisterBehaviours();
         AddListeners();
+        // GetOrCreateObjects();
     }
     static void RegisterBehaviours()
     {
@@ -73,12 +75,10 @@ public class RetroCamera : MonoBehaviour
         Settings.AddEnabledListener(UpdateEnabled);
         Settings.AddFieldOfViewListener(UpdateFieldOfView);
         Settings.AddHideHUDListener(ToggleHUD);
+        Settings.AddHideFogListener(ToggleFog);
     }
-    void Update()
+    static void GetOrCreateObjects()
     {
-        if (!Core._initialized) return;
-        else if (!_gameFocused || !Settings.Enabled) return;
-
         if (_crosshairPrefab == null) BuildCrosshair();
 
         if (_gameCamera == null)
@@ -99,6 +99,18 @@ public class RetroCamera : MonoBehaviour
             {
                 Core.Log.LogWarning("ChatWindow(Clone) not found!");
             }
+        }
+    }
+    void Update()
+    {
+        if (!Core._initialized) return;
+        else if (!_gameFocused || !Settings.Enabled) return;
+
+        if (_crosshairPrefab == null) BuildCrosshair();
+
+        if (_gameCamera == null)
+        {
+            _gameCamera = CameraManager.GetCamera();
         }
 
         UpdateSystems();
@@ -144,6 +156,8 @@ public class RetroCamera : MonoBehaviour
     static void UpdateSystems()
     {
         if (_uiDataSystem == null || _prefabCollectionSystem == null) return;
+
+        // should really just replace these with actual buff checks, interesting method of getting shapeshift/mounted status
 
         try
         {

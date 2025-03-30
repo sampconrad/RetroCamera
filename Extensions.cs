@@ -27,7 +27,7 @@ internal static class Extensions
         action(ref item);
         EntityManager.SetComponentData(entity, item);
     }
-    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct // need to make sure this works but don't really want to atm
+    public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
     {
         if (!entity.Has<T>())
         {
@@ -35,6 +35,13 @@ internal static class Extensions
         }
 
         entity.With(action);
+    }
+    public static void HasWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
+    {
+        if (entity.Has<T>())
+        {
+            entity.With(action);
+        }
     }
     public unsafe static void Write<T>(this Entity entity, T componentData) where T : struct
     {

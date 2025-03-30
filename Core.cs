@@ -2,9 +2,11 @@ using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using ProjectM;
 using ProjectM.Physics;
+using ProjectM.Scripting;
 using ProjectM.Sequencer;
 using ProjectM.UI;
 using RetroCamera.Patches;
+using RetroCamera.Utilities;
 using System.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -14,11 +16,13 @@ internal class Core
 {
     public static World _client;
     public static EntityManager EntityManager => _client.EntityManager;
-    public static ZoomModifierSystem ZoomModifierSystem { get; internal set; }
-    public static TopdownCameraSystem TopdownCameraSystem { get; internal set; }
-    public static PrefabCollectionSystem PrefabCollectionSystem { get; internal set; }
-    public static UIDataSystem UIDataSystem { get; internal set; }
-    public static CursorPositionSystem CursorPositionSystem { get; internal set; }
+    public static ClientScriptMapper ClientScriptMapper { get; set; }
+    public static ClientGameManager ClientGameManager { get; set; }
+    public static ZoomModifierSystem ZoomModifierSystem { get; set; }
+    public static TopdownCameraSystem TopdownCameraSystem { get; set; }
+    public static PrefabCollectionSystem PrefabCollectionSystem { get; set; }
+    public static UIDataSystem UIDataSystem { get; set; }
+    public static CursorPositionSystem CursorPositionSystem { get; set; }
     public static ManualLogSource Log => Plugin.LogInstance;
 
     static MonoBehaviour _monoBehaviour;
@@ -48,6 +52,9 @@ internal class Core
         CursorPositionSystem = _client.GetExistingSystemManaged<CursorPositionSystem>();
         Systems.RetroCamera._cursorPositionSystem = CursorPositionSystem;
 
+        ClientScriptMapper = _client.GetExistingSystemManaged<ClientScriptMapper>();
+        ClientGameManager = ClientScriptMapper._ClientGameManager;
+
         TopdownCameraSystemPatch.Initialize();
 
         _initialized = true;
@@ -62,5 +69,10 @@ internal class Core
         }
 
         return _monoBehaviour.StartCoroutine(routine.WrapToIl2Cpp());
+    }
+    public static void ResetStates()
+    {
+        ClearSkies.ResetClearSkies();
+        _initialized = false;
     }
 }
