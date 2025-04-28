@@ -15,7 +15,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ## Features
 
-Generally streamlined ModernCamera to the essentials with a few extra goodies. Not considered compatible with controllers/gamepads at this time; will explore that in the future if able. If anything is missing you were fond of open to feedback!
+Generally streamlined ModernCamera to the essentials with a few extra goodies (also a fancy news panel at the main menu :D). Not considered compatible with controllers/gamepads at this time; will explore that in the future if able. If anything is missing you were fond of open to feedback!
 
 - **Camera Enhancements:**  Generally increased range of camera motion with specific first-person and third-person modes. Includes options for adjustable FOV, over-the-shoulder offsets, pitch/zoom locking, and aiming offsets. Supports forward aiming in action mode with optional crosshair visibility.
 - **Additional Features:** Toggle HUD visibility; toggle batform fog visibility (this also hides clouds and their shadows on the ground);
