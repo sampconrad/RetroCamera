@@ -11,7 +11,7 @@
 			https://nuget.bepinex.dev/v3/index.json;
 	  </RestoreSources>
 	  <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-	  <BepInExPluginGuid>io.zfolmt.ModernCamera</BepInExPluginGuid>
+	  <BepInExPluginGuid>io.zfolmt.RetroCamera</BepInExPluginGuid>
 	  <LangVersion>preview</LangVersion>
 	  <EnablePreviewFeatures>true</EnablePreviewFeatures>
   </PropertyGroup>
