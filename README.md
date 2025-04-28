@@ -21,6 +21,7 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ## Credits
 
+- The VRising mod Discord logo and RetroCamera logo were both made by ([@Odjit](https://github.com/Odjit)), a very talented artist who also authors the Kindred mods! ([Kindred](https://thunderstore.io/c/v-rising/p/odjit/))
 - [ModernCamera](https://github.com/oscarpedrero/BloodyMerchant) by [@Trodi](https://github.com/oscarpedrero) was invaluable in putting this together, many thanks to him and other listed contributors!
 - [ModernCameraFix](https://github.com/oscarpedrero/BloodyMerchant) by [@Trodi](https://github.com/oscarpedrero) was invaluable in putting this together, many thanks to him and other listed contributors!
 - [Silkworm](https://github.com/oscarpedrero/BloodyMerchant) by [@iZastic](https://github.com/iZastic/vrising-silkworm) Menu option implementation is almost all from Silkworm, with rebinding handled by a coroutine of mine.

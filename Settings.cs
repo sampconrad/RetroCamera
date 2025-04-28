@@ -118,7 +118,6 @@ internal static class Settings
 
         _enabledOption = AddToggle("Enabled", "Enable or disable RetroCamera", true);
         _firstPersonEnabledOption = AddToggle("First Person", "Enable zooming in far enough for first-person view", true);
-        // _defaultBuildModeOption = AddToggle("Build Mode", "Use RetroCamera in build mode", true);
         _alwaysShowCrosshairOption = AddToggle("Always Show Crosshair", "Keep crosshair visible always", false);
         _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
         _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
