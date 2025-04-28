@@ -47,7 +47,8 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
             state.LastTarget.NormalizedLookAtOffset.y = Mathf.Lerp(Settings.OverTheShoulderY, 0, lerpValue);
         }
 
-        if (Settings.LockPitch && (!state.InBuildMode || !Settings.ActiveDuringBuildMode))
+        //if (Settings.LockPitch && (!state.InBuildMode || !Settings.ActiveDuringBuildMode))
+        if (Settings.LockPitch && !state.InBuildMode)
         {
             state.ZoomSettings.MaxPitch = Settings.LockPitchAngle;
             state.ZoomSettings.MinPitch = Settings.LockPitchAngle;
@@ -55,7 +56,8 @@ internal class ThirdPersonCameraBehaviour : CameraBehaviour
             data.BuildModeZoomSettings.MaxPitch = Settings.LockPitchAngle;
             data.BuildModeZoomSettings.MinPitch = Settings.LockPitchAngle;
         }
-        else if (state.InBuildMode && Settings.ActiveDuringBuildMode)
+        // else if (state.InBuildMode && Settings.ActiveDuringBuildMode)
+        else if (state.InBuildMode)
         {
             data.BuildModeZoomSettings.MinZoom = Settings.MinZoom;
             data.BuildModeZoomSettings.MaxZoom = Settings.MaxZoom;

@@ -39,11 +39,13 @@ internal class FirstPersonCameraBehaviour : CameraBehaviour
         float forwardOffset = Settings.FIRST_PERSON_FORWARD_OFFSET;
         float headHeight = Settings.HEAD_HEIGHT_OFFSET;
 
+        /*
         if (Settings.FirstPersonShapeshiftOffsets.ContainsKey(_shapeshiftName))
         {
             forwardOffset = Settings.FirstPersonShapeshiftOffsets[_shapeshiftName].y;
             headHeight = Settings.FirstPersonShapeshiftOffsets[_shapeshiftName].x;
         }
+        */
 
         state.LastTarget.NormalizedLookAtOffset.z = forwardOffset;
         state.LastTarget.NormalizedLookAtOffset.y = _isMounted ? headHeight + Settings.MOUNTED_OFFSET : headHeight;

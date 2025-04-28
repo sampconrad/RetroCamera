@@ -200,14 +200,12 @@ internal static class TopdownCameraSystemHooks
            (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
            !IsMenuOpen)
         {
-            if (_isActionMode || _isFirstPerson || Settings.CameraAimMode == CameraAimMode.Forward)
+            // if (_isActionMode || _isFirstPerson || Settings.CameraAimMode == CameraAimMode.Forward)
+            if (_isActionMode || _isFirstPerson)
             {
-                // CursorPosition cursorPosition = _cursorPositionSystem._CursorPosition;
-
                 float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) - Settings.AimOffsetY);
                 cursorPosition.ScreenPosition = screenPosition;
 
-                // _cursorPositionSystem._CursorPosition = cursorPosition;
                 Cursor.lockState = CursorLockMode.Locked;
             }
         }

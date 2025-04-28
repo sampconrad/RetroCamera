@@ -15,14 +15,17 @@ Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMik
 
 ## Features
 
-- **Camera Enhancements:** WIP
-- **Additional Features:** WIP
-- **Configuration:** Configuration for keybinds and options is done in-game.
+Generally streamlined ModernCamera to it's essential features with a few extra goodies. Not considered compatible with controllers/gamepads at this time; will explore that in the future if able. If anything is missing you were fond of open to feedback!
+
+- **Camera Enhancements:**  Generally increased range of camera motion with specific first-person and third-person modes. Includes options for adjustable FOV, over-the-shoulder offsets, pitch/zoom locking, and aiming offsets. Supports forward aiming in action mode with optional crosshair visibility.
+- **Additional Features:** Toggle HUD visibility; toggle batform fog visibility (this also hides clouds and their shadows on the ground);
+- **Configuration:** Configuration for keybinds and options done in-game. Current keybinds: toggle mod functioning, toggle action mode, toggle HUD, and toggle batform fog.
 
 ## Credits
 
-- The VRising mod Discord logo and RetroCamera logo were both made by ([@Odjit](https://github.com/Odjit)), a very talented artist who also authors the Kindred mods! ([Kindred](https://thunderstore.io/c/v-rising/p/odjit/))
-- [ModernCamera](https://github.com/oscarpedrero/BloodyMerchant) by [@Trodi](https://github.com/oscarpedrero) was invaluable in putting this together, many thanks to him and other listed contributors!
-- [ModernCameraFix](https://github.com/oscarpedrero/BloodyMerchant) by [@Trodi](https://github.com/oscarpedrero) was invaluable in putting this together, many thanks to him and other listed contributors!
-- [Silkworm](https://github.com/oscarpedrero/BloodyMerchant) by [@iZastic](https://github.com/iZastic/vrising-silkworm) Menu option implementation is almost all from Silkworm, with rebinding handled by a coroutine of mine.
-- [Bloodstone](https://github.com/oscarpedrero/BloodyMerchant) by [@Trodi](https://github.com/decaprime/Bloodstone) Keybind implementation is mostly informed by Bloodstone (plan on updating that aspect of Bloodstone back to functioning #soon) although I think some Silkworm made it in? Was extremely hard to keep track of at the time which was a large motivation for refactoring.
+- The modding Discord logo and RetroCamera logo were both made by [@Odjit](https://github.com/Odjit), a very talented artist who also authors the Kindred mods! ([Kindred](https://thunderstore.io/c/v-rising/p/odjit/))
+- [ModernCamera](https://github.com/v-rising/ModernCamera) by [@Dimentox](https://github.com/dimentox) serves as the foundation this mod and the versions below were built upon; a fantasic, much-needed addition to the game that tremendously improved the player experience and serves as a valuable open-source reference for client modding.
+- [ModernCamera.fix_mouse-look](https://github.com/aequis/ModernCamera/tree/fix_mouse_look) by [@aequis](https://github.com/aequis) was a solid interim between the refactoring arrived at here and the original ModernCamera. 
+- [ModernCameraFix](https://github.com/panthernet/ModernCameraFix) by [@panthernet](https://github.com/panthernet) is the most recently updated version of the original ModernCamera, making use of a continued Silkworm.
+- [Silkworm](https://github.com/iZastic/vrising-silkworm) by [@iZastic](https://github.com/iZastic) Menu option implementation almost all from Silkworm (most likely incorporating into Bloodstone with keybinds #soon), with rebinding handled by a coroutine of mine.
+- [Bloodstone](https://github.com/decaprime/Bloodstone) by [@decaprime](https://github.com/decaprime) Keybind implementation mostly informed by Bloodstone (plan on updating that aspect of Bloodstone back to functioning #soonTM) although I think some Silkworm made it in? Was extremely hard to keep track of at the time which was a large motivation for refactoring.

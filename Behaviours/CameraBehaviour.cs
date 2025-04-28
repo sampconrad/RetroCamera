@@ -45,10 +45,11 @@ internal abstract class CameraBehaviour
         // Manually manage camera zoom
         float zoomValue = inputState.GetAnalogValue(AnalogInputAction.ZoomCamera);
 
-        if (zoomValue != 0 && (!_inBuildMode || !Settings.ActiveDuringBuildMode))
+        // if (zoomValue != 0 && (!_inBuildMode || !Settings.ActiveDuringBuildMode))
+        if (zoomValue != 0 && !_inBuildMode)
         {
-            // Consume zoom input for the camera
-            var zoomAmount = Mathf.Lerp(.25f, 1.5f, Mathf.Max(0, _targetZoom - Settings.MinZoom) / Settings.MaxZoom);
+                // Consume zoom input for the camera
+                var zoomAmount = Mathf.Lerp(.25f, 1.5f, Mathf.Max(0, _targetZoom - Settings.MinZoom) / Settings.MaxZoom);
             var zoomChange = inputState.GetAnalogValue(AnalogInputAction.ZoomCamera) > 0 ? zoomAmount : -zoomAmount;
 
             if ((_targetZoom > Settings.MinZoom && _targetZoom + zoomChange < Settings.MinZoom) || (_isFirstPerson && zoomChange > 0)) _targetZoom = Settings.MinZoom;
@@ -75,7 +76,8 @@ internal abstract class CameraBehaviour
         state.ZoomSettings.MinPitch = DefaultMinPitch;
 
         // Manually set zoom if not in build mode
-        if (!state.InBuildMode || !Settings.ActiveDuringBuildMode)
+        // if (!state.InBuildMode || !Settings.ActiveDuringBuildMode)
+        if (!state.InBuildMode)
         {
             data.BuildModeZoomSettings.MaxPitch = DefaultMaxPitch;
             data.BuildModeZoomSettings.MinPitch = DefaultMinPitch;
@@ -83,8 +85,8 @@ internal abstract class CameraBehaviour
             state.LastTarget.Zoom = _targetZoom;
             state.Target.Zoom = _targetZoom;
         }
-        // Use default build mode zoom
-        else if (state.InBuildMode && Settings.ActiveDuringBuildMode)
+        // else if (state.InBuildMode && Settings.ActiveDuringBuildMode)
+        else if (state.InBuildMode)
         {
             data.BuildModeZoomSettings = _buildModeZoomSettings;
 

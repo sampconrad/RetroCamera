@@ -7,7 +7,7 @@ using Guid = Il2CppSystem.Guid;
 namespace RetroCamera.Configuration;
 internal static class LocalizationManager
 {
-    public const string HEADER = MyPluginInfo.PLUGIN_NAME;
+    public const string HEADER = "Retro Camera";
     public static LocalizationKey _sectionHeader;
 
     static readonly Dictionary<AssetGuid, string> _assetGuids = [];

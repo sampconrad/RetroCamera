@@ -21,7 +21,6 @@ public class RetroCamera : MonoBehaviour
     static CanvasScaler _canvasScaler;
     static Camera _gameCamera;
     static ZoomModifierSystem ZoomModifierSystem => Core.ZoomModifierSystem;
-    static InputActionSystem InputActionSystem => Core.InputActionSystem;
 
     static bool _gameFocused = true;
     static bool _listening = false;
@@ -74,7 +73,7 @@ public class RetroCamera : MonoBehaviour
         Settings.AddFieldOfViewListener(UpdateFieldOfView);
         Settings.AddHideHUDListener(ToggleHUD);
         Settings.AddHideFogListener(ToggleFog);
-        Settings.AddCycleCameraListener(CycleCamera);
+        // Settings.AddCycleCameraListener(CycleCamera);
     }
 
     static readonly Dictionary<ProjectM.CameraType, Camera> _cameras = [];
@@ -95,7 +94,7 @@ public class RetroCamera : MonoBehaviour
 
                 _cameraQuery = Core.BuildEntityQuery(EntityManager, cameraUserAllComponents, EntityQueryOptions.IncludeAll);
 
-                _cameraUser = _cameraQuery.ToEntityArray(Allocator.Temp).get_Item(0).TryGetComponent(out CameraUser cameraUser) ? cameraUser : default;
+                _cameraUser = _cameraQuery.ToEntityArray(Allocator.Temp)[0].TryGetComponent(out CameraUser cameraUser) ? cameraUser : default;
                 _camera = CameraUtilities.FindActiveCamera(EntityManager, _cameraQuery);
 
                 if (_camera.Equals(null))
@@ -187,7 +186,7 @@ public class RetroCamera : MonoBehaviour
         }
     }
 
-    /* not sure if really needed tbh
+    /* not sure if warranted tbh
     static void UpdateSystems()
     {
         if (_uiDataSystem == null || _prefabCollectionSystem == null) return;
@@ -262,23 +261,12 @@ public class RetroCamera : MonoBehaviour
                 _crosshair.active = true;
             }
 
-            // Locks the mouse to the center of the screen if the mouse should be locked or the camera rotate button is pressed
             if (_validGameplayInputState &&
                (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
                !IsMenuOpen)
             {
-                /*
-                if (_isActionMode || _isFirstPerson || Settings.CameraAimMode == CameraAimMode.Forward)
-                {
-                    CursorPosition cursorPosition = _cursorPositionSystem._CursorPosition;
-                    float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) - Settings.AimOffsetY);
-                    cursorPosition.ScreenPosition = screenPosition;
-                    _cursorPositionSystem._CursorPosition = cursorPosition;
-                    Cursor.lockState = CursorLockMode.Locked;
-                }
-                */
                 
-                // Set crosshair visibility based on the camera mode
+                // Set crosshair & cursor visibility based on the camera mode
                 crosshairVisible = _isFirstPerson || (_isActionMode && Settings.ActionModeCrosshair);
                 cursorVisible = false;
             }

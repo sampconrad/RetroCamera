@@ -19,7 +19,7 @@
 	<ItemGroup>
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
 		<PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" />
-		<PackageReference Include="VRising.Unhollowed" Version="1.1.0-r91074-b2" />
+		<PackageReference Include="VRising.Unhollowed" Version="1.1.0-r91217-b18" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -28,7 +28,7 @@
 	</ItemGroup>
 	
 	<Target Name="BuildToClient" AfterTargets="Build">
-		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRisingBeta\BepInEx\plugins" />
+		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRising\BepInEx\plugins" />
 	</Target>
 
 </Project>

@@ -14,19 +14,17 @@ internal static class Settings
 {
     public static bool Enabled { get => _enabledOption.Value; set => _enabledOption.SetValue(value); }
     public static bool FirstPersonEnabled { get => _firstPersonEnabledOption.Value; set => _firstPersonEnabledOption.SetValue(value); }
-    public static bool ActiveDuringBuildMode { get => _defaultBuildModeOption.Value; set => _defaultBuildModeOption.SetValue(value); }
     public static bool AlwaysShowCrosshair { get => _alwaysShowCrosshairOption.Value; set => _alwaysShowCrosshairOption.SetValue(value); }
     public static bool ActionModeCrosshair { get => _actionModeCrosshairOption.Value; set => _actionModeCrosshairOption.SetValue(value); }
     public static float FieldOfView { get => _fieldOfViewOption.Value; set => _fieldOfViewOption.SetValue(value); }
     public static int AimOffsetX { get => (int)(Screen.width * (_aimOffsetXOption.Value / 100)); set => _aimOffsetXOption.SetValue(Mathf.Clamp(value / Screen.width, -25, 25)); }
     public static int AimOffsetY { get => (int)(Screen.height * (_aimOffsetYOption.Value / 100)); set => _aimOffsetYOption.SetValue(Mathf.Clamp(value / Screen.width, -25, 25)); }
-    public static CameraAimMode CameraAimMode { get => _cameraAimModeOption.GetEnumValue<CameraAimMode>(); set => _cameraAimModeOption.SetValue((int)value); }
     public static bool LockZoom { get => _lockCameraZoomOption.Value; set => _lockCameraZoomOption.SetValue(value); }
     public static float LockZoomDistance { get => _lockCameraZoomDistanceOption.Value; set => _lockCameraZoomDistanceOption.SetValue(value); }
     public static float MinZoom { get => _minZoomOption.Value; set => _minZoomOption.SetValue(value); }
     public static float MaxZoom { get => _maxZoomOption.Value; set => _maxZoomOption.SetValue(value); }
-    public static bool LockPitch { get => _lockCamerMenuOptionstchOption.Value; set => _lockCamerMenuOptionstchOption.SetValue(value); }
-    public static float LockPitchAngle { get => _lockCamerMenuOptionstchAngleOption.Value * Mathf.Deg2Rad; set => _lockCamerMenuOptionstchAngleOption.SetValue(Mathf.Clamp(value * Mathf.Rad2Deg, 0, 90)); }
+    public static bool LockPitch { get => _lockCamerPitchOption.Value; set => _lockCamerPitchOption.SetValue(value); }
+    public static float LockPitchAngle { get => _lockCameraPitchAngleOption.Value * Mathf.Deg2Rad; set => _lockCameraPitchAngleOption.SetValue(Mathf.Clamp(value * Mathf.Rad2Deg, 0, 90)); }
     public static float MinPitch { get => _minPitchOption.Value * Mathf.Deg2Rad; set => _minPitchOption.SetValue(Mathf.Clamp(value * Mathf.Rad2Deg, 0, 90)); }
     public static float MaxPitch { get => _maxPitchOption.Value * Mathf.Deg2Rad; set => _maxPitchOption.SetValue(Mathf.Clamp(value * Mathf.Rad2Deg, 0, 90)); }
     public static bool OverTheShoulder { get => _overTheShoulderOption.Value; set => _overTheShoulderOption.SetValue(value); }
@@ -40,6 +38,7 @@ internal static class Settings
 
     const float ZOOM_OFFSET = 2f;
 
+    /* unused, if overall merited will do actual buff checks
     public static readonly Dictionary<string, Vector2> FirstPersonShapeshiftOffsets = new()
     {
         { "AB_Shapeshift_Bat_Buff", new Vector2(0, 2.5f) },
@@ -52,15 +51,16 @@ internal static class Settings
         { "AB_Shapeshift_Wolf_Buff", new Vector2(-0.25f, 4.3f) },
         { "AB_Shapeshift_Wolf_Skin01_Buff", new Vector2(-0.25f, 4.3f) }
     };
+    */
 
     static Toggle _enabledOption;
     static Slider _fieldOfViewOption;
     static Toggle _alwaysShowCrosshairOption;
     static Toggle _actionModeCrosshairOption;
     static Toggle _firstPersonEnabledOption;
-    static Toggle _defaultBuildModeOption;
+    // static Toggle _defaultBuildModeOption;
 
-    static Dropdown _cameraAimModeOption;
+    // static Dropdown _cameraAimModeOption;
     static Slider _aimOffsetXOption;
     static Slider _aimOffsetYOption;
 
@@ -69,8 +69,8 @@ internal static class Settings
     static Slider _minZoomOption;
     static Slider _maxZoomOption;
 
-    static Toggle _lockCamerMenuOptionstchOption;
-    static Slider _lockCamerMenuOptionstchAngleOption;
+    static Toggle _lockCamerPitchOption;
+    static Slider _lockCameraPitchAngleOption;
     static Slider _minPitchOption;
     static Slider _maxPitchOption;
 
@@ -82,7 +82,7 @@ internal static class Settings
     static Keybinding _actionModeKeybind;
     static Keybinding _toggleHUDKeybind;
     static Keybinding _toggleFogKeybind;
-    static Keybinding _cycleCameraKeybind;
+    static Keybinding _cycleCameraKeybind; // WIP
     public static void Initialize()
     {
         try
@@ -122,11 +122,6 @@ internal static class Settings
         _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
         _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
 
-        AddDivider("Third Person Aiming");
-        _cameraAimModeOption = AddDropdown("Aiming Mode", "Ability aiming style", (int)CameraAimMode.Default, Enum.GetNames(typeof(CameraAimMode)));
-        _aimOffsetXOption = AddSlider("Aiming Horizontal Offset", "Aim horizontal offset", -25f, 25f, 0f);
-        _aimOffsetYOption = AddSlider("Aiming Vertical Offset", "Aim vertical offset", -25f, 25f, 0f);
-
         AddDivider("Third Person Zoom");
         _minZoomOption = AddSlider("Min Zoom", "Minimum zoom", 1f, 15f, 1f);
         _maxZoomOption = AddSlider("Max Zoom", "Maximum zoom", 5f, 20f, 15f);
@@ -136,8 +131,13 @@ internal static class Settings
         AddDivider("Third Person Pitch");
         _minPitchOption = AddSlider("Min Pitch", "Minimum camera pitch", 0f, 90f, 10f);
         _maxPitchOption = AddSlider("Max Pitch", "Maximum camera pitch", 0f, 90f, 90f);
-        _lockCamerMenuOptionstchOption = AddToggle("Lock Pitch", "Lock camera pitch", false);
-        _lockCamerMenuOptionstchAngleOption = AddSlider("Locked Pitch Angle", "Fixed pitch angle when locked", 0f, 90f, 60f);
+        _lockCamerPitchOption = AddToggle("Lock Pitch", "Lock camera pitch", false);
+        _lockCameraPitchAngleOption = AddSlider("Locked Pitch Angle", "Fixed pitch angle when locked", 0f, 90f, 60f);
+
+        AddDivider("Third Person Aiming");
+        // _cameraAimModeOption = AddDropdown("Aiming Mode", "Ability aiming style", (int)CameraAimMode.Default, Enum.GetNames(typeof(CameraAimMode)));
+        _aimOffsetXOption = AddSlider("Aiming Horizontal Offset", "Aim horizontal offset", -25f, 25f, 0f);
+        _aimOffsetYOption = AddSlider("Aiming Vertical Offset", "Aim vertical offset", -25f, 25f, 0f);
 
         AddDivider("Over Shoulder");
         _overTheShoulderOption = AddToggle("Enable Shoulder Offset", "Enable over-the-shoulder camera", false);
@@ -186,7 +186,7 @@ internal static class Settings
             _enabledOption.SetValue(!Enabled);
         });
 
-        _actionModeKeybind = AddKeybind("Action Mode", "Toggle action mode", KeyCode.RightBracket);
+        _actionModeKeybind = AddKeybind("Toggle Action Mode", "Toggle action mode", KeyCode.RightBracket);
         _actionModeKeybind.AddKeyDownListener(() =>
         {
             if (Enabled && !_isFirstPerson)
@@ -201,9 +201,9 @@ internal static class Settings
 
         _toggleHUDKeybind = AddKeybind("Toggle HUD", "Toggle HUD visibility", KeyCode.Backslash);
 
-        _toggleFogKeybind = AddKeybind("Toggle Fog", "Toggle visibility of fog and clouds", KeyCode.Equals);
+        _toggleFogKeybind = AddKeybind("Toggle Fog/Clouds", "Toggle visibility of fog and clouds (cloud ground shadows also affected)", KeyCode.Equals);
 
-        _cycleCameraKeybind = AddKeybind("Cycle Camera", "Cycle active camera (topdown, orbit, hybrid, free)", KeyCode.Minus);
+        // _cycleCameraKeybind = AddKeybind("Cycle Camera", "Cycle active camera (topdown, orbit, hybrid, free)", KeyCode.Minus);
     }
     public static bool TryLoadOptions()
     {

@@ -14,6 +14,8 @@ internal static class GameplayInputSystemPatch
         CameraState._validGameplayInputState = true;
         CameraState._gameplayInputState = inputState;
 
+        // Core.Log.LogWarning($"[GameplayInputSystem.HandleInput]");
+
         if (!Settings.Enabled) return;
         else if (CameraState._isMouseLocked && !CameraState.IsMenuOpen && !inputState.IsInputPressed(ButtonInputAction.RotateCamera))
         {
