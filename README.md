@@ -19,7 +19,7 @@ Generally streamlined ModernCamera to the essentials with a few extra goodies (a
 
 - **Camera Enhancements:**  Generally increased range of camera motion with specific first-person and third-person modes. Includes options for adjustable FOV, over-the-shoulder offsets, pitch/zoom locking, and aiming offsets. Supports forward aiming in action mode with optional crosshair visibility.
 - **Additional Features:** Toggle HUD visibility; toggle batform fog visibility (this also hides clouds and their shadows on the ground);
-- **Configuration:** Configuration for keybinds and options done in-game. Current keybinds: toggle mod functioning, toggle action mode, toggle HUD, and toggle batform fog.
+- **Configuration:** Configuration for keybinds and options done at the in-game menu with rebinding support. Current keybinds: toggle mod functioning, toggle action mode, toggle HUD, and toggle batform fog.
 
 ## Credits
 
