@@ -1,10 +1,7 @@
 ﻿using HarmonyLib;
 using ProjectM;
-using ProjectM.Gameplay.Systems;
 using ProjectM.UI;
 using RetroCamera.Utilities;
-using Unity.Collections;
-using Unity.Entities;
 
 namespace RetroCamera.Patches;
 
@@ -40,6 +37,7 @@ internal static class InitializationPatches
         Core.ResetStates();
     }
 
+    /*
     static bool _isFound = false;
 
     [HarmonyPatch(typeof(DayNightCycleMoodSystem), nameof(DayNightCycleMoodSystem.OnUpdate))]
@@ -60,10 +58,9 @@ internal static class InitializationPatches
                     ClearSkies._dayNightCycleSingleton = entity;
                     ClearSkies.Initialize();
 
-                    // bool exists = __instance.TryGetSingletonEntity<DayNightCycle>(out Entity dayNightCycleSingleton) && dayNightCycleSingleton.Exists();
-                    // Core.Log.LogWarning($"[ClearSkies] DayNightCycle singleton test: {exists}");
-
+                    Core.LogEntity(Core._client, entity);
                     _isFound = true;
+
                     break;
                 }
             }
@@ -73,11 +70,15 @@ internal static class InitializationPatches
             entities.Dispose();
         }
     }
+    */
 
     [HarmonyPatch(typeof(UICanvasSystem), nameof(UICanvasSystem.UpdateHideIfDisabled))]
     [HarmonyPostfix]
     static void OnUpdatePostfix(UICanvasBase canvas)
     {
         if (!Core._initialized) return;
+        else if (ClearSkies._initialized) return;
+
+        ClearSkies.Initialize();
     }
 }

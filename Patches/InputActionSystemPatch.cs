@@ -23,7 +23,7 @@ internal static class InputActionSystemPatch
         __instance._LoadedInputActions.Disable();
 
         InputActionMap inputActionMap = new(LocalizationManager.HEADER);
-        __instance._LoadedInputActions.AddActionMap(inputActionMap);
+        __instance._LoadedInputActions.m_ActionMaps.AddItem(inputActionMap);
 
         __instance._LoadedInputActions.Enable();
     }

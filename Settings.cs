@@ -14,7 +14,7 @@ internal static class Settings
 {
     public static bool Enabled { get => _enabledOption.Value; set => _enabledOption.SetValue(value); }
     public static bool FirstPersonEnabled { get => _firstPersonEnabledOption.Value; set => _firstPersonEnabledOption.SetValue(value); }
-    public static bool DefaultBuildMode { get => _defaultBuildModeOption.Value; set => _defaultBuildModeOption.SetValue(value); }
+    public static bool ActiveDuringBuildMode { get => _defaultBuildModeOption.Value; set => _defaultBuildModeOption.SetValue(value); }
     public static bool AlwaysShowCrosshair { get => _alwaysShowCrosshairOption.Value; set => _alwaysShowCrosshairOption.SetValue(value); }
     public static bool ActionModeCrosshair { get => _actionModeCrosshairOption.Value; set => _actionModeCrosshairOption.SetValue(value); }
     public static float FieldOfView { get => _fieldOfViewOption.Value; set => _fieldOfViewOption.SetValue(value); }
@@ -82,6 +82,7 @@ internal static class Settings
     static Keybinding _actionModeKeybind;
     static Keybinding _toggleHUDKeybind;
     static Keybinding _toggleFogKeybind;
+    static Keybinding _cycleCameraKeybind;
     public static void Initialize()
     {
         try
@@ -108,13 +109,16 @@ internal static class Settings
         _toggleHUDKeybind.AddKeyDownListener(action);
     public static void AddHideFogListener(KeyHandler action) =>
         _toggleFogKeybind.AddKeyDownListener(action);
+    public static void AddCycleCameraListener(KeyHandler action) =>
+        _cycleCameraKeybind.AddKeyDownListener(action);
+
     static void RegisterOptions()
     {
         // Core.Log.LogWarning("Registering options...");
 
         _enabledOption = AddToggle("Enabled", "Enable or disable RetroCamera", true);
         _firstPersonEnabledOption = AddToggle("First Person", "Enable zooming in far enough for first-person view", true);
-        _defaultBuildModeOption = AddToggle("Build Mode", "Use RetroCamera in build mode", true);
+        // _defaultBuildModeOption = AddToggle("Build Mode", "Use RetroCamera in build mode", true);
         _alwaysShowCrosshairOption = AddToggle("Always Show Crosshair", "Keep crosshair visible always", false);
         _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
         _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
@@ -177,7 +181,7 @@ internal static class Settings
     {
         // Core.Log.LogWarning("Registering keybinds...");
 
-        _enabledKeybind = AddKeybind("Toggle Camera", "Toggle between RetroCamera and default camera", KeyCode.LeftBracket);
+        _enabledKeybind = AddKeybind("Toggle RetroCamera", "Enable or disable RetroCamera functions", KeyCode.LeftBracket);
         _enabledKeybind.AddKeyDownListener(() =>
         {
             _enabledOption.SetValue(!Enabled);
@@ -196,9 +200,11 @@ internal static class Settings
             }
         });
 
-        _toggleHUDKeybind = AddKeybind("Toggle HUD", "Toggle HUD visibility", KeyCode.Minus);
+        _toggleHUDKeybind = AddKeybind("Toggle HUD", "Toggle HUD visibility", KeyCode.Backslash);
 
         _toggleFogKeybind = AddKeybind("Toggle Fog", "Toggle visibility of fog and clouds", KeyCode.Equals);
+
+        _cycleCameraKeybind = AddKeybind("Cycle Camera", "Cycle active camera (topdown, orbit, hybrid, free)", KeyCode.Minus);
     }
     public static bool TryLoadOptions()
     {

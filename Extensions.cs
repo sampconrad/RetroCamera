@@ -3,7 +3,6 @@ using ProjectM;
 using ProjectM.CastleBuilding;
 using ProjectM.Gameplay.Systems;
 using ProjectM.Network;
-using ProjectM.Scripting;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
@@ -134,11 +133,6 @@ internal static class Extensions
     {
         var ct = new ComponentType(Il2CppType.Of<T>());
         return EntityManager.HasComponent(entity, ct);
-    }
-    public static string LookupName(this PrefabGUID prefabGUID)
-    {
-        return (PrefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGUID)
-            ? PrefabCollectionSystem.PrefabGuidToNameDictionary[prefabGUID] + " " + prefabGUID : "Guid Not Found").ToString();
     }
     public static void LogComponentTypes(this Entity entity)
     {
@@ -338,18 +332,55 @@ internal static class Extensions
     {
         return Core.StartCoroutine(routine);
     }
-    public static Texture2D LoadTextureFromStream(this Stream stream, FilterMode filterMode = FilterMode.Bilinear)
+    static EntityQuery BuildEntityQuery(
+    this EntityManager entityManager,
+    ComponentType[] all)
     {
-        byte[] array = new byte[stream.Length];
-        stream.Read(array, 0, array.Length);
+        var builder = new EntityQueryBuilder(Allocator.Temp);
 
-        Texture2D texture2D = new(2, 2, TextureFormat.RGBA32, false);
-        texture2D.LoadImage(array);
+        foreach (var componentType in all)
+            builder.AddAll(componentType);
 
-        texture2D.filterMode = filterMode;
-        texture2D.wrapMode = TextureWrapMode.Clamp;
+        return entityManager.CreateEntityQuery(ref builder);
+    }
+    static EntityQuery BuildEntityQuery(
+    this EntityManager entityManager,
+    ComponentType[] all,
+    EntityQueryOptions options)
+    {
+        var builder = new EntityQueryBuilder(Allocator.Temp);
 
-        return texture2D;
+        foreach (var componentType in all)
+            builder.AddAll(componentType);
+
+        builder.WithOptions(options);
+
+        return entityManager.CreateEntityQuery(ref builder);
+    }
+    static EntityQuery BuildEntityQuery(
+    this EntityManager entityManager,
+    ComponentType[] all,
+    ComponentType[] none,
+    EntityQueryOptions options)
+    {
+        var builder = new EntityQueryBuilder(Allocator.Temp);
+
+        foreach (var componentType in all)
+            builder.AddAll(componentType);
+
+        foreach (var componentType in none)
+            builder.AddNone(componentType);
+
+        builder.WithOptions(options);
+
+        return entityManager.CreateEntityQuery(ref builder);
+    }
+    static int[] GenerateDefaultIndices(int length)
+    {
+        var indices = new int[length];
+        for (int i = 0; i < length; i++)
+            indices[i] = i;
+        return indices;
     }
     public static float3 GetPosition(this Entity entity)
     {

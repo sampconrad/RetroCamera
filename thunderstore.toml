@@ -1,0 +1,18 @@
+[package.dependencies]
+BepInEx-BepInExPack_V_Rising = "1.691.3"
+deca-VampireCommandFramework = "0.9.0"
+
+[publish]
+communities = ["v-rising"]
+repository = "https://thunderstore.io"
+
+[publish.categories]
+v-rising = ["1-1-update", "mods", "server"]
+
+[package]
+namespace = "zfolmt"
+name = "RetroCamera"
+versionNumber = "1.0.0"
+description = "Simplified camera enhancements w/ additional features!"
+websiteUrl = "https://github.com/mfoltz/Penumbra"
+containsNsfwContent = false

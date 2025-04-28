@@ -1,5 +1,4 @@
-﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using ProjectM;
+﻿using ProjectM;
 using Unity.Entities;
 
 namespace RetroCamera.Utilities;
@@ -17,6 +16,7 @@ internal static class ClearSkies
     const float CLOUDINESS = 0.65f;
     const string MATERIAL = "Hidden/Shader/BatFormFog";
 
+    public static bool _initialized = false;
     public static void ToggleFog()
     {
         _isActive = !_isActive;
@@ -30,7 +30,7 @@ internal static class ClearSkies
 
         if (_primaryMaterial == null)
         {
-            Core.Log.LogWarning($"[ClearSkies] BatFormFog material not found!");
+            // Core.Log.LogWarning($"[ClearSkies] BatFormFog material not found!");
             return;
         }
 
@@ -48,7 +48,7 @@ internal static class ClearSkies
     {
         if (_secondaryMaterial == null)
         {
-            Core.Log.LogWarning($"[ClearSkies] BatFormFog material not found!");
+            // Core.Log.LogWarning($"[ClearSkies] BatFormFog material not found!");
             return;
         }
 
@@ -62,27 +62,45 @@ internal static class ClearSkies
     public static void Initialize()
     {
         GetBatFormFogMaterial();
-        // GetDayNightCycleSingleton();
+        GetDayNightCycleSingleton();
+        
+        // UpdateTilePositionSystem
+        // BehaviourTreeParallelWriteSystem
+        // CurrentCastsSystem
+        // DisableWhenNoPlayersInRangeOfChunkSystem
+        // MoveWithCurveSystem
+        // mood stuff for lighting
     }
     static void GetBatFormFogMaterial()
     {
         if (_primaryMaterial != null) return;
 
-        Il2CppArrayBase<BatFormFog> batFormFogObjects = UnityEngine.Object.FindObjectsOfType<BatFormFog>();
+        var batFormFogObjects = UnityEngine.Object.FindObjectsOfType<BatFormFog>();
 
         _primaryMaterial = batFormFogObjects.LastOrDefault(batFormFog => batFormFog.m_Material != null && batFormFog.m_Material.name.Contains(MATERIAL));
-        bool found = _primaryMaterial != null;
+        bool found = _primaryMaterial != null && _primaryMaterial.m_Material != null;
 
-        // Core.Log.LogWarning($"[ClearSkies] BatFormFog material found: {found}");
+        if (found)
+        {
+            // Core.Log.LogWarning($"[ClearSkies] BatFormFog material found: {found}");
+        }
+        else
+        {
+            // Core.Log.LogWarning($"[ClearSkies] BatFormFog material not found: {_primaryMaterial != null}");
+        }
     }
     static void GetDayNightCycleSingleton()
     {
-        _dayNightCycleSingleton = Core.UIDataSystem.TryGetSingletonEntity<DayNightCycle>(out Entity singleton) ? singleton : Entity.Null;
+        _dayNightCycleSingleton = SingletonAccessor<DayNightCycle>.TryGetSingletonEntityWasteful(EntityManager, out _dayNightCycleSingleton) 
+            ? _dayNightCycleSingleton : Entity.Null;
+        
         bool exists = _dayNightCycleSingleton.Exists();
+        
+        // Core.Log.LogWarning($"[ClearSkies] DayNightCycle singleton from accessor: {exists}");
 
-        Core.Log.LogWarning($"[ClearSkies] DayNightCycle singleton found: {exists}");
+        if (exists) _initialized = true;
     }
-    public static void ResetClearSkies()
+    public static void Reset()
     {
         _primaryMaterial = null;
         _secondaryMaterial = null;

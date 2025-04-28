@@ -8,6 +8,7 @@ using ProjectM.UI;
 using RetroCamera.Patches;
 using RetroCamera.Utilities;
 using System.Collections;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -23,6 +24,7 @@ internal class Core
     public static PrefabCollectionSystem PrefabCollectionSystem { get; set; }
     public static UIDataSystem UIDataSystem { get; set; }
     public static CursorPositionSystem CursorPositionSystem { get; set; }
+    public static InputActionSystem InputActionSystem { get; set; }
     public static ManualLogSource Log => Plugin.LogInstance;
 
     static MonoBehaviour _monoBehaviour;
@@ -34,28 +36,20 @@ internal class Core
 
         _client = __instance.World;
 
-        // ProjectM.Scripting.GameManager_Shared
-        // ProjectM.Scripting.Game.SpellMods.TryApplyPrefabGUIDSpellMods
-
         ZoomModifierSystem = _client.GetExistingSystemManaged<ZoomModifierSystem>();
-        ZoomModifierSystem.Enabled = false;
-        Systems.RetroCamera._zoomModifierSystem = ZoomModifierSystem;
+        ZoomModifierSystem.Enabled = false; // necessary?
 
         TopdownCameraSystem = _client.GetExistingSystemManaged<TopdownCameraSystem>();
-
         PrefabCollectionSystem = _client.GetExistingSystemManaged<PrefabCollectionSystem>();
-        Systems.RetroCamera._prefabCollectionSystem = PrefabCollectionSystem;
-
         UIDataSystem = _client.GetExistingSystemManaged<UIDataSystem>();
-        Systems.RetroCamera._uiDataSystem = UIDataSystem;
-
         CursorPositionSystem = _client.GetExistingSystemManaged<CursorPositionSystem>();
-        Systems.RetroCamera._cursorPositionSystem = CursorPositionSystem;
 
         ClientScriptMapper = _client.GetExistingSystemManaged<ClientScriptMapper>();
         ClientGameManager = ClientScriptMapper._ClientGameManager;
 
-        TopdownCameraSystemPatch.Initialize();
+        InputActionSystem = _client.GetExistingSystemManaged<InputActionSystem>();
+
+        TopdownCameraSystemHooks.Initialize();
 
         _initialized = true;
     }
@@ -63,7 +57,7 @@ internal class Core
     {
         if (_monoBehaviour == null)
         {
-            var go = new GameObject("RetroCamera");
+            var go = new GameObject(MyPluginInfo.PLUGIN_NAME);
             _monoBehaviour = go.AddComponent<IgnorePhysicsDebugSystem>();
             UnityEngine.Object.DontDestroyOnLoad(go);
         }
@@ -72,7 +66,38 @@ internal class Core
     }
     public static void ResetStates()
     {
-        ClearSkies.ResetClearSkies();
+        ClearSkies.Reset();
+        TopdownCameraSystemHooks.Dispose();
+        // MainMenuPatch.Reset();
+
         _initialized = false;
+    }
+    public static void LogEntity(World world, Entity entity)
+    {
+        Il2CppSystem.Text.StringBuilder sb = new();
+
+        try
+        {
+            EntityDebuggingUtility.DumpEntity(world, entity, true, sb);
+            Log.LogInfo($"Entity Dump:\n{sb.ToString()}");
+        }
+        catch (Exception e)
+        {
+            Log.LogWarning($"Error dumping entity: {e.Message}");
+        }
+    }
+    public static EntityQuery BuildEntityQuery(
+    EntityManager entityManager,
+    ComponentType[] all,
+    EntityQueryOptions options)
+    {
+        var builder = new EntityQueryBuilder(Allocator.Temp);
+
+        foreach (var componentType in all)
+            builder.AddAll(componentType);
+
+        builder.WithOptions(options);
+
+        return entityManager.CreateEntityQuery(ref builder);
     }
 }

@@ -1,8 +1,11 @@
-﻿using ProjectM;
+﻿using Il2CppInterop.Runtime;
+using ProjectM;
+using ProjectM.Network;
 using ProjectM.Sequencer;
 using ProjectM.UI;
 using RetroCamera.Behaviours;
-using Unity.Mathematics;
+using Unity.Collections;
+using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
 using static RetroCamera.Utilities.CameraState;
@@ -10,22 +13,18 @@ using static RetroCamera.Utilities.CameraState;
 namespace RetroCamera.Systems;
 public class RetroCamera : MonoBehaviour
 {
+    static EntityManager EntityManager => Core.EntityManager;
+    static Entity _localCharacter;
+
     static GameObject _crosshairPrefab;
     static GameObject _crosshair;
     static CanvasScaler _canvasScaler;
     static Camera _gameCamera;
-
-    public static ZoomModifierSystem _zoomModifierSystem;
-    public static PrefabCollectionSystem _prefabCollectionSystem;
-    public static UIDataSystem _uiDataSystem;
-    public static CursorPositionSystem _cursorPositionSystem;
-
-    public static GameObject _chatWindow;
-    public static HUDChatWindow _hudChatWindow;
-
-    public static bool _chatScroll;
+    static ZoomModifierSystem ZoomModifierSystem => Core.ZoomModifierSystem;
+    static InputActionSystem InputActionSystem => Core.InputActionSystem;
 
     static bool _gameFocused = true;
+    static bool _listening = false;
     public static void Enabled(bool enabled)
     {
         Settings.Enabled = enabled;
@@ -38,7 +37,7 @@ public class RetroCamera : MonoBehaviour
     }
     static void UpdateEnabled(bool enabled)
     {
-        if (_zoomModifierSystem != null) _zoomModifierSystem.Enabled = !enabled;
+        if (ZoomModifierSystem != null) ZoomModifierSystem.Enabled = !enabled;
 
         if (_crosshair != null) _crosshair.active = enabled && Settings.AlwaysShowCrosshair && !_inBuildMode;
 
@@ -62,7 +61,6 @@ public class RetroCamera : MonoBehaviour
     {
         Settings.Initialize();
         RegisterBehaviours();
-        AddListeners();
         // GetOrCreateObjects();
     }
     static void RegisterBehaviours()
@@ -76,6 +74,54 @@ public class RetroCamera : MonoBehaviour
         Settings.AddFieldOfViewListener(UpdateFieldOfView);
         Settings.AddHideHUDListener(ToggleHUD);
         Settings.AddHideFogListener(ToggleFog);
+        Settings.AddCycleCameraListener(CycleCamera);
+    }
+
+    static readonly Dictionary<ProjectM.CameraType, Camera> _cameras = [];
+    static Camera _camera;
+    static CameraUser _cameraUser;
+
+    static EntityQuery _cameraQuery;
+    static void CycleCamera()
+    {
+        try
+        {
+            if (_camera.Equals(null))
+            {
+                ComponentType[] cameraUserAllComponents =
+                [
+                    ComponentType.ReadOnly(Il2CppType.Of<CameraUser>())
+                ];
+
+                _cameraQuery = Core.BuildEntityQuery(EntityManager, cameraUserAllComponents, EntityQueryOptions.IncludeAll);
+
+                _cameraUser = _cameraQuery.ToEntityArray(Allocator.Temp).get_Item(0).TryGetComponent(out CameraUser cameraUser) ? cameraUser : default;
+                _camera = CameraUtilities.FindActiveCamera(EntityManager, _cameraQuery);
+
+                if (_camera.Equals(null))
+                {
+                    Core.Log.LogWarning($"[RetroCamera] Camera is null!");
+                }
+                else
+                {
+                    Core.Log.LogWarning($"[RetroCamera] Camera found - {_camera.name}");
+                }
+
+                if (!_cameraUser.CameraEntity.Exists())
+                {
+                    Core.Log.LogWarning($"[RetroCamera] Camera entity on CameraUser is null!");
+                }
+                else
+                {
+                    Core.Log.LogWarning($"[RetroCamera] Camera entity on CameraUser exists!");
+                    Core.LogEntity(Core._client, _cameraUser.CameraEntity);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Core.Log.LogWarning(ex);
+        }
     }
     static void GetOrCreateObjects()
     {
@@ -85,35 +131,22 @@ public class RetroCamera : MonoBehaviour
         {
             _gameCamera = CameraManager.GetCamera();
         }
-
-        if (_chatWindow == null)
-        {
-            GameObject chatWindowObject = GameObject.Find("ChatWindow(Clone)");
-
-            if (chatWindowObject != null)
-            {
-                _chatWindow = chatWindowObject;
-                _hudChatWindow = _chatWindow.GetComponent<HUDChatWindow>();
-            }
-            else
-            {
-                Core.Log.LogWarning("ChatWindow(Clone) not found!");
-            }
-        }
     }
     void Update()
     {
         if (!Core._initialized) return;
         else if (!_gameFocused || !Settings.Enabled) return;
 
-        if (_crosshairPrefab == null) BuildCrosshair();
-
-        if (_gameCamera == null)
+        if (!_listening)
         {
-            _gameCamera = CameraManager.GetCamera();
+            _listening = true;
+            AddListeners();
         }
 
-        UpdateSystems();
+        if (_crosshairPrefab == null) BuildCrosshair();
+        if (_gameCamera == null) _gameCamera = CameraManager.GetCamera();
+
+        // UpdateSystems();
         UpdateCrosshair();
     }
     void OnApplicationFocus(bool hasFocus)
@@ -153,6 +186,8 @@ public class RetroCamera : MonoBehaviour
             Core.Log.LogError(ex);
         }
     }
+
+    /* not sure if really needed tbh
     static void UpdateSystems()
     {
         if (_uiDataSystem == null || _prefabCollectionSystem == null) return;
@@ -161,14 +196,21 @@ public class RetroCamera : MonoBehaviour
 
         try
         {
+            if (!_localCharacter.Exists())
+            {
+                _localCharacter = StunAnalytics.Client.TryGetLocalCharacter(EntityManager, out Entity result) ? result : default;
+            }
+
             if (_uiDataSystem.UI.BuffBarParent != null)
             {
-                _isShapeshifted = false;
-                _shapeshiftName = "";
+                _isShapeshifted = BuffUtility.HasBuff<Script_Buff_Shapeshift_DataShared>(EntityManager, _localCharacter);
+
+                // _isShapeshifted = false;
+                // _shapeshiftName = "";
 
                 foreach (BuffBarEntry.Data buff in _uiDataSystem.UI.BuffBarParent.BuffsSelectionGroup.Entries)
                 {
-                    if (_prefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(buff.PrefabGUID, out string buffName))
+                    if (_prefabCollectionSystem.SpawnableNameToPrefabGuidDictionary.TryGetValue(buff.PrefabGUID, out string buffName))
                     {
                         _isShapeshifted = buffName.Contains("shapeshift", StringComparison.OrdinalIgnoreCase);
 
@@ -183,11 +225,11 @@ public class RetroCamera : MonoBehaviour
 
             if (_uiDataSystem.UI.AbilityBar != null)
             {
-                _isMounted = false;
+                _isMounted = BuffUtility.HasBuff<MountBuff>(EntityManager, _localCharacter);
 
                 foreach (AbilityBarEntry abilityBarEntry in _uiDataSystem.UI.AbilityBar.Entries)
                 {
-                    if (_prefabCollectionSystem.PrefabGuidToNameDictionary.TryGetValue(abilityBarEntry.AbilityId, out string abilityName))
+                    if (_prefabCollectionSystem.SpawnableNameToPrefabGuidDictionary.TryGetValue(abilityBarEntry.AbilityId, out string abilityName))
                     {
                         _isMounted = abilityName.Contains("mounted", StringComparison.OrdinalIgnoreCase);
 
@@ -201,6 +243,7 @@ public class RetroCamera : MonoBehaviour
             Core.Log.LogError(ex);
         }
     }
+    */
     static void UpdateCrosshair()
     {
         try
@@ -224,16 +267,17 @@ public class RetroCamera : MonoBehaviour
                (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
                !IsMenuOpen)
             {
+                /*
                 if (_isActionMode || _isFirstPerson || Settings.CameraAimMode == CameraAimMode.Forward)
                 {
                     CursorPosition cursorPosition = _cursorPositionSystem._CursorPosition;
                     float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) - Settings.AimOffsetY);
-
                     cursorPosition.ScreenPosition = screenPosition;
                     _cursorPositionSystem._CursorPosition = cursorPosition;
                     Cursor.lockState = CursorLockMode.Locked;
                 }
-
+                */
+                
                 // Set crosshair visibility based on the camera mode
                 crosshairVisible = _isFirstPerson || (_isActionMode && Settings.ActionModeCrosshair);
                 cursorVisible = false;

@@ -26,7 +26,7 @@ internal class Plugin : BasePlugin
     }
     public override bool Unload()
     {
-        TopdownCameraSystemPatch.Dispose();
+        TopdownCameraSystemHooks.Dispose();
         _harmony.UnpatchSelf();
 
         return true;
