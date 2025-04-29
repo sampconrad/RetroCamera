@@ -1,6 +1,8 @@
 ﻿using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using ProjectM;
 using ProjectM.UI;
+using Stunlock.Localization;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -138,6 +140,27 @@ internal static class MainMenuPatch
             }
 
             InitializeNewsEntries();
+
+            /*
+            if (!Localization.Initialized)
+            {
+                // not ready if menu opened quickly enough, but if the rest of the menu is fine and presumably localized what's the rub?
+                Core.Log.LogWarning("[OptionsPanel_Interface.Start()] Localization isn't ready yet! Attempting manual loading...");
+
+                try
+                {
+                    Localization.LoadDefaultLanguage();
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[OptionsPanel_Interface.Start()] Failed to load localization: {ex.Message}");
+                }
+            }
+            else
+            {
+                Core.Log.LogWarning("[OptionsPanel_Interface.Start()] Localization is ready!");
+            }
+            */
         }
         catch (Exception ex)
         {

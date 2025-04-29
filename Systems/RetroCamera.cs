@@ -74,6 +74,23 @@ public class RetroCamera : MonoBehaviour
         Settings.AddHideHUDListener(ToggleHUD);
         Settings.AddHideFogListener(ToggleFog);
         // Settings.AddCycleCameraListener(CycleCamera);
+        Settings.AddCompleteTutorialListener(CompleteTutorial);
+    }
+
+    static GameObject _journalClaimButtonObject;
+    static void CompleteTutorial()
+    {
+        if (_journalClaimButtonObject == null) _journalClaimButtonObject = GameObject.Find("HUDCanvas(Clone)/JournalCanvas/JournalParent(Clone)/Content/Layout/JournalEntry_Multi/ButtonParent/ClaimButton");
+
+        if (_journalClaimButtonObject != null)
+        {
+            SimpleStunButton claimButton = _journalClaimButtonObject.GetComponent<SimpleStunButton>();
+            claimButton?.Press();
+        }
+        else
+        {
+            Core.Log.LogWarning($"[RetroCamera] Journal claim button not found!");
+        }
     }
 
     static readonly Dictionary<ProjectM.CameraType, Camera> _cameras = [];
@@ -268,7 +285,7 @@ public class RetroCamera : MonoBehaviour
                 
                 // Set crosshair & cursor visibility based on the camera mode
                 crosshairVisible = _isFirstPerson || (_isActionMode && Settings.ActionModeCrosshair);
-                cursorVisible = false;
+                cursorVisible = _usingMouseWheel;
             }
 
             if (_crosshair != null)

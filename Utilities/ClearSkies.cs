@@ -26,6 +26,8 @@ internal static class ClearSkies
     }
     static void RemoveFog()
     {
+        if (!_dayNightCycleSingleton.Exists()) GetDayNightCycleSingleton();
+
         if (_primaryMaterial == null) GetBatFormFogMaterial();
 
         if (_primaryMaterial == null)
@@ -46,6 +48,8 @@ internal static class ClearSkies
     }
     static void RestoreFog()
     {
+        if (!_dayNightCycleSingleton.Exists()) GetDayNightCycleSingleton();
+
         if (_secondaryMaterial == null)
         {
             // Core.Log.LogWarning($"[ClearSkies] BatFormFog material not found!");
@@ -54,7 +58,7 @@ internal static class ClearSkies
 
         _primaryMaterial.m_Material = new(_secondaryMaterial);
 
-        _dayNightCycleSingleton.With((ref DayNightCycle dayNightCycle) =>
+        _dayNightCycleSingleton.HasWith((ref DayNightCycle dayNightCycle) =>
         {
             dayNightCycle.Cloudiness = _cloudiness;
         });
@@ -63,13 +67,6 @@ internal static class ClearSkies
     {
         GetBatFormFogMaterial();
         GetDayNightCycleSingleton();
-        
-        // UpdateTilePositionSystem
-        // BehaviourTreeParallelWriteSystem
-        // CurrentCastsSystem
-        // DisableWhenNoPlayersInRangeOfChunkSystem
-        // MoveWithCurveSystem
-        // mood stuff for lighting
     }
     static void GetBatFormFogMaterial()
     {

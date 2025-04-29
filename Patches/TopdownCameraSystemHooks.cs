@@ -192,16 +192,19 @@ internal static class TopdownCameraSystemHooks
     ref EntityManager entityManager
 )
     {
-        // Record the cursor position in a static property or field
-        // _cursorPosition = cursorPosition;
+        _usingMouseWheel = _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleEmoteWheel) 
+            || _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleActionWheel);
 
-        // Locks the mouse to the center of the screen if the mouse should be locked or the camera rotate button is pressed
+        // Locks the mouse to the center of the screen if the mouse should be locked like for action mode or the camera rotate button is pressed
         if (_validGameplayInputState &&
            (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
            !IsMenuOpen)
         {
-            // if (_isActionMode || _isFirstPerson || Settings.CameraAimMode == CameraAimMode.Forward)
-            if (_isActionMode || _isFirstPerson)
+            if (_usingMouseWheel)
+            {
+                Cursor.lockState = CursorLockMode.None;
+            }
+            else if (_isActionMode || _isFirstPerson)
             {
                 float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) - Settings.AimOffsetY);
                 cursorPosition.ScreenPosition = screenPosition;

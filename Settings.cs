@@ -82,6 +82,7 @@ internal static class Settings
     static Keybinding _actionModeKeybind;
     static Keybinding _toggleHUDKeybind;
     static Keybinding _toggleFogKeybind;
+    static Keybinding _completeTutorialKeybind;
     static Keybinding _cycleCameraKeybind; // WIP
     public static void Initialize()
     {
@@ -109,6 +110,8 @@ internal static class Settings
         _toggleHUDKeybind.AddKeyDownListener(action);
     public static void AddHideFogListener(KeyHandler action) =>
         _toggleFogKeybind.AddKeyDownListener(action);
+    public static void AddCompleteTutorialListener(KeyHandler action) =>
+        _completeTutorialKeybind.AddKeyDownListener(action);
     public static void AddCycleCameraListener(KeyHandler action) =>
         _cycleCameraKeybind.AddKeyDownListener(action);
 
@@ -202,6 +205,8 @@ internal static class Settings
         _toggleHUDKeybind = AddKeybind("Toggle HUD", "Toggle HUD visibility", KeyCode.Backslash);
 
         _toggleFogKeybind = AddKeybind("Toggle Fog/Clouds", "Toggle visibility of fog and clouds (cloud ground shadows also affected)", KeyCode.Equals);
+
+        _completeTutorialKeybind = AddKeybind("Complete Tutorial", "Pushes button for completed tutorials if applicable", KeyCode.Minus);
 
         // _cycleCameraKeybind = AddKeybind("Cycle Camera", "Cycle active camera (topdown, orbit, hybrid, free)", KeyCode.Minus);
     }

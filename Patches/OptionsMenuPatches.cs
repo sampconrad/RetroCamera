@@ -32,15 +32,36 @@ internal static class OptionsMenuPatches
     [HarmonyPostfix]
     static void StartPostfix(OptionsPanel_Interface __instance)
     {
+        /*
         if (!Localization.Initialized)
         {
-            Core.Log.LogWarning("[OptionsPanel_Interface.Start()] Localization isn't ready yet!");
+            Core.Log.LogWarning("[OptionsPanel_Interface.Start()] Localization may not be ready!");
+            try
+            {
+                Localization.LoadDefaultLanguage();
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError($"[OptionsPanel_Interface.Start()] Failed to load localization: {ex.Message}");
+                return;
+            }
         }
-        else if (_shouldLocalize)
+        */
+        
+        if (_shouldLocalize)
         {
-            Core.Log.LogWarning("[OptionsPanel_Interface.Start()] Localization ready, adding keys!");
+            Core.Log.LogWarning("[OptionsPanel_Interface.Start()] Attempting to localize keys...");
 
-            LocalizeText();
+            try
+            {
+                LocalizeText();
+                Core.Log.LogWarning("[OptionsPanel_Interface.Start()] Keys localized successfully!");
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError($"[OptionsPanel_Interface.Start()] Failed to localize keys, may need to reload from main menu for option labels: {ex.Message}");
+            }
+
             _shouldLocalize = false;
         }
 
@@ -252,5 +273,9 @@ internal static class OptionsMenuPatches
             option.SetValue(value);
             Persistence.SaveOptions();
         });
+    }
+    public static void Reset()
+    {
+        _shouldLocalize = true;
     }
 }

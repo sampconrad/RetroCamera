@@ -8,11 +8,12 @@ internal static class CameraState
     public static bool _isUIHidden;
     public static bool _isFirstPerson;
     public static bool _isActionMode;
-    public static bool _isMouseLocked;
+    public static bool _isMouseLocked; // don't lock mouse if left alt/left ctrl pushed?
     public static bool _isShapeshifted;
     public static bool _isMounted;
     public static bool _inBuildMode;
     public static bool _validGameplayInputState;
+    public static bool _usingMouseWheel;
 
     public static BehaviourType _currentBehaviourType = BehaviourType.Default;
     public static Dictionary<BehaviourType, CameraBehaviour> _cameraBehaviours = [];

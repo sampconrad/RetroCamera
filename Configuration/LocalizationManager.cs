@@ -9,9 +9,8 @@ internal static class LocalizationManager
 {
     public const string HEADER = "Retro Camera";
     public static LocalizationKey _sectionHeader;
-
-    static readonly Dictionary<AssetGuid, string> _assetGuids = [];
     public static IReadOnlyDictionary<AssetGuid, string> AssetGuids => _assetGuids;
+    static readonly Dictionary<AssetGuid, string> _assetGuids = [];
     public static void LocalizeText()
     {
         _sectionHeader = GetLocalizationKey(HEADER);

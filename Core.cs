@@ -68,6 +68,7 @@ internal class Core
     {
         ClearSkies.Reset();
         TopdownCameraSystemHooks.Dispose();
+        OptionsMenuPatches.Reset();
 
         _initialized = false;
     }
