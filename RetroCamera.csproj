@@ -26,6 +26,12 @@
 		<EmbeddedResource Include="Resources\ModDiscordLogo.png" />
 		<EmbeddedResource Include="Resources\RetroCameraLogo.png" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include=".github\FUNDING.yml" />
+	  <None Include=".github\workflows\build.yml" />
+	  <None Include=".github\workflows\release.yml" />
+	</ItemGroup>
 	
 	<Target Name="BuildToClient" AfterTargets="Build">
 		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRising\BepInEx\plugins" />
