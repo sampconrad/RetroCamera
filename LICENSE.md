@@ -158,7 +158,7 @@ d. Nothing in this Public License constitutes or may be interpreted as a limitat
 >
 > Creative Commons may be contacted at creativecommons.org
 
-{:toc}
+---
 
 MIT License
 
