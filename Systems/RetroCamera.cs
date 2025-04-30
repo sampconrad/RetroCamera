@@ -7,6 +7,8 @@ using RetroCamera.Behaviours;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Layouts;
 using UnityEngine.UI;
 using static RetroCamera.Utilities.CameraState;
 
@@ -99,7 +101,7 @@ public class RetroCamera : MonoBehaviour
 
     static EntityQuery _cameraQuery;
     static void CycleCamera()
-    {
+    {        
         try
         {
             if (_camera.Equals(null))
