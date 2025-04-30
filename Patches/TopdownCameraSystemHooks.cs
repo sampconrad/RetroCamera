@@ -192,7 +192,7 @@ internal static class TopdownCameraSystemHooks
     ref EntityManager entityManager
 )
     {
-        _usingMouseWheel = _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleEmoteWheel) 
+        if (!IsMenuOpen) _usingMouseWheel = _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleEmoteWheel) 
             || _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleActionWheel);
 
         // Locks the mouse to the center of the screen if the mouse should be locked like for action mode or the camera rotate button is pressed

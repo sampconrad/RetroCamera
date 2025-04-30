@@ -199,6 +199,10 @@ internal static class Settings
 
                 if (IsMenuOpen) IsMenuOpen = false;
                 if (ActionWheelSystemPatch._wheelVisible) ActionWheelSystemPatch._wheelVisible = false;
+                if (Cursor.lockState.Equals(CursorLockMode.Locked) && (!_isActionMode || !_isMouseLocked))
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                }
             }
         });
 

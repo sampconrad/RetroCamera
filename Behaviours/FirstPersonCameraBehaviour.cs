@@ -1,4 +1,5 @@
 ﻿using ProjectM;
+using UnityEngine;
 using static RetroCamera.Utilities.CameraState;
 
 namespace RetroCamera.Behaviours;
@@ -27,6 +28,7 @@ internal class FirstPersonCameraBehaviour : CameraBehaviour
 
         if (!_isActionMode) _isMouseLocked = false;
         _isFirstPerson = false;
+        if (Cursor.lockState.Equals(CursorLockMode.Locked)) Cursor.lockState = CursorLockMode.None;
     }
     public override bool ShouldActivate(ref TopdownCameraState state)
     {
