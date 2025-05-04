@@ -1,14 +1,9 @@
-﻿using Il2CppInterop.Runtime;
-using ProjectM;
-using ProjectM.Network;
+﻿using ProjectM;
 using ProjectM.Sequencer;
 using ProjectM.UI;
 using RetroCamera.Behaviours;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Layouts;
 using UnityEngine.UI;
 using static RetroCamera.Utilities.CameraState;
 
@@ -16,16 +11,19 @@ namespace RetroCamera.Systems;
 public class RetroCamera : MonoBehaviour
 {
     static EntityManager EntityManager => Core.EntityManager;
-    static Entity _localCharacter;
+    static ZoomModifierSystem ZoomModifierSystem => Core.ZoomModifierSystem;
+    static ActionWheelSystem ActionWheelSystem => Core.ActionWheelSystem;
 
     static GameObject _crosshairPrefab;
     static GameObject _crosshair;
     static CanvasScaler _canvasScaler;
+    public static Camera GameCamera => _gameCamera;
     static Camera _gameCamera;
-    static ZoomModifierSystem ZoomModifierSystem => Core.ZoomModifierSystem;
 
     static bool _gameFocused = true;
     static bool _listening = false;
+    static bool HideCharacterInfoPanel => Settings.HideCharacterInfoPanel;
+    static GameObject _characterInfoPanel;
     public static void Enabled(bool enabled)
     {
         Settings.Enabled = enabled;
@@ -54,15 +52,21 @@ public class RetroCamera : MonoBehaviour
     }
     static void ToggleHUD()
     {
+        if (!Settings.Enabled) return;
+
         _isUIHidden = !_isUIHidden;
         DisableUISettings.SetHideHUD(_isUIHidden, Core._client);
     }
-    static void ToggleFog() => Utilities.ClearSkies.ToggleFog();
+    static void ToggleFog()
+    {
+        if (!Settings.Enabled) return;
+
+        Utilities.ClearSkies.ToggleFog();
+    }
     void Awake()
     {
         Settings.Initialize();
         RegisterBehaviours();
-        // GetOrCreateObjects();
     }
     static void RegisterBehaviours()
     {
@@ -76,12 +80,15 @@ public class RetroCamera : MonoBehaviour
         Settings.AddHideHUDListener(ToggleHUD);
         Settings.AddHideFogListener(ToggleFog);
         // Settings.AddCycleCameraListener(CycleCamera);
+        // Settings.AddSocialWheelPressedListener(SocialWheelKeyPressed);
+        // Settings.AddSocialWheelUpListener(SocialWheelKeyUp);
         Settings.AddCompleteTutorialListener(CompleteTutorial);
     }
 
     static GameObject _journalClaimButtonObject;
     static void CompleteTutorial()
     {
+        if (!Settings.Enabled) return;
         if (_journalClaimButtonObject == null) _journalClaimButtonObject = GameObject.Find("HUDCanvas(Clone)/JournalCanvas/JournalParent(Clone)/Content/Layout/JournalEntry_Multi/ButtonParent/ClaimButton");
 
         if (_journalClaimButtonObject != null)
@@ -94,6 +101,92 @@ public class RetroCamera : MonoBehaviour
             Core.Log.LogWarning($"[RetroCamera] Journal claim button not found!");
         }
     }
+    public static bool SocialWheelActive => _socialWheelActive;
+    static bool _socialWheelActive = false;
+    public static ActionWheel SocialWheel => _socialWheel;
+    static ActionWheel _socialWheel;
+    public static bool _shouldActivateWheel = false;
+
+    static Entity _rootPrefabCollection;
+    static bool _socialWheelInitialized = false;
+
+    static Entity _freeCameraPrefab;
+    static Entity _topDownCameraPrefab;
+    static Entity _orbitCameraPrefab;
+    static void SocialWheelKeyPressed()
+    {
+        /*
+        if (!_rootPrefabCollection.Exists()) ActionWheelSystem._RootPrefabCollectionAccessor.TryGetSingletonEntity(out _rootPrefabCollection);
+        
+        if (!_socialWheelInitialized && _rootPrefabCollection.TryGetComponent(out RootPrefabCollection rootPrefabCollection) 
+            && rootPrefabCollection.GeneralGameplayCollectionPrefab.TryGetComponent(out GeneralGameplayCollection generalGameplayCollection))
+        {
+            ActionWheelSystem.InitializeSocialWheel(true, generalGameplayCollection);
+            _socialWheelInitialized = true;
+
+            try
+            {
+                var socialWheelData = ActionWheelSystem._SocialWheelDataList;
+                var socialWheelShortcuts = ActionWheelSystem._SocialWheelShortcutList;
+
+                Core.Log.LogWarning($"[SocialWheelKeyPressed] Social Wheel - {socialWheelData.Count}, {socialWheelShortcuts.Count}");
+                int index = 0;
+
+                foreach (var data in socialWheelData)
+                {
+                    Core.Log.LogWarning($"[RetroCamera] ({index++}) Data - ActionType: {data.Type}, Disabled: {data.Disabled}, Unlocked: {data.Unlocked}, PrefabGUID: {data.PrefabGUID}");
+                }
+
+                index = 0;
+
+                foreach (var shortcut in socialWheelShortcuts)
+                {
+                    Core.Log.LogWarning($"[RetroCamera] ({index++}) Shortcut - ActionType: {shortcut.Type}, Disabled: {shortcut.Disabled}, Unlocked: {shortcut.Unlocked}, PrefabGUID: {shortcut.PrefabGUID}");
+                }
+
+                if (rootPrefabCollection.FreeCameraPrefab.Exists())
+                {
+                    FreeCameraPrefab = rootPrefabCollection.FreeCameraPrefab;
+                    Core.LogEntity(Core._client, rootPrefabCollection.FreeCameraPrefab);
+                }
+
+                if (rootPrefabCollection.TopDownCameraPrefab.Exists())
+                {
+                    TopDownCameraPrefab = rootPrefabCollection.TopDownCameraPrefab;
+                    Core.LogEntity(Core._client, rootPrefabCollection.TopDownCameraPrefab);
+                }
+
+                if (rootPrefabCollection.OrbitCameraPrefab.Exists())
+                {
+                    OrbitCameraPrefab = rootPrefabCollection.OrbitCameraPrefab;
+                    Core.LogEntity(Core._client, rootPrefabCollection.OrbitCameraPrefab);
+                }
+            }
+            catch (Exception ex)
+            {
+                Core.Log.LogError(ex);
+            }
+        }
+
+        if (_socialWheel == null)
+        {
+            _socialWheel = ActionWheelSystem._SocialWheel;
+        }
+        */
+
+        _socialWheelActive = true;
+        _shouldActivateWheel = true;
+        _socialWheel.gameObject.SetActive(_socialWheelActive);
+    }
+    static void SocialWheelKeyUp()
+    {
+        if (_socialWheelActive && !_shouldActivateWheel)
+        {
+            ActionWheelSystem.HideCurrentWheel();
+            _socialWheelActive = false;
+            _socialWheel.gameObject.SetActive(_socialWheelActive);
+        }
+    }
 
     static readonly Dictionary<ProjectM.CameraType, Camera> _cameras = [];
     static Camera _camera;
@@ -101,7 +194,8 @@ public class RetroCamera : MonoBehaviour
 
     static EntityQuery _cameraQuery;
     static void CycleCamera()
-    {        
+    {      
+        /*
         try
         {
             if (_camera.Equals(null))
@@ -140,6 +234,7 @@ public class RetroCamera : MonoBehaviour
         {
             Core.Log.LogWarning(ex);
         }
+        */
     }
     static void GetOrCreateObjects()
     {
@@ -154,6 +249,7 @@ public class RetroCamera : MonoBehaviour
     {
         if (!Core._initialized) return;
         else if (!_gameFocused || !Settings.Enabled) return;
+        // else if (!Settings.Enabled) return;
 
         if (!_listening)
         {
@@ -164,12 +260,73 @@ public class RetroCamera : MonoBehaviour
         if (_crosshairPrefab == null) BuildCrosshair();
         if (_gameCamera == null) _gameCamera = CameraManager.GetCamera();
 
+        if (_characterInfoPanel == null)
+        {
+            GameObject characterInfoPanelCanvas = GameObject.Find("HUDCanvas(Clone)/TargetInfoPanelCanvas");
+            _characterInfoPanel = characterInfoPanelCanvas?.transform.GetChild(0).gameObject;
+
+            if (_characterInfoPanel == null)
+            {
+                // _characterInfoPanel = characterInfoPanelCanvas?.transform.GetChild(0).gameObject;
+                Core.Log.LogWarning($"[RetroCamera] CharacterInfoPanel (0) not found!");
+            }
+            else
+            {
+                Core.Log.LogWarning($"[RetroCamera] CharacterInfoPanel (0) found!");
+            }
+        }
+
+        /*
+        if (!_rootPrefabCollection.Exists() || _socialWheel == null)
+        {
+            ActionWheelSystem?._RootPrefabCollectionAccessor.TryGetSingletonEntity(out _rootPrefabCollection);
+
+            if (!_socialWheelInitialized && _rootPrefabCollection.TryGetComponent(out RootPrefabCollection rootPrefabCollection)
+                && rootPrefabCollection.GeneralGameplayCollectionPrefab.TryGetComponent(out GeneralGameplayCollection generalGameplayCollection))
+            {
+                ActionWheelSystem.InitializeSocialWheel(true, generalGameplayCollection);
+                _socialWheelInitialized = true;
+
+                try
+                {
+                    var socialWheelData = ActionWheelSystem._SocialWheelDataList;
+                    var socialWheelShortcuts = ActionWheelSystem._SocialWheelShortcutList;
+
+                    if (rootPrefabCollection.FreeCameraPrefab.Exists())
+                    {
+                        _freeCameraPrefab = rootPrefabCollection.FreeCameraPrefab;
+                        // Core.LogEntity(Core._client, rootPrefabCollection.FreeCameraPrefab);
+                    }
+
+                    if (rootPrefabCollection.TopDownCameraPrefab.Exists())
+                    {
+                        _topDownCameraPrefab = rootPrefabCollection.TopDownCameraPrefab;
+                        // Core.LogEntity(Core._client, rootPrefabCollection.TopDownCameraPrefab);
+                    }
+
+                    if (rootPrefabCollection.OrbitCameraPrefab.Exists())
+                    {
+                        _orbitCameraPrefab = rootPrefabCollection.OrbitCameraPrefab;
+                        // Core.LogEntity(Core._client, rootPrefabCollection.OrbitCameraPrefab);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError(ex);
+                }
+            }
+
+            _socialWheel = ActionWheelSystem?._SocialWheel;
+        }
+        */
+
         // UpdateSystems();
         UpdateCrosshair();
     }
     void OnApplicationFocus(bool hasFocus)
     {
-        _gameFocused = hasFocus;
+        // _gameFocused = hasFocus;
+        if (hasFocus) IsMenuOpen = false;
     }
     static void BuildCrosshair()
     {
@@ -280,19 +437,34 @@ public class RetroCamera : MonoBehaviour
                 _crosshair.active = true;
             }
 
-            if (_validGameplayInputState &&
-               (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
-               !IsMenuOpen)
+            bool shouldHandle = _validGameplayInputState &&
+               (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera));
+
+            if (shouldHandle && !IsMenuOpen)
             {
-                
-                // Set crosshair & cursor visibility based on the camera mode
+                if (_isActionMode && HideCharacterInfoPanel)
+                {
+                    _characterInfoPanel.SetActive(false);
+                }
+                else
+                {
+                    _characterInfoPanel.SetActive(true);
+                }
+
                 crosshairVisible = _isFirstPerson || (_isActionMode && Settings.ActionModeCrosshair);
                 cursorVisible = _usingMouseWheel;
+            }
+            // hide mouse when rotating in build mode?
+            else if (shouldHandle && _inBuildMode)
+            {
+                crosshairVisible = Settings.AlwaysShowCrosshair;
+                cursorVisible = false;
             }
 
             if (_crosshair != null)
             {
-                _crosshair.active = (crosshairVisible || Settings.AlwaysShowCrosshair) && !_inBuildMode;
+                // _crosshair.active = (crosshairVisible || Settings.AlwaysShowCrosshair) && !_inBuildMode;
+                _crosshair.active = crosshairVisible || Settings.AlwaysShowCrosshair;
 
                 if (_isFirstPerson)
                 {
