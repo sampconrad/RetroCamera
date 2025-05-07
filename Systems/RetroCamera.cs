@@ -190,12 +190,13 @@ public class RetroCamera : MonoBehaviour
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(32, 32);
-            rectTransform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+            rectTransform.sizeDelta = new Vector2(24, 24);
+            rectTransform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
             rectTransform.localPosition = new Vector3(0, 0, 0);
 
             Image image = _crosshairPrefab.AddComponent<Image>();
             image.sprite = Sprite.Create(cursorData.Texture, new Rect(0, 0, cursorData.Texture.width, cursorData.Texture.height), new Vector2(0.5f, 0.5f), 100f);
+            image.preserveAspect = true;
 
             _crosshairPrefab.active = false;
         }
