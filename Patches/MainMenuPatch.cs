@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using ProjectM;
 using ProjectM.UI;
-using Stunlock.Localization;
 using System.Reflection;
 using TMPro;
 using UnityEngine;

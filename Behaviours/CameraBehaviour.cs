@@ -2,6 +2,7 @@
 using RetroCamera.Patches;
 using UnityEngine;
 using static RetroCamera.Utilities.CameraState;
+using static RetroCamera.Systems.RetroCamera;
 
 namespace RetroCamera.Behaviours;
 internal abstract class CameraBehaviour
@@ -30,10 +31,10 @@ internal abstract class CameraBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (EscapeMenuViewPatch.IsEscapeMenuOpen)
+            if (EscapeMenuViewPatch._isEscapeMenuOpen)
             {
                 IsMenuOpen = false;
-                EscapeMenuViewPatch.IsEscapeMenuOpen = false;
+                EscapeMenuViewPatch._isEscapeMenuOpen = false;
             }
         }
 
@@ -48,8 +49,8 @@ internal abstract class CameraBehaviour
         // if (zoomValue != 0 && (!_inBuildMode || !Settings.ActiveDuringBuildMode))
         if (zoomValue != 0 && !_inBuildMode)
         {
-                // Consume zoom input for the camera
-                var zoomAmount = Mathf.Lerp(.25f, 1.5f, Mathf.Max(0, _targetZoom - Settings.MinZoom) / Settings.MaxZoom);
+            // Consume zoom input for the camera
+            var zoomAmount = Mathf.Lerp(.25f, 1.5f, Mathf.Max(0, _targetZoom - Settings.MinZoom) / Settings.MaxZoom);
             var zoomChange = inputState.GetAnalogValue(AnalogInputAction.ZoomCamera) > 0 ? zoomAmount : -zoomAmount;
 
             if ((_targetZoom > Settings.MinZoom && _targetZoom + zoomChange < Settings.MinZoom) || (_isFirstPerson && zoomChange > 0)) _targetZoom = Settings.MinZoom;
@@ -60,6 +61,12 @@ internal abstract class CameraBehaviour
 
         // Update zoom if MaxZoom is changed
         if (_targetZoom > Settings.MaxZoom) _targetZoom = Settings.MaxZoom;
+
+        if (SocialWheelActive && _shouldActivateWheel)
+        {
+            Core.ActionWheelSystem.UpdateAndShowWheel(SocialWheel, inputState);
+            _shouldActivateWheel = false;
+        }
     }
     public virtual void UpdateCameraInputs(ref TopdownCameraState state, ref TopdownCamera data)
     {

@@ -9,6 +9,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
+using static RetroCamera.Systems.RetroCamera;
 using static RetroCamera.Utilities.CameraState;
 
 namespace RetroCamera.Patches;
@@ -16,20 +17,11 @@ namespace RetroCamera.Patches;
 internal static class TopdownCameraSystemHooks
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    unsafe delegate void HandleInputHandler(IntPtr _this, ref InputState inputState);
+    unsafe delegate void HandleInputHandler(
+        IntPtr _this, 
+        ref InputState inputState);
     static HandleInputHandler? _handleInputOriginal;
     static INativeDetour? _handleInputDetour;
-
-    /*
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    unsafe delegate void UpdateCameraInputsHandler(IntPtr _this, ref TopdownCameraState cameraState, ref TopdownCamera cameraData);
-    static UpdateCameraInputsHandler? _updateCameraInputsOriginal;
-    static INativeDetour? _updateCameraInputsDetour;
-    */
-
-    // CursorPositionSystem
-    // CursorPositionSystem_59A0B5A3_LambdaJob_0_Execute
-    // public unsafe void CursorPositionSystem_59A0B5A3_LambdaJob_0_Execute([DefaultParameterValue(null)] ref CollisionWorld collisionWorld, [DefaultParameterValue(null)] ref int heightLevel, [DefaultParameterValue(null)] ref FadeTargetsSingleton fadeTargets, [DefaultParameterValue(null)] ref CurrentFadingDataSingleton fadeData, [DefaultParameterValue(null)] ref CursorPosition cursorPosition, [DefaultParameterValue(null)] ref EntityManager entityManager)
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         unsafe delegate void UpdateCameraHandler(
@@ -56,8 +48,6 @@ internal static class TopdownCameraSystemHooks
 
     static CursorPositionExecuteHandler? _cursorPositionExecuteOriginal;
     static INativeDetour? _cursorPositionExecuteDetour;
-
-    // public static CursorPosition _cursorPosition;
 
     static ZoomSettings _defaultZoomSettings;
     static ZoomSettings _defaultStandardZoomSettings;
@@ -183,16 +173,31 @@ internal static class TopdownCameraSystemHooks
         );
     }
     static unsafe void CursorPositionExecutePatch(
-    IntPtr _this,
-    ref CollisionWorld collisionWorld,
-    ref int heightLevel,
-    ref FadeTargetsSingleton fadeTargets,
-    ref CurrentFadingDataSingleton fadeData,
-    ref CursorPosition cursorPosition,
-    ref EntityManager entityManager
-)
+        IntPtr _this,
+        ref CollisionWorld collisionWorld,
+        ref int heightLevel,
+        ref FadeTargetsSingleton fadeTargets,
+        ref CurrentFadingDataSingleton fadeData,
+        ref CursorPosition cursorPosition,
+        ref EntityManager entityManager
+    )
     {
-        if (!IsMenuOpen) _usingMouseWheel = _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleEmoteWheel) 
+        if (EscapeMenuViewPatch._isEscapeMenuOpen || EscapeMenuViewPatch._isServerPaused || IsMenuOpen)
+        {
+            _cursorPositionExecuteOriginal!(
+                _this,
+                ref collisionWorld,
+                ref heightLevel,
+                ref fadeTargets,
+                ref fadeData,
+                ref cursorPosition,
+                ref entityManager
+            );
+
+            return;
+        }
+
+        _usingMouseWheel = _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleEmoteWheel) 
             || _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleActionWheel);
 
         // Locks the mouse to the center of the screen if the mouse should be locked like for action mode or the camera rotate button is pressed
@@ -200,13 +205,14 @@ internal static class TopdownCameraSystemHooks
            (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
            !IsMenuOpen)
         {
-            if (_usingMouseWheel)
+            if (_usingMouseWheel || SocialWheelActive)
             {
                 Cursor.lockState = CursorLockMode.None;
             }
+            // else if (_isActionMode || _isFirstPerson || Settings.CameraAimMode.Equals(CameraAimMode.Forward))
             else if (_isActionMode || _isFirstPerson)
             {
-                float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) - Settings.AimOffsetY);
+                float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) + Settings.AimOffsetY);
                 cursorPosition.ScreenPosition = screenPosition;
 
                 Cursor.lockState = CursorLockMode.Locked;

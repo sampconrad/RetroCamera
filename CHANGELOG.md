@@ -1,3 +1,11 @@
+`1.3.2`
+- vertical aim offset appears to now be functioning as expected
+- option to hide character info panel at the top of the screen during action mode
+- generally more state-aware and shouldn't require as much fiddling with options when changing modes (heavy refactor pending, still too much pasta)
+- increased range for shoulder offset values
+- crash prevention (I'm sure if you're creative enough can still manage but seems pretty stable now :p) for server pause in singleplayer (if you choose to go in the menu while the server is paused and enable RetroCamera after the mod has disabled itself for safety it will probably crash, so don't)
+- localizationKeys set in dictionary every time menu is opened instead of just once
+
 `1.2.1`
 - mouse unlocks when exiting first person or action mode without further user input
 - added check to prevent memory access issues when escape menu is open
