@@ -17,6 +17,7 @@ internal static class Settings
     public static bool AlwaysShowCrosshair { get => _alwaysShowCrosshairOption.Value; set => _alwaysShowCrosshairOption.SetValue(value); }
     public static bool ActionModeCrosshair { get => _actionModeCrosshairOption.Value; set => _actionModeCrosshairOption.SetValue(value); }
     public static bool ActionModeControlsRetroCamera { get => _actionModeControlsRetroCameraOption.Value; set => _actionModeControlsRetroCameraOption.SetValue(value); }
+    public static bool UseDotCrosshair { get => _useDotCrosshairOption.Value; set => _useDotCrosshairOption.SetValue(value); }
     public static float FieldOfView { get => _fieldOfViewOption.Value; set => _fieldOfViewOption.SetValue(value); }
     public static bool HideCharacterInfoPanel { get => _hideCharacterInfoPanel.Value; set => _hideCharacterInfoPanel.SetValue(value); }
     // public static CameraAimMode CameraAimMode { get => _cameraAimModeOption.GetEnumValue<CameraAimMode>(); set => _cameraAimModeOption.SetValue((int)value); }
@@ -62,6 +63,7 @@ internal static class Settings
     static Toggle _alwaysShowCrosshairOption;
     static Toggle _actionModeCrosshairOption;
     static Toggle _actionModeControlsRetroCameraOption;
+    static Toggle _useDotCrosshairOption;
     static Toggle _firstPersonEnabledOption;
     static Toggle _hideCharacterInfoPanel; // WIP
     // static Toggle _defaultBuildModeOption;
@@ -137,6 +139,8 @@ internal static class Settings
         _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
         _actionModeControlsRetroCameraOption = AddToggle("Action Mode Controls Retro Camera", "Action Mode keybind toggle will also control Retro Camera", false);
         _hideCharacterInfoPanel = AddToggle("Hide Character Info Panel", "Hide character info panel", false);
+        _useDotCrosshairOption = AddToggle("Use Dot Crosshair", "Use a simple white dot instead of the default cursor texture", false);
+        _useDotCrosshairOption.AddListener(_ => Systems.RetroCamera.RebuildCrosshair());
         _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
 
         AddDivider("Third Person Zoom");

@@ -328,12 +328,71 @@ public class RetroCamera : MonoBehaviour
         // _gameFocused = hasFocus;
         if (hasFocus) IsMenuOpen = false;
     }
+    public static void RebuildCrosshair()
+    {
+        if (_crosshair != null)
+        {
+            GameObject.Destroy(_crosshair);
+            _crosshair = null;
+        }
+        if (_crosshairPrefab != null)
+        {
+            GameObject.Destroy(_crosshairPrefab);
+            _crosshairPrefab = null;
+        }
+        BuildCrosshair();
+    }
+
+    static Texture2D CreateDotTexture()
+    {
+        int size = 24;
+        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Color[] colors = new Color[size * size];
+
+        float radius = size / 5f;
+        float center = size / 2f;
+        float radiusSquared = radius * radius;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x - center;
+                float dy = y - center;
+                float distanceSquared = dx * dx + dy * dy;
+
+                if (distanceSquared <= radiusSquared)
+                {
+                    float alpha = 1f - (distanceSquared / radiusSquared);
+                    colors[y * size + x] = new Color(1f, 1f, 1f, alpha);
+                }
+                else
+                {
+                    colors[y * size + x] = Color.clear;
+                }
+            }
+        }
+
+        texture.SetPixels(colors);
+        texture.Apply();
+        return texture;
+    }
+
     static void BuildCrosshair()
     {
         try
         {
-            CursorData cursorData = CursorController._CursorDatas.First(x => x.CursorType == CursorType.Game_Normal);
-            if (cursorData == null) return;
+            Texture2D crosshairTexture;
+            if (Settings.UseDotCrosshair)
+            {
+                crosshairTexture = CreateDotTexture();
+            }
+            else
+            {
+                CursorData cursorData = CursorController._CursorDatas.First(x => x.CursorType == CursorType.Game_Normal);
+                if (cursorData == null) return;
+                crosshairTexture = cursorData.Texture;
+            }
 
             _crosshairPrefab = new("Crosshair")
             {
@@ -352,10 +411,22 @@ public class RetroCamera : MonoBehaviour
             rectTransform.localPosition = new Vector3(0, 0, 0);
 
             Image image = _crosshairPrefab.AddComponent<Image>();
-            image.sprite = Sprite.Create(cursorData.Texture, new Rect(0, 0, cursorData.Texture.width, cursorData.Texture.height), new Vector2(0.5f, 0.5f), 100f);
+            image.sprite = Sprite.Create(crosshairTexture, new Rect(0, 0, crosshairTexture.width, crosshairTexture.height), new Vector2(0.5f, 0.5f), 100f);
             image.preserveAspect = true;
 
             _crosshairPrefab.active = false;
+
+            // If we already have a crosshair instance, recreate it with the new prefab
+            if (_crosshair != null)
+            {
+                GameObject uiCanvas = GameObject.Find("HUDCanvas(Clone)/Canvas");
+                if (uiCanvas != null)
+                {
+                    GameObject.Destroy(_crosshair);
+                    _crosshair = Instantiate(_crosshairPrefab, uiCanvas.transform);
+                    _crosshair.active = true;
+                }
+            }
         }
         catch (Exception ex)
         {
