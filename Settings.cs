@@ -16,7 +16,6 @@ internal static class Settings
     public static bool FirstPersonEnabled { get => _firstPersonEnabledOption.Value; set => _firstPersonEnabledOption.SetValue(value); }
     public static bool AlwaysShowCrosshair { get => _alwaysShowCrosshairOption.Value; set => _alwaysShowCrosshairOption.SetValue(value); }
     public static bool ActionModeCrosshair { get => _actionModeCrosshairOption.Value; set => _actionModeCrosshairOption.SetValue(value); }
-    public static bool ActionModeControlsRetroCamera { get => _actionModeControlsRetroCameraOption.Value; set => _actionModeControlsRetroCameraOption.SetValue(value); }
     public static float FieldOfView { get => _fieldOfViewOption.Value; set => _fieldOfViewOption.SetValue(value); }
     public static int AimOffsetX { get => (int)(Screen.width * (_aimOffsetXOption.Value / 100)); set => _aimOffsetXOption.SetValue(Mathf.Clamp(value / Screen.width, -25, 25)); }
     public static int AimOffsetY { get => (int)(Screen.height * (_aimOffsetYOption.Value / 100)); set => _aimOffsetYOption.SetValue(Mathf.Clamp(value / Screen.width, -25, 25)); }
@@ -58,7 +57,6 @@ internal static class Settings
     static Slider _fieldOfViewOption;
     static Toggle _alwaysShowCrosshairOption;
     static Toggle _actionModeCrosshairOption;
-    static Toggle _actionModeControlsRetroCameraOption;
     static Toggle _firstPersonEnabledOption;
     // static Toggle _defaultBuildModeOption;
 
@@ -125,7 +123,6 @@ internal static class Settings
         _firstPersonEnabledOption = AddToggle("First Person", "Enable zooming in far enough for first-person view", true);
         _alwaysShowCrosshairOption = AddToggle("Always Show Crosshair", "Keep crosshair visible always", false);
         _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
-        _actionModeControlsRetroCameraOption = AddToggle("Action Mode Controls Retro Camera", "Action Mode keybind toggle will also control Retro Camera", false);
         _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
 
         AddDivider("Third Person Zoom");
@@ -195,7 +192,7 @@ internal static class Settings
         _actionModeKeybind = AddKeybind("Toggle Action Mode", "Toggle action mode", KeyCode.RightBracket);
         _actionModeKeybind.AddKeyDownListener(() =>
         {
-            if (!_isFirstPerson)
+            if (Enabled && !_isFirstPerson)
             {
                 _isMouseLocked = !_isMouseLocked;
                 _isActionMode = !_isActionMode;
@@ -205,21 +202,6 @@ internal static class Settings
                 if (Cursor.lockState.Equals(CursorLockMode.Locked) && (!_isActionMode || !_isMouseLocked))
                 {
                     Cursor.lockState = CursorLockMode.None;
-                }
-
-                // FORCES RETRO CAMERA ON/OFF WHEN TOGGLING ACTION MODE
-                if (Settings.ActionModeControlsRetroCamera)
-                {
-                    if (_isActionMode && !Settings.Enabled)
-                    {
-                        Settings.Enabled = true;
-                        Systems.RetroCamera.Enabled(true);
-                    }
-                    else if (!_isActionMode && Settings.Enabled)
-                    {
-                        Settings.Enabled = false;
-                        Systems.RetroCamera.Enabled(false);
-                    }
                 }
             }
         });
