@@ -18,6 +18,8 @@ internal static class Settings
     public static bool ActionModeCrosshair { get => _actionModeCrosshairOption.Value; set => _actionModeCrosshairOption.SetValue(value); }
     public static bool ActionModeControlsRetroCamera { get => _actionModeControlsRetroCameraOption.Value; set => _actionModeControlsRetroCameraOption.SetValue(value); }
     public static float FieldOfView { get => _fieldOfViewOption.Value; set => _fieldOfViewOption.SetValue(value); }
+    public static bool HideCharacterInfoPanel { get => _hideCharacterInfoPanel.Value; set => _hideCharacterInfoPanel.SetValue(value); }
+    // public static CameraAimMode CameraAimMode { get => _cameraAimModeOption.GetEnumValue<CameraAimMode>(); set => _cameraAimModeOption.SetValue((int)value); }
     public static int AimOffsetX { get => (int)(Screen.width * (_aimOffsetXOption.Value / 100)); set => _aimOffsetXOption.SetValue(Mathf.Clamp(value / Screen.width, -25, 25)); }
     public static int AimOffsetY { get => (int)(Screen.height * (_aimOffsetYOption.Value / 100)); set => _aimOffsetYOption.SetValue(Mathf.Clamp(value / Screen.width, -25, 25)); }
     public static bool LockZoom { get => _lockCameraZoomOption.Value; set => _lockCameraZoomOption.SetValue(value); }
@@ -55,11 +57,13 @@ internal static class Settings
     */
 
     static Toggle _enabledOption;
+    static Toggle _firstPersonEnabledOption;
     static Slider _fieldOfViewOption;
     static Toggle _alwaysShowCrosshairOption;
     static Toggle _actionModeCrosshairOption;
     static Toggle _actionModeControlsRetroCameraOption;
     static Toggle _firstPersonEnabledOption;
+    static Toggle _hideCharacterInfoPanel; // WIP
     // static Toggle _defaultBuildModeOption;
 
     // static Dropdown _cameraAimModeOption;
@@ -85,6 +89,7 @@ internal static class Settings
     static Keybinding _toggleHUDKeybind;
     static Keybinding _toggleFogKeybind;
     static Keybinding _completeTutorialKeybind;
+    static Keybinding _toggleSocialWheel;
     static Keybinding _cycleCameraKeybind; // WIP
     public static void Initialize()
     {
@@ -114,9 +119,14 @@ internal static class Settings
         _toggleFogKeybind.AddKeyDownListener(action);
     public static void AddCompleteTutorialListener(KeyHandler action) =>
         _completeTutorialKeybind.AddKeyDownListener(action);
+    public static void AddSocialWheelPressedListener(KeyHandler action) =>
+        _toggleSocialWheel.AddKeyPressedListener(action);
+    public static void AddSocialWheelUpListener(KeyHandler action) =>
+        _toggleSocialWheel.AddKeyUpListener(action);
     public static void AddCycleCameraListener(KeyHandler action) =>
         _cycleCameraKeybind.AddKeyDownListener(action);
 
+    public static bool _wasDisabled = false;
     static void RegisterOptions()
     {
         // Core.Log.LogWarning("Registering options...");
@@ -126,11 +136,12 @@ internal static class Settings
         _alwaysShowCrosshairOption = AddToggle("Always Show Crosshair", "Keep crosshair visible always", false);
         _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
         _actionModeControlsRetroCameraOption = AddToggle("Action Mode Controls Retro Camera", "Action Mode keybind toggle will also control Retro Camera", false);
+        _hideCharacterInfoPanel = AddToggle("Hide Character Info Panel", "Hide character info panel", false);
         _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
 
         AddDivider("Third Person Zoom");
         _minZoomOption = AddSlider("Min Zoom", "Minimum zoom", 1f, 15f, 1f);
-        _maxZoomOption = AddSlider("Max Zoom", "Maximum zoom", 5f, 20f, 15f);
+        _maxZoomOption = AddSlider("Max Zoom", "Maximum zoom", 5f, 30f, 15f);
         _lockCameraZoomOption = AddToggle("Lock Zoom", "Lock zoom distance", false);
         _lockCameraZoomDistanceOption = AddSlider("Locked Zoom Distance", "Fixed zoom distance when locked", 1f, 20f, 15f);
 
@@ -147,8 +158,8 @@ internal static class Settings
 
         AddDivider("Over Shoulder");
         _overTheShoulderOption = AddToggle("Enable Shoulder Offset", "Enable over-the-shoulder camera", false);
-        _overTheShoulderXOption = AddSlider("Shoulder Horizontal Offset", "Shoulder view horizontal offset", 1f, 4f, 1f);
-        _overTheShoulderYOption = AddSlider("Shoulder Vertical Offset", "Shoulder view vertical offset", 1f, 8f, 1f);
+        _overTheShoulderXOption = AddSlider("Shoulder Horizontal Offset", "Shoulder view horizontal offset", -10f, 10f, 0f);
+        _overTheShoulderYOption = AddSlider("Shoulder Vertical Offset", "Shoulder view vertical offset", -10f, 10f, 0f);
 
         _minZoomOption.AddListener(value =>
         {
@@ -189,14 +200,53 @@ internal static class Settings
         _enabledKeybind = AddKeybind("Toggle RetroCamera", "Enable or disable RetroCamera functions", KeyCode.LeftBracket);
         _enabledKeybind.AddKeyDownListener(() =>
         {
-            _enabledOption.SetValue(!Enabled);
+            if (!EscapeMenuViewPatch._isServerPaused) _enabledOption.SetValue(!Enabled);
+
+            if (Enabled && (_isFirstPerson || _isActionMode))
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+            else if (Cursor.lockState.Equals(CursorLockMode.Locked) && !Enabled)
+            {
+                Cursor.lockState = CursorLockMode.None;
+            }
         });
 
         _actionModeKeybind = AddKeybind("Toggle Action Mode", "Toggle action mode", KeyCode.RightBracket);
         _actionModeKeybind.AddKeyDownListener(() =>
         {
-            if (!_isFirstPerson)
+            if (_wasDisabled && Enabled && !_isFirstPerson)
             {
+                _wasDisabled = false;
+                _isMouseLocked = !_isMouseLocked;
+                _isActionMode = !_isActionMode;
+
+                if (IsMenuOpen) IsMenuOpen = false;
+                if (ActionWheelSystemPatch._wheelVisible) ActionWheelSystemPatch._wheelVisible = false;
+                if (Cursor.lockState.Equals(CursorLockMode.Locked) && (!_isActionMode || !_isMouseLocked))
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                }
+                
+                _enabledOption.SetValue(false);
+            }
+            else if (Enabled && !_isFirstPerson)
+            {
+                _isMouseLocked = !_isMouseLocked;
+                _isActionMode = !_isActionMode;
+
+                if (IsMenuOpen) IsMenuOpen = false;
+                if (ActionWheelSystemPatch._wheelVisible) ActionWheelSystemPatch._wheelVisible = false;
+                if (Cursor.lockState.Equals(CursorLockMode.Locked) && (!_isActionMode || !_isMouseLocked))
+                {
+                    Cursor.lockState = CursorLockMode.None;
+                }
+            }
+            else if (!Enabled && !_isFirstPerson && !IsMenuOpen && !EscapeMenuViewPatch._isServerPaused)
+            {
+                _wasDisabled = true;
+                _enabledOption.SetValue(true);
+
                 _isMouseLocked = !_isMouseLocked;
                 _isActionMode = !_isActionMode;
 
@@ -230,7 +280,9 @@ internal static class Settings
 
         _completeTutorialKeybind = AddKeybind("Complete Tutorial", "Pushes button for completed tutorials if applicable", KeyCode.Minus);
 
-        // _cycleCameraKeybind = AddKeybind("Cycle Camera", "Cycle active camera (topdown, orbit, hybrid, free)", KeyCode.Minus);
+        // _toggleSocialWheel = AddKeybind("Use Social Wheel", "Toggle social wheel visibility", KeyCode.Slash);
+
+        // _cycleCameraKeybind = AddKeybind("Cycle Camera", "Cycle active camera (topdown, orbit, hybrid, free)", KeyCode.Slash);
     }
     public static bool TryLoadOptions()
     {

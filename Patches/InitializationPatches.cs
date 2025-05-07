@@ -37,41 +37,6 @@ internal static class InitializationPatches
         Core.ResetStates();
     }
 
-    /*
-    static bool _isFound = false;
-
-    [HarmonyPatch(typeof(DayNightCycleMoodSystem), nameof(DayNightCycleMoodSystem.OnUpdate))]
-    [HarmonyPrefix]
-    static void OnUpdatePrefix(DayNightCycleMoodSystem __instance)
-    {
-        if (!Core._initialized) return;
-        else if (_isFound) return;
-
-        NativeArray<Entity> entities = __instance.EntityQueries[0].ToEntityArray(Allocator.Temp);
-
-        try
-        {
-            foreach (Entity entity in entities)
-            {
-                if (entity.Has<DayNightCycle>())
-                {
-                    ClearSkies._dayNightCycleSingleton = entity;
-                    ClearSkies.Initialize();
-
-                    Core.LogEntity(Core._client, entity);
-                    _isFound = true;
-
-                    break;
-                }
-            }
-        }
-        finally
-        {
-            entities.Dispose();
-        }
-    }
-    */
-
     [HarmonyPatch(typeof(UICanvasSystem), nameof(UICanvasSystem.UpdateHideIfDisabled))]
     [HarmonyPostfix]
     static void OnUpdatePostfix(UICanvasBase canvas)

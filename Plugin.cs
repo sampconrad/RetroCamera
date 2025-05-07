@@ -4,6 +4,7 @@ using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using RetroCamera.Patches;
 using System.Reflection;
+using UnityEngine;
 
 namespace RetroCamera;
 
@@ -16,6 +17,12 @@ internal class Plugin : BasePlugin
     public override void Load()
     {
         Instance = this;
+
+        if (Application.productName == "VRisingServer")
+        {
+            Core.Log.LogInfo($"{MyPluginInfo.PLUGIN_NAME}[{MyPluginInfo.PLUGIN_VERSION}] is a client mod! ({Application.productName})");
+            return;
+        }
 
         // Settings.Initialize();
         AddComponent<Systems.RetroCamera>();

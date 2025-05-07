@@ -62,7 +62,7 @@ internal static class OptionsMenuPatches
                 Core.Log.LogError($"[OptionsPanel_Interface.Start()] Failed to localize keys, may need to reload from main menu for option labels: {ex.Message}");
             }
 
-            _shouldLocalize = false;
+            // _shouldLocalize = false;
         }
 
         __instance.AddHeader(_sectionHeader);

@@ -1,6 +1,7 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using ProjectM;
+using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Sequencer;
@@ -16,12 +17,22 @@ namespace RetroCamera;
 internal class Core
 {
     public static World _client;
+    static Entity _localCharacter = Entity.Null;
+    public static Entity LocalCharacter =>
+        _localCharacter != Entity.Null
+        ? _localCharacter
+        : (ConsoleShared.TryGetLocalCharacterInCurrentWorld(out _localCharacter, _client)
+        ? _localCharacter
+        : Entity.Null);
     public static EntityManager EntityManager => _client.EntityManager;
     public static ClientScriptMapper ClientScriptMapper { get; set; }
     public static ClientGameManager ClientGameManager { get; set; }
+    public static GameDataSystem GameDataSystem { get; set; }
     public static ZoomModifierSystem ZoomModifierSystem { get; set; }
     public static TopdownCameraSystem TopdownCameraSystem { get; set; }
+    public static TargetInfoParentSystem TargetInfoParentSystem { get; set; }
     public static PrefabCollectionSystem PrefabCollectionSystem { get; set; }
+    public static ActionWheelSystem ActionWheelSystem { get; set; }
     public static UIDataSystem UIDataSystem { get; set; }
     public static CursorPositionSystem CursorPositionSystem { get; set; }
     public static InputActionSystem InputActionSystem { get; set; }
@@ -40,15 +51,17 @@ internal class Core
         ZoomModifierSystem.Enabled = false; // necessary?
 
         TopdownCameraSystem = _client.GetExistingSystemManaged<TopdownCameraSystem>();
+        TargetInfoParentSystem = _client.GetExistingSystemManaged<TargetInfoParentSystem>();
         PrefabCollectionSystem = _client.GetExistingSystemManaged<PrefabCollectionSystem>();
+        ActionWheelSystem = _client.GetExistingSystemManaged<ActionWheelSystem>();
         UIDataSystem = _client.GetExistingSystemManaged<UIDataSystem>();
         CursorPositionSystem = _client.GetExistingSystemManaged<CursorPositionSystem>();
 
         ClientScriptMapper = _client.GetExistingSystemManaged<ClientScriptMapper>();
         ClientGameManager = ClientScriptMapper._ClientGameManager;
+        GameDataSystem = _client.GetExistingSystemManaged<GameDataSystem>();
 
         InputActionSystem = _client.GetExistingSystemManaged<InputActionSystem>();
-
         TopdownCameraSystemHooks.Initialize();
 
         _initialized = true;
