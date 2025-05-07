@@ -64,7 +64,6 @@ internal static class Settings
     static Toggle _actionModeCrosshairOption;
     static Toggle _actionModeControlsRetroCameraOption;
     static Toggle _useDotCrosshairOption;
-    static Toggle _firstPersonEnabledOption;
     static Toggle _hideCharacterInfoPanel; // WIP
     // static Toggle _defaultBuildModeOption;
 
