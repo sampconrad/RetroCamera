@@ -349,7 +349,7 @@ public class RetroCamera : MonoBehaviour
         Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
         Color[] colors = new Color[size * size];
 
-        float radius = size / 5f;
+        float radius = size / 6f;
         float center = size / 2f;
         float radiusSquared = radius * radius;
 
@@ -363,8 +363,8 @@ public class RetroCamera : MonoBehaviour
 
                 if (distanceSquared <= radiusSquared)
                 {
-                    float alpha = 1f - (distanceSquared / radiusSquared);
-                    colors[y * size + x] = new Color(1f, 1f, 1f, alpha);
+                    float alpha = (1f - (distanceSquared / radiusSquared)) * 0.7f;
+                    colors[y * size + x] = new Color(0.8f, 0.8f, 0.8f, alpha);
                 }
                 else
                 {
