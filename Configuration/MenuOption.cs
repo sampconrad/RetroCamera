@@ -1,4 +1,5 @@
-﻿using Stunlock.Localization;
+﻿using RetroCamera.Utilities;
+using Stunlock.Localization;
 using System.Text.Json.Serialization;
 using UnityEngine;
 
@@ -46,6 +47,7 @@ internal abstract class MenuOption<T> : MenuOption
     {
         Value = value;
         OnOptionChanged(value);
+        Persistence.SaveOptions();
     }
     public void AddListener(OptionChangedHandler<T> listener) => OnOptionChanged += listener;
     public override void ApplyDefault() => SetValue(DefaultValue);
@@ -76,6 +78,7 @@ internal class Toggle : MenuOption<bool>
     }
     public override void ApplyDefault() => SetValue(DefaultValue);
 }
+
 [Serializable]
 internal class Slider : MenuOption<float>
 {

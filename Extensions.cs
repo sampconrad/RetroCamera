@@ -6,7 +6,6 @@ using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
 using System.Collections;
-using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -22,8 +21,9 @@ internal static class Extensions
     public delegate void WithRefHandler<T>(ref T item);
     public static void With<T>(this Entity entity, WithRefHandler<T> action) where T : struct
     {
-        T item = entity.ReadRW<T>();
+        T item = entity.Read<T>();
         action(ref item);
+
         EntityManager.SetComponentData(entity, item);
     }
     public static void AddWith<T>(this Entity entity, WithRefHandler<T> action) where T : struct
@@ -42,49 +42,13 @@ internal static class Extensions
             entity.With(action);
         }
     }
-    public unsafe static void Write<T>(this Entity entity, T componentData) where T : struct
+    public static void Write<T>(this Entity entity, T componentData) where T : struct
     {
-        // Get the ComponentType for T
-        var ct = new ComponentType(Il2CppType.Of<T>());
-
-        // Marshal the component data to a byte array
-        byte[] byteArray = StructureToByteArray(componentData);
-
-        // Get the size of T
-        int size = Marshal.SizeOf<T>();
-
-        // Create a pointer to the byte array
-        fixed (byte* p = byteArray)
-        {
-            // Set the component data
-            EntityManager.SetComponentDataRaw(entity, ct.TypeIndex, p, size);
-        }
+        EntityManager.SetComponentData(entity, componentData);
     }
-    public static byte[] StructureToByteArray<T>(T structure) where T : struct
+    public static T Read<T>(this Entity entity) where T : struct
     {
-        int size = Marshal.SizeOf(structure);
-        byte[] byteArray = new byte[size];
-        IntPtr ptr = Marshal.AllocHGlobal(size);
-
-        Marshal.StructureToPtr(structure, ptr, true);
-        Marshal.Copy(ptr, byteArray, 0, size);
-        Marshal.FreeHGlobal(ptr);
-
-        return byteArray;
-    }
-    public unsafe static T ReadRW<T>(this Entity entity) where T : struct
-    {
-        var ct = new ComponentType(Il2CppType.Of<T>());
-        void* componentDataRawRW = EntityManager.GetComponentDataRawRW(entity, ct.TypeIndex);
-        T componentData = Marshal.PtrToStructure<T>(new IntPtr(componentDataRawRW));
-        return componentData;
-    }
-    public unsafe static T Read<T>(this Entity entity) where T : struct
-    {
-        var ct = new ComponentType(Il2CppType.Of<T>());
-        void* rawPointer = EntityManager.GetComponentDataRawRO(entity, ct.TypeIndex);
-        T componentData = Marshal.PtrToStructure<T>(new IntPtr(rawPointer));
-        return componentData;
+        return EntityManager.GetComponentData<T>(entity);
     }
     public static DynamicBuffer<T> ReadBuffer<T>(this Entity entity) where T : struct
     {
@@ -105,6 +69,21 @@ internal static class Extensions
         }
 
         return false;
+    }
+    public static bool TryRemove<T>(this Entity entity) where T : struct
+    {
+        if (entity.Has<T>())
+        {
+            entity.Remove<T>();
+
+            return true;
+        }
+
+        return false;
+    }
+    public static bool Has<T>(this Entity entity) where T : struct
+    {
+        return EntityManager.HasComponent(entity, new(Il2CppType.Of<T>()));
     }
     public static bool TryGetBuffer<T>(this Entity entity, out DynamicBuffer<T> buffer) where T : struct
     {
@@ -128,11 +107,6 @@ internal static class Extensions
         }
 
         return false;
-    }
-    public static bool Has<T>(this Entity entity)
-    {
-        var ct = new ComponentType(Il2CppType.Of<T>());
-        return EntityManager.HasComponent(entity, ct);
     }
     public static void LogComponentTypes(this Entity entity)
     {

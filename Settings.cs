@@ -1,23 +1,27 @@
 ﻿using RetroCamera.Configuration;
 using RetroCamera.Patches;
 using UnityEngine;
+using static RetroCamera.Configuration.Keybinding;
+using static RetroCamera.Configuration.KeybindsManager;
+using static RetroCamera.Configuration.OptionsManager;
 using static RetroCamera.Utilities.CameraState;
 using static RetroCamera.Utilities.Persistence;
-using static RetroCamera.Configuration.OptionsManager;
+using static RetroCamera.Configuration.QuipManager;
 using BoolChanged = RetroCamera.Configuration.MenuOption<bool>.OptionChangedHandler<bool>;
 using FloatChanged = RetroCamera.Configuration.MenuOption<float>.OptionChangedHandler<float>;
-using static RetroCamera.Configuration.KeybindsManager;
-using static RetroCamera.Configuration.Keybinding;
 
 namespace RetroCamera;
 internal static class Settings
 {
     public static bool Enabled { get => _enabledOption.Value; set => _enabledOption.SetValue(value); }
     public static bool FirstPersonEnabled { get => _firstPersonEnabledOption.Value; set => _firstPersonEnabledOption.SetValue(value); }
+    public static bool CommandWheelEnabled { get => _commandWheelEnabled.Value; set => _commandWheelEnabled.SetValue(value); }
     public static bool AlwaysShowCrosshair { get => _alwaysShowCrosshairOption.Value; set => _alwaysShowCrosshairOption.SetValue(value); }
     public static bool ActionModeCrosshair { get => _actionModeCrosshairOption.Value; set => _actionModeCrosshairOption.SetValue(value); }
     public static float FieldOfView { get => _fieldOfViewOption.Value; set => _fieldOfViewOption.SetValue(value); }
+    public static float CrosshairSize { get => _crosshairSize.Value; set => _crosshairSize.SetValue(value); }
     public static bool HideCharacterInfoPanel { get => _hideCharacterInfoPanel.Value; set => _hideCharacterInfoPanel.SetValue(value); }
+
     // public static CameraAimMode CameraAimMode { get => _cameraAimModeOption.GetEnumValue<CameraAimMode>(); set => _cameraAimModeOption.SetValue((int)value); }
     public static int AimOffsetX { get => (int)(Screen.width * (_aimOffsetXOption.Value / 100)); set => _aimOffsetXOption.SetValue(Mathf.Clamp(value / Screen.width, -25, 25)); }
     public static int AimOffsetY { get => (int)(Screen.height * (_aimOffsetYOption.Value / 100)); set => _aimOffsetYOption.SetValue(Mathf.Clamp(value / Screen.width, -25, 25)); }
@@ -57,10 +61,12 @@ internal static class Settings
 
     static Toggle _enabledOption;
     static Toggle _firstPersonEnabledOption;
+    static Toggle _commandWheelEnabled;
     static Slider _fieldOfViewOption;
+    static Slider _crosshairSize;
     static Toggle _alwaysShowCrosshairOption;
     static Toggle _actionModeCrosshairOption;
-    static Toggle _hideCharacterInfoPanel; // WIP
+    static Toggle _hideCharacterInfoPanel;
     // static Toggle _defaultBuildModeOption;
 
     // static Dropdown _cameraAimModeOption;
@@ -87,7 +93,6 @@ internal static class Settings
     static Keybinding _toggleFogKeybind;
     static Keybinding _completeTutorialKeybind;
     static Keybinding _toggleSocialWheel;
-    static Keybinding _cycleCameraKeybind; // WIP
     public static void Initialize()
     {
         try
@@ -97,6 +102,7 @@ internal static class Settings
 
             TryLoadOptions();
             TryLoadKeybinds();
+            TryLoadCommands();
 
             SaveOptions();
             SaveKeybinds();
@@ -120,8 +126,6 @@ internal static class Settings
         _toggleSocialWheel.AddKeyPressedListener(action);
     public static void AddSocialWheelUpListener(KeyHandler action) =>
         _toggleSocialWheel.AddKeyUpListener(action);
-    public static void AddCycleCameraListener(KeyHandler action) =>
-        _cycleCameraKeybind.AddKeyDownListener(action);
 
     public static bool _wasDisabled = false;
     static void RegisterOptions()
@@ -130,10 +134,12 @@ internal static class Settings
 
         _enabledOption = AddToggle("Enabled", "Enable or disable RetroCamera", true);
         _firstPersonEnabledOption = AddToggle("First Person", "Enable zooming in far enough for first-person view", true);
+        _commandWheelEnabled = AddToggle("Command Wheel", "Enable command wheel", false);
         _alwaysShowCrosshairOption = AddToggle("Always Show Crosshair", "Keep crosshair visible always", false);
         _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
         _hideCharacterInfoPanel = AddToggle("Hide Character Info Panel", "Hide character info panel", false);
         _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
+        _crosshairSize = AddSlider("Crosshair Size", "Crosshair size scaling", 1f, 5f, 1f);
 
         AddDivider("Third Person Zoom");
         _minZoomOption = AddSlider("Min Zoom", "Minimum zoom", 1f, 15f, 1f);
@@ -261,15 +267,18 @@ internal static class Settings
 
         _completeTutorialKeybind = AddKeybind("Complete Tutorial", "Pushes button for completed tutorials if applicable", KeyCode.Minus);
 
-        // _toggleSocialWheel = AddKeybind("Use Social Wheel", "Toggle social wheel visibility", KeyCode.Slash);
-
-        // _cycleCameraKeybind = AddKeybind("Cycle Camera", "Cycle active camera (topdown, orbit, hybrid, free)", KeyCode.Slash);
+        _toggleSocialWheel = AddKeybind("Use Social Wheel", "Toggle social wheel visibility", KeyCode.RightAlt);
     }
     public static bool TryLoadOptions()
     {
         var loaded = LoadOptions();
+
         if (loaded == null)
+        {
+            Core.Log.LogWarning("No options saved!");
             return false;
+        }
+            
 
         foreach (var (key, loadedOption) in loaded)
         {
@@ -282,7 +291,12 @@ internal static class Settings
     public static bool TryLoadKeybinds()
     {
         var loaded = LoadKeybinds();
-        if (loaded == null) return false;
+
+        if (loaded == null)
+        {
+            Core.Log.LogWarning("No keybinds saved!");
+            return false;
+        }
 
         foreach (var (key, loadedBind) in loaded)
         {

@@ -26,7 +26,11 @@ internal static class OptionsMenuPatches
 
     [HarmonyPatch(typeof(OptionsMenu_Base), nameof(OptionsMenu_Base.OnDestroy))]
     [HarmonyPostfix]
-    static void OnDestroyPostfix() => CameraState.IsMenuOpen = false;
+    static void OnDestroyPostfix()
+    {
+        Persistence.SaveOptions();
+        CameraState.IsMenuOpen = false;
+    }
 
     [HarmonyPatch(typeof(OptionsPanel_Interface), nameof(OptionsPanel_Interface.Start))]
     [HarmonyPostfix]
@@ -59,7 +63,7 @@ internal static class OptionsMenuPatches
             }
             catch (Exception ex)
             {
-                Core.Log.LogError($"[OptionsPanel_Interface.Start()] Failed to localize keys, may need to reload from main menu for option labels: {ex.Message}");
+                Core.Log.LogError($"[OptionsPanel_Interface.Start] Failed to localize keys - {ex.Message}");
             }
 
             // _shouldLocalize = false;
@@ -176,7 +180,6 @@ internal static class OptionsMenuPatches
 
             settingsEntryBinding.SetInputInfo(keybind.NameKey, keybind.DescriptionKey);
             settingsEntryBinding.SetPrimary(keybind.PrimaryName);
-            settingsEntryBinding.SetSecondary(keybind.SecondaryName);
 
             settingsEntryBinding.PrimaryButton.onClick.AddListener((UnityAction)(() => RefreshKeybind(__instance, settingsEntryBinding, keybind).Start()));
             settingsEntryBinding.SecondaryButton.gameObject.SetActive(false);

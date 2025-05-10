@@ -200,17 +200,29 @@ internal static class TopdownCameraSystemHooks
         _usingMouseWheel = _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleEmoteWheel) 
             || _gameplayInputState.IsInputPressed(ButtonInputAction.ToggleActionWheel);
 
+        if (_usingMouseWheel)
+        {
+            // Core.Log.LogWarning($"[RetroCamera] UsingActionWheel");
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else if (SocialWheelActive)
+        {
+
+        }
         // Locks the mouse to the center of the screen if the mouse should be locked like for action mode or the camera rotate button is pressed
-        if (_validGameplayInputState &&
+        else if (_validGameplayInputState &&
            (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera)) &&
            !IsMenuOpen)
         {
+            /*
             if (_usingMouseWheel || SocialWheelActive)
             {
+                Core.Log.LogWarning($"[RetroCamera] UsingActionWheel");
                 Cursor.lockState = CursorLockMode.None;
             }
+            */
             // else if (_isActionMode || _isFirstPerson || Settings.CameraAimMode.Equals(CameraAimMode.Forward))
-            else if (_isActionMode || _isFirstPerson)
+            if (_isActionMode || _isFirstPerson)
             {
                 float2 screenPosition = new((Screen.width / 2) + Settings.AimOffsetX, (Screen.height / 2) + Settings.AimOffsetY);
                 cursorPosition.ScreenPosition = screenPosition;

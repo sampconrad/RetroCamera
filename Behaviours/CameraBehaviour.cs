@@ -62,10 +62,20 @@ internal abstract class CameraBehaviour
         // Update zoom if MaxZoom is changed
         if (_targetZoom > Settings.MaxZoom) _targetZoom = Settings.MaxZoom;
 
-        if (SocialWheelActive && _shouldActivateWheel)
+        /*
+        if (_shouldActivateWheel)
+        {
+            Core.Log.LogWarning($"[RetroCamera] Setting current wheel...");
+            // Core.ActionWheelSystem._CurrentActiveWheel = SocialWheel;
+            _shouldActivateWheel = false;
+        }
+        */
+
+        if (SocialWheelActive)
         {
             Core.ActionWheelSystem.UpdateAndShowWheel(SocialWheel, inputState);
-            _shouldActivateWheel = false;
+            // Core.ActionWheelSystem._CurrentActiveWheel = SocialWheel;
+            // Core.Log.LogWarning($"[RetroCamera] UsingActionWheel");
         }
     }
     public virtual void UpdateCameraInputs(ref TopdownCameraState state, ref TopdownCamera data)
