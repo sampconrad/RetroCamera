@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using static RetroCamera.Configuration.OptionsManager;
 using static RetroCamera.Configuration.KeybindsManager;
+using static RetroCamera.Configuration.QuipManager;
 
 namespace RetroCamera.Utilities;
 internal static class Persistence
@@ -20,19 +21,24 @@ internal static class Persistence
 
     const string KEYBINDS_KEY = "Keybinds";
     const string OPTIONS_KEY = "Options";
+    const string COMMANDS_KEY = "Commands";
 
     static readonly string _keybindsJson = Path.Combine(_directoryPath, $"{KEYBINDS_KEY}.json");
     static readonly string _settingsJson = Path.Combine(_directoryPath, $"{OPTIONS_KEY}.json");
+    static readonly string _commandsJson = Path.Combine(_directoryPath, $"{COMMANDS_KEY}.json");
 
     static readonly Dictionary<string, string> _filePaths = new()
     {
         {KEYBINDS_KEY, _keybindsJson },
-        {OPTIONS_KEY, _settingsJson }
+        {OPTIONS_KEY, _settingsJson },
+        {COMMANDS_KEY, _commandsJson }
     };
     public static void SaveKeybinds() => SaveDictionary(Keybinds, KEYBINDS_KEY);
     public static void SaveOptions() => SaveDictionary(Options, OPTIONS_KEY);
+    public static void SaveCommands() => SaveDictionary(CommandQuips, COMMANDS_KEY);
     public static Dictionary<string, Keybinding> LoadKeybinds() => LoadDictionary<string, Keybinding>(KEYBINDS_KEY);
     public static Dictionary<string, MenuOption> LoadOptions() => LoadDictionary<string, MenuOption>(OPTIONS_KEY);
+    public static Dictionary<int, Command> LoadCommands() => LoadDictionary<int, Command>(COMMANDS_KEY);
     static Dictionary<T, U> LoadDictionary<T, U>(string fileKey)
     {
         if (!_filePaths.TryGetValue(fileKey, out string filePath)) return null;
@@ -45,6 +51,19 @@ internal static class Persistence
             if (!File.Exists(filePath))
             {
                 File.Create(filePath).Dispose();
+
+                if (fileKey == COMMANDS_KEY && typeof(T) == typeof(int) && typeof(U) == typeof(Command))
+                {
+                    var defaultDict = new Dictionary<int, Command>();
+                    for (int i = 0; i < 8; i++)
+                    {
+                        defaultDict[i] = new Command { Name = "", InputString = "" };
+                    }
+
+                    File.WriteAllText(filePath, JsonSerializer.Serialize(defaultDict, _jsonOptions));
+                    return defaultDict as Dictionary<T, U>;
+                }
+
                 return [];
             }
 

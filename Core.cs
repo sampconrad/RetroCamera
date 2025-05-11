@@ -18,11 +18,18 @@ internal class Core
 {
     public static World _client;
     static Entity _localCharacter = Entity.Null;
+    static Entity _localUser = Entity.Null;
     public static Entity LocalCharacter =>
         _localCharacter != Entity.Null
         ? _localCharacter
         : (ConsoleShared.TryGetLocalCharacterInCurrentWorld(out _localCharacter, _client)
         ? _localCharacter
+        : Entity.Null);
+    public static Entity LocalUser =>
+        _localUser != Entity.Null
+        ? _localUser
+        : (ConsoleShared.TryGetLocalUserInCurrentWorld(out _localUser, _client)
+        ? _localUser
         : Entity.Null);
     public static EntityManager EntityManager => _client.EntityManager;
     public static ClientScriptMapper ClientScriptMapper { get; set; }
@@ -36,6 +43,7 @@ internal class Core
     public static UIDataSystem UIDataSystem { get; set; }
     public static CursorPositionSystem CursorPositionSystem { get; set; }
     public static InputActionSystem InputActionSystem { get; set; }
+    public static LocalUserSystem LocalUserSystem { get; set; }
     public static ManualLogSource Log => Plugin.LogInstance;
 
     static MonoBehaviour _monoBehaviour;
@@ -62,6 +70,7 @@ internal class Core
         GameDataSystem = _client.GetExistingSystemManaged<GameDataSystem>();
 
         InputActionSystem = _client.GetExistingSystemManaged<InputActionSystem>();
+        LocalUserSystem = _client.GetExistingSystemManaged<LocalUserSystem>();
         TopdownCameraSystemHooks.Initialize();
 
         _initialized = true;

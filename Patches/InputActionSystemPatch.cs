@@ -41,14 +41,14 @@ internal static class InputActionSystemPatch
     }
     static bool IsKeybindDown(Keybinding keybind)
     {
-        return Input.GetKeyDown(keybind.Primary) || Input.GetKeyDown(keybind.Secondary);
+        return Input.GetKeyDown(keybind.Primary);
     }
     static bool IsKeybindUp(Keybinding keybind)
     {
-        return Input.GetKeyUp(keybind.Primary) || Input.GetKeyUp(keybind.Secondary);
+        return Input.GetKeyUp(keybind.Primary);
     }
     static bool IsKeybindPressed(Keybinding keybind)
     {
-        return Input.GetKey(keybind.Primary) || Input.GetKey(keybind.Secondary);
+        return Input.GetKey(keybind.Primary);
     }
 }

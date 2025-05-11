@@ -2,15 +2,16 @@
 using ProjectM.Sequencer;
 using ProjectM.UI;
 using RetroCamera.Behaviours;
+using RetroCamera.Configuration;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
+using static RetroCamera.Configuration.QuipManager;
 using static RetroCamera.Utilities.CameraState;
 
 namespace RetroCamera.Systems;
 public class RetroCamera : MonoBehaviour
 {
-    static EntityManager EntityManager => Core.EntityManager;
     static ZoomModifierSystem ZoomModifierSystem => Core.ZoomModifierSystem;
     static ActionWheelSystem ActionWheelSystem => Core.ActionWheelSystem;
 
@@ -79,9 +80,8 @@ public class RetroCamera : MonoBehaviour
         Settings.AddFieldOfViewListener(UpdateFieldOfView);
         Settings.AddHideHUDListener(ToggleHUD);
         Settings.AddHideFogListener(ToggleFog);
-        // Settings.AddCycleCameraListener(CycleCamera);
-        // Settings.AddSocialWheelPressedListener(SocialWheelKeyPressed);
-        // Settings.AddSocialWheelUpListener(SocialWheelKeyUp);
+        Settings.AddSocialWheelPressedListener(SocialWheelKeyPressed);
+        Settings.AddSocialWheelUpListener(SocialWheelKeyUp);
         Settings.AddCompleteTutorialListener(CompleteTutorial);
     }
 
@@ -109,140 +109,100 @@ public class RetroCamera : MonoBehaviour
 
     static Entity _rootPrefabCollection;
     static bool _socialWheelInitialized = false;
-
-    static Entity _freeCameraPrefab;
-    static Entity _topDownCameraPrefab;
-    static Entity _orbitCameraPrefab;
     static void SocialWheelKeyPressed()
     {
-        /*
-        if (!_rootPrefabCollection.Exists()) ActionWheelSystem._RootPrefabCollectionAccessor.TryGetSingletonEntity(out _rootPrefabCollection);
-        
-        if (!_socialWheelInitialized && _rootPrefabCollection.TryGetComponent(out RootPrefabCollection rootPrefabCollection) 
-            && rootPrefabCollection.GeneralGameplayCollectionPrefab.TryGetComponent(out GeneralGameplayCollection generalGameplayCollection))
+        if (!Settings.CommandWheelEnabled) return;
+
+        if (!_rootPrefabCollection.Exists() || _socialWheel == null)
         {
-            ActionWheelSystem.InitializeSocialWheel(true, generalGameplayCollection);
-            _socialWheelInitialized = true;
+            Core.Log.LogWarning($"[RetroCamera] Initializing SocialWheel...");
+            ActionWheelSystem?._RootPrefabCollectionAccessor.TryGetSingletonEntity(out _rootPrefabCollection);
 
-            try
+            if (!_socialWheelInitialized && _rootPrefabCollection.TryGetComponent(out RootPrefabCollection rootPrefabCollection)
+                && rootPrefabCollection.GeneralGameplayCollectionPrefab.TryGetComponent(out GeneralGameplayCollection generalGameplayCollection))
             {
-                var socialWheelData = ActionWheelSystem._SocialWheelDataList;
-                var socialWheelShortcuts = ActionWheelSystem._SocialWheelShortcutList;
-
-                Core.Log.LogWarning($"[SocialWheelKeyPressed] Social Wheel - {socialWheelData.Count}, {socialWheelShortcuts.Count}");
-                int index = 0;
-
-                foreach (var data in socialWheelData)
+                foreach (var commandQuip in CommandQuips)
                 {
-                    Core.Log.LogWarning($"[RetroCamera] ({index++}) Data - ActionType: {data.Type}, Disabled: {data.Disabled}, Unlocked: {data.Unlocked}, PrefabGUID: {data.PrefabGUID}");
+                    if (string.IsNullOrEmpty(commandQuip.Value.Name)
+                        || string.IsNullOrEmpty(commandQuip.Value.Command))
+                        continue;
+
+                    ChatQuip chatQuip = generalGameplayCollection.ChatQuips[commandQuip.Key];
+                    chatQuip.Text = commandQuip.Value.NameKey;
+
+                    Core.Log.LogWarning($"[RetroCamera] QuipData - {commandQuip.Value.Name} | {commandQuip.Value.Command} | {chatQuip.Sequence} | {chatQuip.Sequence.ToPrefabGUID()}");
+
+                    generalGameplayCollection.ChatQuips[commandQuip.Key] = chatQuip;
                 }
 
-                index = 0;
+                ActionWheelSystem.InitializeSocialWheel(true, generalGameplayCollection);
+                _socialWheelInitialized = true;
 
-                foreach (var shortcut in socialWheelShortcuts)
+                try
                 {
-                    Core.Log.LogWarning($"[RetroCamera] ({index++}) Shortcut - ActionType: {shortcut.Type}, Disabled: {shortcut.Disabled}, Unlocked: {shortcut.Unlocked}, PrefabGUID: {shortcut.PrefabGUID}");
+                    LocalizationManager.LocalizeText();
+                }
+                catch (Exception ex)
+                {
+                    Core.Log.LogError($"[RetroCamera.Update] Failed to localize keys - {ex.Message}");
                 }
 
-                if (rootPrefabCollection.FreeCameraPrefab.Exists())
+                try
                 {
-                    FreeCameraPrefab = rootPrefabCollection.FreeCameraPrefab;
-                    Core.LogEntity(Core._client, rootPrefabCollection.FreeCameraPrefab);
-                }
+                    var chatQuips = generalGameplayCollection.ChatQuips;
+                    var socialWheelData = ActionWheelSystem._SocialWheelDataList;
+                    var socialWheelShortcuts = ActionWheelSystem._SocialWheelShortcutList;
 
-                if (rootPrefabCollection.TopDownCameraPrefab.Exists())
-                {
-                    TopDownCameraPrefab = rootPrefabCollection.TopDownCameraPrefab;
-                    Core.LogEntity(Core._client, rootPrefabCollection.TopDownCameraPrefab);
-                }
+                    // Core.Log.LogWarning($"[RetroCamera] SocialWheelData count - {socialWheelData.Count} | {chatQuips.Length}");
 
-                if (rootPrefabCollection.OrbitCameraPrefab.Exists())
+                    foreach (var commandQuip in CommandQuips)
+                    {
+                        if (string.IsNullOrEmpty(commandQuip.Value.Name)
+                            || string.IsNullOrEmpty(commandQuip.Value.Command))
+                            continue;
+
+                        ActionWheelData wheelData = socialWheelData[commandQuip.Key];
+
+                        // Core.Log.LogWarning($"[RetroCamera] WheelData - {commandQuip.Value.Name} | {commandQuip.Value.Command} | {wheelData.Name}");
+                        wheelData.Name = commandQuip.Value.NameKey;
+                    }
+                }
+                catch (Exception ex)
                 {
-                    OrbitCameraPrefab = rootPrefabCollection.OrbitCameraPrefab;
-                    Core.LogEntity(Core._client, rootPrefabCollection.OrbitCameraPrefab);
+                    Core.Log.LogError(ex);
                 }
             }
-            catch (Exception ex)
+
+            _socialWheel = ActionWheelSystem?._SocialWheel;
+            var shortcuts = _socialWheel.ActionWheelShortcuts;
+
+            foreach (var shortcut in shortcuts)
             {
-                Core.Log.LogError(ex);
+                shortcut?.gameObject?.SetActive(false);
             }
+
+            _socialWheel.gameObject.SetActive(true);
         }
 
-        if (_socialWheel == null)
+        if (!_socialWheelActive)
         {
-            _socialWheel = ActionWheelSystem._SocialWheel;
+            _shouldActivateWheel = true;
+            _socialWheelActive = true;
+            ActionWheelSystem._CurrentActiveWheel = SocialWheel;
+            // Core.Log.LogWarning($"[RetroCamera] Activating wheel");
         }
-        */
-
-        _socialWheelActive = true;
-        _shouldActivateWheel = true;
-        _socialWheel.gameObject.SetActive(_socialWheelActive);
     }
     static void SocialWheelKeyUp()
     {
-        if (_socialWheelActive && !_shouldActivateWheel)
+        if (!Settings.CommandWheelEnabled) return;
+
+        if (_socialWheelActive)
         {
-            ActionWheelSystem.HideCurrentWheel();
             _socialWheelActive = false;
-            _socialWheel.gameObject.SetActive(_socialWheelActive);
-        }
-    }
-
-    static readonly Dictionary<ProjectM.CameraType, Camera> _cameras = [];
-    static Camera _camera;
-    static CameraUser _cameraUser;
-
-    static EntityQuery _cameraQuery;
-    static void CycleCamera()
-    {      
-        /*
-        try
-        {
-            if (_camera.Equals(null))
-            {
-                ComponentType[] cameraUserAllComponents =
-                [
-                    ComponentType.ReadOnly(Il2CppType.Of<CameraUser>())
-                ];
-
-                _cameraQuery = Core.BuildEntityQuery(EntityManager, cameraUserAllComponents, EntityQueryOptions.IncludeAll);
-
-                _cameraUser = _cameraQuery.ToEntityArray(Allocator.Temp)[0].TryGetComponent(out CameraUser cameraUser) ? cameraUser : default;
-                _camera = CameraUtilities.FindActiveCamera(EntityManager, _cameraQuery);
-
-                if (_camera.Equals(null))
-                {
-                    Core.Log.LogWarning($"[RetroCamera] Camera is null!");
-                }
-                else
-                {
-                    Core.Log.LogWarning($"[RetroCamera] Camera found - {_camera.name}");
-                }
-
-                if (!_cameraUser.CameraEntity.Exists())
-                {
-                    Core.Log.LogWarning($"[RetroCamera] Camera entity on CameraUser is null!");
-                }
-                else
-                {
-                    Core.Log.LogWarning($"[RetroCamera] Camera entity on CameraUser exists!");
-                    Core.LogEntity(Core._client, _cameraUser.CameraEntity);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogWarning(ex);
-        }
-        */
-    }
-    static void GetOrCreateObjects()
-    {
-        if (_crosshairPrefab == null) BuildCrosshair();
-
-        if (_gameCamera == null)
-        {
-            _gameCamera = CameraManager.GetCamera();
+            ActionWheelSystem.HideCurrentWheel();
+            _socialWheel.gameObject.SetActive(false);
+            ActionWheelSystem._CurrentActiveWheel = null;
+            // Core.Log.LogWarning($"[RetroCamera] SocialWheelKeyUp");
         }
     }
     void Update()
@@ -267,7 +227,6 @@ public class RetroCamera : MonoBehaviour
 
             if (_characterInfoPanel == null)
             {
-                // _characterInfoPanel = characterInfoPanelCanvas?.transform.GetChild(0).gameObject;
                 Core.Log.LogWarning($"[RetroCamera] CharacterInfoPanel (0) not found!");
             }
             else
@@ -276,56 +235,11 @@ public class RetroCamera : MonoBehaviour
             }
         }
 
-        /*
-        if (!_rootPrefabCollection.Exists() || _socialWheel == null)
-        {
-            ActionWheelSystem?._RootPrefabCollectionAccessor.TryGetSingletonEntity(out _rootPrefabCollection);
-
-            if (!_socialWheelInitialized && _rootPrefabCollection.TryGetComponent(out RootPrefabCollection rootPrefabCollection)
-                && rootPrefabCollection.GeneralGameplayCollectionPrefab.TryGetComponent(out GeneralGameplayCollection generalGameplayCollection))
-            {
-                ActionWheelSystem.InitializeSocialWheel(true, generalGameplayCollection);
-                _socialWheelInitialized = true;
-
-                try
-                {
-                    var socialWheelData = ActionWheelSystem._SocialWheelDataList;
-                    var socialWheelShortcuts = ActionWheelSystem._SocialWheelShortcutList;
-
-                    if (rootPrefabCollection.FreeCameraPrefab.Exists())
-                    {
-                        _freeCameraPrefab = rootPrefabCollection.FreeCameraPrefab;
-                        // Core.LogEntity(Core._client, rootPrefabCollection.FreeCameraPrefab);
-                    }
-
-                    if (rootPrefabCollection.TopDownCameraPrefab.Exists())
-                    {
-                        _topDownCameraPrefab = rootPrefabCollection.TopDownCameraPrefab;
-                        // Core.LogEntity(Core._client, rootPrefabCollection.TopDownCameraPrefab);
-                    }
-
-                    if (rootPrefabCollection.OrbitCameraPrefab.Exists())
-                    {
-                        _orbitCameraPrefab = rootPrefabCollection.OrbitCameraPrefab;
-                        // Core.LogEntity(Core._client, rootPrefabCollection.OrbitCameraPrefab);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Core.Log.LogError(ex);
-                }
-            }
-
-            _socialWheel = ActionWheelSystem?._SocialWheel;
-        }
-        */
-
-        // UpdateSystems();
         UpdateCrosshair();
     }
     void OnApplicationFocus(bool hasFocus)
     {
-        // _gameFocused = hasFocus;
+        _gameFocused = hasFocus;
         if (hasFocus) IsMenuOpen = false;
     }
     public static void RebuildCrosshair()
@@ -406,8 +320,9 @@ public class RetroCamera : MonoBehaviour
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(24, 24);
-            rectTransform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            rectTransform.sizeDelta = new Vector2(32, 32);
+            // rectTransform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+            rectTransform.localScale = Vector3.one;
             rectTransform.localPosition = new Vector3(0, 0, 0);
 
             Image image = _crosshairPrefab.AddComponent<Image>();
@@ -433,64 +348,6 @@ public class RetroCamera : MonoBehaviour
             Core.Log.LogError(ex);
         }
     }
-
-    /* not sure if warranted tbh
-    static void UpdateSystems()
-    {
-        if (_uiDataSystem == null || _prefabCollectionSystem == null) return;
-
-        // should really just replace these with actual buff checks, interesting method of getting shapeshift/mounted status
-
-        try
-        {
-            if (!_localCharacter.Exists())
-            {
-                _localCharacter = StunAnalytics.Client.TryGetLocalCharacter(EntityManager, out Entity result) ? result : default;
-            }
-
-            if (_uiDataSystem.UI.BuffBarParent != null)
-            {
-                _isShapeshifted = BuffUtility.HasBuff<Script_Buff_Shapeshift_DataShared>(EntityManager, _localCharacter);
-
-                // _isShapeshifted = false;
-                // _shapeshiftName = "";
-
-                foreach (BuffBarEntry.Data buff in _uiDataSystem.UI.BuffBarParent.BuffsSelectionGroup.Entries)
-                {
-                    if (_prefabCollectionSystem.SpawnableNameToPrefabGuidDictionary.TryGetValue(buff.PrefabGUID, out string buffName))
-                    {
-                        _isShapeshifted = buffName.Contains("shapeshift", StringComparison.OrdinalIgnoreCase);
-
-                        if (_isShapeshifted)
-                        {
-                            _shapeshiftName = buffName.Trim();
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (_uiDataSystem.UI.AbilityBar != null)
-            {
-                _isMounted = BuffUtility.HasBuff<MountBuff>(EntityManager, _localCharacter);
-
-                foreach (AbilityBarEntry abilityBarEntry in _uiDataSystem.UI.AbilityBar.Entries)
-                {
-                    if (_prefabCollectionSystem.SpawnableNameToPrefabGuidDictionary.TryGetValue(abilityBarEntry.AbilityId, out string abilityName))
-                    {
-                        _isMounted = abilityName.Contains("mounted", StringComparison.OrdinalIgnoreCase);
-
-                        if (_isMounted) break;
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Core.Log.LogError(ex);
-        }
-    }
-    */
     static void UpdateCrosshair()
     {
         try
@@ -509,8 +366,9 @@ public class RetroCamera : MonoBehaviour
                 _crosshair.active = true;
             }
 
-            bool shouldHandle = _validGameplayInputState &&
-               (_isMouseLocked || _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera));
+            bool rotatingCamera = _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera);
+            bool shouldHandle = _validGameplayInputState && 
+               (_isMouseLocked || rotatingCamera);
 
             if (shouldHandle && !IsMenuOpen)
             {
@@ -526,7 +384,6 @@ public class RetroCamera : MonoBehaviour
                 crosshairVisible = _isFirstPerson || (_isActionMode && Settings.ActionModeCrosshair);
                 cursorVisible = _usingMouseWheel;
             }
-            // hide mouse when rotating in build mode?
             else if (shouldHandle && _inBuildMode)
             {
                 crosshairVisible = Settings.AlwaysShowCrosshair;
@@ -535,8 +392,10 @@ public class RetroCamera : MonoBehaviour
 
             if (_crosshair != null)
             {
-                // _crosshair.active = (crosshairVisible || Settings.AlwaysShowCrosshair) && !_inBuildMode;
                 _crosshair.active = crosshairVisible || Settings.AlwaysShowCrosshair;
+
+                float scale = Settings.CrosshairSize;
+                _crosshair.transform.localScale = new(scale, scale, scale);
 
                 if (_isFirstPerson)
                 {
@@ -555,6 +414,7 @@ public class RetroCamera : MonoBehaviour
                 }
             }
 
+            if (_inBuildMode && !rotatingCamera && !cursorVisible) cursorVisible = true;
             Cursor.visible = cursorVisible;
         }
         catch (Exception ex)
@@ -563,3 +423,4 @@ public class RetroCamera : MonoBehaviour
         }
     }
 }
+

@@ -12,9 +12,7 @@ internal class Keybinding
     public string Description;
 
     public KeyCode Primary = KeyCode.None;
-    public KeyCode Secondary = KeyCode.None;
     public string PrimaryName => KeybindsManager.GetLiteral(Primary);
-    public string SecondaryName => KeybindsManager.GetLiteral(Secondary);
 
     public delegate void KeyHandler();
 
@@ -55,6 +53,5 @@ internal class Keybinding
         if (keybind == null) return;
 
         Primary = keybind.Primary;
-        Secondary = keybind.Secondary;
     }
 }
