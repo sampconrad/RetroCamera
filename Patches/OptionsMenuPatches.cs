@@ -18,7 +18,7 @@ namespace RetroCamera.Patches;
 [HarmonyPatch]
 internal static class OptionsMenuPatches
 {
-    static bool _shouldLocalize = true;
+    static readonly bool _shouldLocalize = true;
 
     [HarmonyPatch(typeof(OptionsMenu_Base), nameof(OptionsMenu_Base.Start))]
     [HarmonyPostfix]
@@ -276,9 +276,5 @@ internal static class OptionsMenuPatches
             option.SetValue(value);
             Persistence.SaveOptions();
         });
-    }
-    public static void Reset()
-    {
-        _shouldLocalize = true;
     }
 }

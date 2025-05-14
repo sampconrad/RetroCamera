@@ -1,3 +1,8 @@
+`1.4.4`
+- mouse hides when moving camera when inventory menu, crafting menus, etc. are open
+- command wheel configuration persists when changing worlds, should generally feel a bit smoother to use with slight delay to prevent accidental command usage after wheel immediately opened and tuned forced delay between commands
+- added some checks to make sure mod doesn't touch some things until game won't get mad and input state is valid after loading fully into world
+
 `1.4.3`
 - added command wheel (right alt default key), must be enabled from menu and commands set in config file commands.json (first spot for name of command you want showing in wheel, second spot for raw command string)
 - can set size scaling of crosshair in menu

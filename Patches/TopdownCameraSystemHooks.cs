@@ -182,7 +182,7 @@ internal static class TopdownCameraSystemHooks
         ref EntityManager entityManager
     )
     {
-        if (EscapeMenuViewPatch._isEscapeMenuOpen || EscapeMenuViewPatch._isServerPaused || IsMenuOpen)
+        if (EscapeMenuViewPatch._isEscapeMenuOpen || EscapeMenuViewPatch._isServerPaused || IsMenuOpen || !_validGameplayInputState)
         {
             _cursorPositionExecuteOriginal!(
                 _this,
