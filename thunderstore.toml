@@ -11,7 +11,7 @@ v-rising = ["oakveil-update", "mods", "client"]
 [package]
 namespace = "zfolmt"
 name = "RetroCamera"
-versionNumber = "1.4.3"
+versionNumber = "1.4.4"
 description = "Streamlined camera enhancements w/ additional features!"
 websiteUrl = "https://github.com/mfoltz/RetroCamera"
 containsNsfwContent = false

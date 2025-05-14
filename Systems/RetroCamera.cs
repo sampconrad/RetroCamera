@@ -130,7 +130,7 @@ public class RetroCamera : MonoBehaviour
                     ChatQuip chatQuip = generalGameplayCollection.ChatQuips[commandQuip.Key];
                     chatQuip.Text = commandQuip.Value.NameKey;
 
-                    Core.Log.LogWarning($"[RetroCamera] QuipData - {commandQuip.Value.Name} | {commandQuip.Value.Command} | {chatQuip.Sequence} | {chatQuip.Sequence.ToPrefabGUID()}");
+                    // Core.Log.LogWarning($"[RetroCamera] QuipData - {commandQuip.Value.Name} | {commandQuip.Value.Command} | {chatQuip.Sequence} | {chatQuip.Sequence.ToPrefabGUID()}");
 
                     generalGameplayCollection.ChatQuips[commandQuip.Key] = chatQuip;
                 }
@@ -294,7 +294,9 @@ public class RetroCamera : MonoBehaviour
                 _crosshair.active = true;
             }
 
-            bool rotatingCamera = _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera);
+            bool rotatingCamera = false;
+            if (_validGameplayInputState) rotatingCamera = _gameplayInputState.IsInputPressed(ButtonInputAction.RotateCamera);
+
             bool shouldHandle = _validGameplayInputState && 
                (_isMouseLocked || rotatingCamera);
 
@@ -343,12 +345,22 @@ public class RetroCamera : MonoBehaviour
             }
 
             if (_inBuildMode && !rotatingCamera && !cursorVisible) cursorVisible = true;
+            else if (IsMenuOpen && rotatingCamera) cursorVisible = false;
+
             Cursor.visible = cursorVisible;
         }
         catch (Exception ex)
         {
             Core.Log.LogError(ex);
         }
+    }
+    public static void ResetState()
+    {
+        _socialWheel = null;
+        _socialWheelActive = false;
+        _socialWheelInitialized = false;
+        _shouldActivateWheel = false;
+        _rootPrefabCollection = Entity.Null;
     }
 }
 

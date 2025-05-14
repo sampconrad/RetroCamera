@@ -12,15 +12,16 @@
 
 ## Sponsors
 
-Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.;
+Jairon O.; Odjit; Jera; Kokuren TCG and Gaming Shop; Rexxn; Eduardo G.; DirtyMike; Imperivm Draconis; Geoffrey D.; SirSaia; Robin C.; K Simp; Colin F.; Jade K.;
 
 ## Features
 
-Generally streamlined ModernCamera to the essentials with a few extra goodies (also a fancy news panel at the main menu :D). Not considered compatible with controllers/gamepads at this time; will explore that in the future if able. If anything is missing you were fond of open to feedback!
-(Note: original contributions to this project are licensed under the CC BY-NC 4.0, with other portions derived from third-party code licensed under the MIT License)
+Yes, this has action mode (right bracket default, can rebind). Streamlined ModernCamera to the essentials with a few extra goodies (also a fancy news panel at the main menu :D). Not considered compatible with controllers/gamepads at this time; will explore that in the future. If anything is missing you were fond of open to feedback!
+(Note: original contributions to this project are licensed under CC BY-NC 4.0, with other portions derived from third-party code licensed under MIT)
 
 - **Camera Enhancements:**  Generally increased range of camera motion with specific first-person and third-person modes. Includes options for adjustable FOV, over-the-shoulder offsets, pitch/zoom locking, and aiming offsets. Supports forward aiming in action mode with optional crosshair visibility.
-- **Additional Features:** Toggle HUD visibility; toggle batform fog visibility (this also hides clouds and their shadows on the ground); Complete journal quests via keybind;
+- **Additional Features:** Toggle HUD visibility; toggle batform fog visibility (this also hides clouds and their shadows on the ground); Complete journal quests via keybind; configurable action wheel for using commands;
+- **Command Wheel**: Add your label and raw command strings to the config file, enable the wheel in the menu options for RetroCamera, and use right alt key (default, can rebind) to use them on the fly!
 - **Configuration:** Configuration for keybinds and options done at the in-game menu with rebinding support. Current keybinds: toggle mod functioning, toggle action mode, toggle HUD, and toggle batform fog; complete journal quest;
 
 ## Credits

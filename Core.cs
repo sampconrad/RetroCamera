@@ -1,7 +1,6 @@
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using ProjectM;
-using ProjectM.Network;
 using ProjectM.Physics;
 using ProjectM.Scripting;
 using ProjectM.Sequencer;
@@ -90,7 +89,7 @@ internal class Core
     {
         ClearSkies.Reset();
         TopdownCameraSystemHooks.Dispose();
-        OptionsMenuPatches.Reset();
+        Systems.RetroCamera.ResetState();
 
         _initialized = false;
     }

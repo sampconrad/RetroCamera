@@ -10,116 +10,6 @@ namespace RetroCamera.Patches;
 [HarmonyPatch]
 internal static class MainMenuPatch
 {
-    /*
-    static MainMenuCanvasBase _mainMenuCanvasBase;
-
-    static GameObject _retroCameraLogoObject;
-    static RectTransform _retroCameraLogoRect;
-    static Image _retroCameraLogoImage;
-    static Image _cameraFlashImage;
-
-    static GameObject _discordButtonObject;
-    static GameObject _kofiButtonObject;
-    static GameObject _patreonButtonObject;
-
-    static Image _discordButtonImage;
-    static Image _kofiButtonImage;
-    static Image _patreonButtonImage;
-    static bool _consoleReady = false;
-    */
-
-    // WorldVFXVolumeComponent
-
-    /*
-    [HarmonyPatch(typeof(MainMenuNewView), nameof(MainMenuNewView.Update))]
-    [HarmonyPrefix]
-    static void UpdatePrefix(MainMenuNewView __instance)
-    {
-        if (_consoleReady && _retroCameraLogoObject == null)
-        {
-            // Find the canvas base
-            _mainMenuCanvasBase = UnityEngine.Object.FindObjectOfType<MainMenuCanvasBase>();
-            _mainMenuNewView = __instance;
-
-            if (_mainMenuCanvasBase != null)
-            {
-                // Create a new GameObject for texture
-                _retroCameraLogoObject = new("RetroCameraLogo");
-                GameObject.DontDestroyOnLoad(_retroCameraLogoObject);
-
-                // rectTransform, set parent
-                _retroCameraLogoRect = _retroCameraLogoObject.AddComponent<RectTransform>();
-                _retroCameraLogoObject.transform.SetParent(_mainMenuCanvasBase.MenuParent, false);
-                _retroCameraLogoObject.transform.SetAsLastSibling();
-
-                // load texture from png
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                using Stream stream = assembly.GetManifestResourceStream(CAMERA_LOGO_PATH);
-
-                // Make circular sprite for masking
-                Texture2D texture = stream.LoadTextureFromStream();
-                Sprite logoSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100f);
-
-                // Add an Image component to the timer object
-                _retroCameraLogoImage = _retroCameraLogoObject.AddComponent<Image>();
-                _retroCameraLogoImage.sprite = logoSprite;
-
-                // Instead of radial fill, just use a simple Image
-                _retroCameraLogoImage.type = Image.Type.Simple;
-                _retroCameraLogoImage.color = Color.white;
-
-                // Set the RectTransform to properly size and position the timer in the UI
-                _retroCameraLogoRect.sizeDelta = new Vector2(texture.width / 2, texture.height / 2);
-                _retroCameraLogoRect.localScale = Vector3.one;
-
-                // Center the moon logo
-                _retroCameraLogoRect.anchorMin = new Vector2(0.5f, 0.75f);   
-                _retroCameraLogoRect.anchorMax = new Vector2(0.5f, 0.75f);
-                _retroCameraLogoRect.pivot = new Vector2(0.5f, 0.5f);        // Pivot at center
-                _retroCameraLogoRect.anchoredPosition = new Vector2(0f, 0f); // Ensures it's exactly centered
-
-                // Child object for the glow
-                GameObject glowObject = new("RetroCameraGlow");
-                glowObject.transform.SetParent(_retroCameraLogoObject.transform, false);
-
-                // Get the child's RectTransform
-                RectTransform glowRect = glowObject.AddComponent<RectTransform>();
-
-                // Optional: Make the glow bigger than the main sprite
-                glowRect.sizeDelta = _retroCameraLogoRect.sizeDelta * 2.25f;
-                glowRect.anchoredPosition = Vector2.zero;
-
-                // Load the glow sprite
-                using Stream streamGlow = assembly.GetManifestResourceStream(CAMERA_GLOW_PATH);
-                Texture2D glowTexture = streamGlow.LoadTextureFromStream();
-                Sprite glowSprite = Sprite.Create(
-                    glowTexture,
-                    new Rect(0, 0, glowTexture.width, glowTexture.height),
-                    new Vector2(0.5f, 0.5f),
-                    100f
-                );
-
-                // Add Image for the glow
-                _cameraFlashImage = glowObject.AddComponent<Image>();
-                _cameraFlashImage.sprite = glowSprite;
-                _cameraFlashImage.type = Image.Type.Simple;
-
-                // Start transparent or visible depending on _autoContinue.Value
-                _cameraFlashImage.color = new Color(1f, 1f, 1f, 0f);
-
-                // Make sure this draws behind the main logo:
-                glowObject.transform.SetAsFirstSibling();
-
-                // Set active
-                _retroCameraLogoObject.SetActive(true);
-
-                // Core.Log.LogWarning($"[MainMenuNewView.Update()] Preparing social buttons...");
-                InitializeSocialButtons(__instance);
-            }
-        }
-    }
-    */
-
     static MainMenuNewView _mainMenuNewView;
 
     [HarmonyPatch(typeof(MainMenuNewView), nameof(MainMenuNewView.SetConsoleReady))] // reset bools and object states when exiting world
@@ -381,21 +271,6 @@ internal static class MainMenuPatch
         texture = default;
         return false;
     }
-    /*
-    public static Texture2D LoadTextureFromStream(this Stream stream, FilterMode filterMode = FilterMode.Bilinear)
-    {
-        byte[] array = new byte[stream.Length];
-        stream.Read(array, 0, array.Length);
-
-        Texture2D texture2D = new(2, 2, TextureFormat.RGBA32, false);
-        ImageConversion.LoadImage(texture2D, array);
-
-        texture2D.filterMode = filterMode;
-        texture2D.wrapMode = TextureWrapMode.Clamp;
-
-        return texture2D;
-    }
-    */
     public static Texture2D LoadTextureFromStream(this Stream stream, FilterMode filterMode = FilterMode.Bilinear)
     {
         byte[] array = new byte[stream.Length];
@@ -404,28 +279,10 @@ internal static class MainMenuPatch
         Texture2D texture2D = new(2, 2, TextureFormat.RGBA32, mipChain: false, linear: false);
         ImageConversion.LoadImage(texture2D, array, markNonReadable: false);
 
-        texture2D.filterMode = filterMode;               // Bilinear or Trilinear
-        texture2D.wrapMode = TextureWrapMode.Clamp;      // No tiling
+        texture2D.filterMode = filterMode;          
+        texture2D.wrapMode = TextureWrapMode.Clamp;      
 
-        // CleanTransparentPixels(texture2D);
         return texture2D;
-    }
-    public static void CleanTransparentPixels(Texture2D texture)
-    {
-        Color[] pixels = texture.GetPixels();
-
-        for (int i = 0; i < pixels.Length; i++)
-        {
-            if (pixels[i].a <= 0.001f)
-            {
-                pixels[i].r = 0f;
-                pixels[i].g = 0f;
-                pixels[i].b = 0f;
-            }
-        }
-
-        texture.SetPixels(pixels);
-        texture.Apply();
     }
     static void OpenURLs(List<string> urls)
     {

@@ -51,6 +51,6 @@ internal static class Quips
         networkEvent.Write(_networkEventType);
         networkEvent.Write(chatMessage);
 
-        Core.Log.LogInfo($"CommandQuip - {name}({command})");
+        Core.Log.LogInfo($"{name} - {command}");
     }
 }

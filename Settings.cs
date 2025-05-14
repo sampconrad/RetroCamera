@@ -137,7 +137,7 @@ internal static class Settings
         _commandWheelEnabled = AddToggle("Command Wheel", "Enable command wheel", false);
         _alwaysShowCrosshairOption = AddToggle("Always Show Crosshair", "Keep crosshair visible always", false);
         _actionModeCrosshairOption = AddToggle("Action Mode Crosshair", "Show crosshair during action mode", false);
-        _hideCharacterInfoPanel = AddToggle("Hide Character Info Panel", "Hide character info panel", false);
+        _hideCharacterInfoPanel = AddToggle("Hide Character Info Panel", "Removes character info panel from the top of the screen during action mode", false);
         _fieldOfViewOption = AddSlider("FOV", "Camera field of view", 50, 90, 60);
         _crosshairSize = AddSlider("Crosshair Size", "Crosshair size scaling", 1f, 5f, 1f);
 
